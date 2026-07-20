@@ -1,43 +1,57 @@
-/* ==========================================
+/* =====================================================
    KMC SAMULNORI
    Interactive Experience
-========================================== */
+===================================================== */
 
 
 
-// ==========================================
+// =========================
 // SCROLL REVEAL ANIMATION
-// ==========================================
+// =========================
 
 
 const revealElements = document.querySelectorAll(".reveal");
 
 
 const revealObserver = new IntersectionObserver(
+
 (entries)=>{
 
-    entries.forEach(entry=>{
 
-        if(entry.isIntersecting){
+entries.forEach(entry=>{
 
-            entry.target.classList.add("active");
 
-            revealObserver.unobserve(entry.target);
+if(entry.isIntersecting){
 
-        }
 
-    });
+entry.target.classList.add("active");
+
+
+revealObserver.unobserve(entry.target);
+
+
+}
+
+
+});
+
 
 },
+
+
 {
     threshold:0.15
-});
+}
+
+);
 
 
 
 revealElements.forEach(element=>{
 
-    revealObserver.observe(element);
+
+revealObserver.observe(element);
+
 
 });
 
@@ -46,9 +60,10 @@ revealElements.forEach(element=>{
 
 
 
-// ==========================================
-// NAVIGATION GLASS EFFECT
-// ==========================================
+
+// =========================
+// NAVIGATION EFFECT
+// =========================
 
 
 const navbar = document.querySelector(".navbar");
@@ -57,30 +72,32 @@ const navbar = document.querySelector(".navbar");
 window.addEventListener("scroll",()=>{
 
 
-    if(window.scrollY > 50){
-
-        navbar.style.background =
-        "rgba(0,0,0,.75)";
+if(window.scrollY > 60){
 
 
-        navbar.style.padding =
-        "10px 28px";
+navbar.style.background =
+"rgba(0,0,0,0.75)";
 
 
-    }
-
-    else{
-
-
-        navbar.style.background =
-        "rgba(255,255,255,.08)";
+navbar.style.padding =
+"10px 30px";
 
 
-        navbar.style.padding =
-        "14px 28px";
+}
 
 
-    }
+else{
+
+
+navbar.style.background =
+"rgba(255,255,255,0.08)";
+
+
+navbar.style.padding =
+"14px 30px";
+
+
+}
 
 
 });
@@ -90,9 +107,10 @@ window.addEventListener("scroll",()=>{
 
 
 
-// ==========================================
+
+// =========================
 // MOBILE MENU
-// ==========================================
+// =========================
 
 
 const menuButton =
@@ -104,33 +122,42 @@ document.querySelector(".nav-links");
 
 
 
+if(menuButton){
+
+
 menuButton.addEventListener("click",()=>{
 
 
-    navLinks.classList.toggle("open");
+navLinks.classList.toggle("open");
 
 
 });
 
 
+}
 
 
 
 
-// ==========================================
-// CLOSE MOBILE MENU AFTER CLICK
-// ==========================================
+
+
+
+// =========================
+// CLOSE MENU AFTER CLICK
+// =========================
 
 
 document.querySelectorAll(".nav-links a")
 .forEach(link=>{
 
 
-    link.addEventListener("click",()=>{
+link.addEventListener("click",()=>{
 
-        navLinks.classList.remove("open");
 
-    });
+navLinks.classList.remove("open");
+
+
+});
 
 
 });
@@ -141,9 +168,9 @@ document.querySelectorAll(".nav-links a")
 
 
 
-// ==========================================
+// =========================
 // HERO PARALLAX
-// ==========================================
+// =========================
 
 
 const hero =
@@ -154,18 +181,24 @@ document.querySelector(".hero");
 window.addEventListener("scroll",()=>{
 
 
-    let offset =
-    window.scrollY;
+if(!hero) return;
 
 
-    if(offset < window.innerHeight){
+
+const scroll =
+window.scrollY;
 
 
-        hero.style.backgroundPosition =
-        `center ${offset * .35}px`;
+
+if(scroll < window.innerHeight){
 
 
-    }
+hero.style.backgroundPosition =
+`center ${scroll * .35}px`;
+
+
+}
+
 
 
 });
@@ -176,34 +209,55 @@ window.addEventListener("scroll",()=>{
 
 
 
-// ==========================================
-// BUTTON RIPPLE EFFECT
-// ==========================================
+
+// =========================
+// BUTTON RIPPLE
+// =========================
 
 
 document.querySelectorAll(".primary-btn")
 .forEach(button=>{
 
 
-button.addEventListener("click",(e)=>{
+button.addEventListener("click",(event)=>{
 
 
-    const ripple =
-    document.createElement("span");
-
-
-    ripple.className="ripple";
-
-
-    button.appendChild(ripple);
+const ripple =
+document.createElement("span");
 
 
 
-    setTimeout(()=>{
+const rect =
+button.getBoundingClientRect();
 
-        ripple.remove();
 
-    },600);
+
+ripple.style.left =
+`${event.clientX - rect.left}px`;
+
+
+
+ripple.style.top =
+`${event.clientY - rect.top}px`;
+
+
+
+ripple.className =
+"ripple";
+
+
+
+button.appendChild(ripple);
+
+
+
+setTimeout(()=>{
+
+
+ripple.remove();
+
+
+},600);
 
 
 
@@ -217,9 +271,109 @@ button.addEventListener("click",(e)=>{
 
 
 
-// ==========================================
-// PAGE LOAD FADE
-// ==========================================
+
+
+// =========================
+// ACTIVE NAV LINK
+// =========================
+
+
+const sections =
+document.querySelectorAll("section[id]");
+
+
+const navItems =
+document.querySelectorAll(".nav-links a");
+
+
+
+window.addEventListener("scroll",()=>{
+
+
+let current="";
+
+
+
+sections.forEach(section=>{
+
+
+const sectionTop =
+section.offsetTop - 150;
+
+
+
+if(window.scrollY >= sectionTop){
+
+
+current =
+section.getAttribute("id");
+
+
+}
+
+
+});
+
+
+
+navItems.forEach(link=>{
+
+
+link.style.color="";
+
+
+
+if(link.getAttribute("href")
+===
+"#"+current){
+
+
+link.style.color="#ffffff";
+
+
+}
+
+
+});
+
+
+});
+
+
+
+
+
+
+
+
+// =========================
+// IMAGE LAZY LOADING
+// =========================
+
+
+const images =
+document.querySelectorAll("img");
+
+
+
+images.forEach(img=>{
+
+
+img.loading="lazy";
+
+
+});
+
+
+
+
+
+
+
+
+// =========================
+// PAGE LOAD EFFECT
+// =========================
 
 
 window.addEventListener("load",()=>{
