@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Add Performance | KMC Admin</title>
 
@@ -12,17 +16,24 @@
 <body>
 
 
-<h1>Add Performance</h1>
+<div class="admin-container">
+
+
+<h1>
+Add New Performance
+</h1>
 
 
 <form id="performanceForm">
 
 
+<!-- Date -->
+
 <label>
-Date
+Performance Date
 </label>
 
-<input 
+<input
 id="date"
 type="text"
 placeholder="March 15, 2026"
@@ -30,11 +41,14 @@ required
 >
 
 
+
+<!-- Location -->
+
 <label>
 Location
 </label>
 
-<input 
+<input
 id="location"
 type="text"
 placeholder="Korean Cultural Festival"
@@ -42,59 +56,153 @@ required
 >
 
 
+
+<!-- Arrangement -->
+
 <label>
 Arrangement
 </label>
 
 <select id="arrangement">
 
+
 <option>
 Samulnori 사물놀이
 </option>
+
 
 <option>
 Nongak 농악
 </option>
 
+
 <option>
 Ogomu 오고무
 </option>
+
 
 <option>
 Nanta 난타
 </option>
 
+
 <option>
 Sogo 소고춤
 </option>
 
+
 </select>
 
 
+
+<!-- Highlight -->
+
 <label>
-Highlight Image URL
+Highlight Photo
 </label>
 
 <input
-id="highlight"
-type="text"
-placeholder="Image URL"
+id="highlightFile"
+type="file"
+accept="image/*"
+required
 >
 
 
-<button type="submit">
+
+<!-- Photos -->
+
+<label>
+Performance Photos
+</label>
+
+<input
+id="photoFiles"
+type="file"
+accept="image/*"
+multiple
+>
+
+
+
+<!-- Videos -->
+
+<h2>
+Videos
+</h2>
+
+
+<label>
+Video Title
+</label>
+
+<input
+id="videoTitle"
+type="text"
+placeholder="Spring Festival Performance"
+>
+
+
+
+<label>
+Video Thumbnail
+</label>
+
+<input
+id="videoThumbnail"
+type="text"
+placeholder="YouTube thumbnail URL"
+>
+
+
+
+<label>
+Video URL
+</label>
+
+<input
+id="videoURL"
+type="text"
+placeholder="https://youtube.com/..."
+>
+
+
+
+<label>
+Video Length
+</label>
+
+<input
+id="videoLength"
+type="text"
+placeholder="3:42"
+>
+
+
+
+
+<button
+type="submit">
+
 Publish Performance
+
 </button>
+
 
 
 </form>
 
 
-<script 
+</div>
+
+
+
+<script
 type="module"
 src="../js/performance-add.js">
 </script>
 
 
 </body>
+
 </html>
