@@ -4,12 +4,14 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Our Performances | KMC Samulnori</title>
 
+<title>
+Our Performances | KMC Samulnori
+</title>
 
-<link rel="stylesheet" href="css/style.css">
 
 <link rel="stylesheet" href="css/performances.css">
 
@@ -20,6 +22,7 @@
 <body>
 
 
+
 <nav>
 
 <h2>
@@ -27,37 +30,9 @@ KMC Samulnori
 </h2>
 
 
-<ul>
-
-<li>
 <a href="index.html">
 Home
 </a>
-</li>
-
-
-<li>
-<a href="performances.html">
-Performances
-</a>
-</li>
-
-
-<li>
-<a href="arrangements.html">
-Arrangements
-</a>
-</li>
-
-
-<li>
-<a href="team.html">
-Team
-</a>
-</li>
-
-
-</ul>
 
 
 </nav>
@@ -65,7 +40,10 @@ Team
 
 
 
-<header class="performance-header">
+
+
+
+<section class="performance-page">
 
 
 <h1>
@@ -73,20 +51,16 @@ Our Performances
 </h1>
 
 
-<p>
-Every rhythm tells a story.
-</p>
 
+<div id="performanceContainer">
 
-</header>
+Loading...
 
-
+</div>
 
 
 
-<main id="performanceContainer">
-
-</main>
+</section>
 
 
 
@@ -94,23 +68,20 @@ Every rhythm tells a story.
 
 
 
-<!-- Performance Expanded Viewer -->
 
+<div id="performanceModal"
 
-<div
-id="performanceModal"
-class="modal hidden">
-
-
-<div
-class="modal-content">
+class="hidden">
 
 
 
-<button
-id="closeModal">
+<div class="modal-content">
 
-×
+
+
+<button id="closeModal">
+
+✕
 
 </button>
 
@@ -118,7 +89,9 @@ id="closeModal">
 
 
 <img
+
 id="modalHighlight"
+
 class="modal-highlight">
 
 
@@ -126,21 +99,25 @@ class="modal-highlight">
 
 
 
-<h2 id="modalArrangement">
+
+<h2 id="modalDate">
 
 </h2>
-
-
-
-<p id="modalDate">
-
-</p>
 
 
 
 <p id="modalLocation">
 
 </p>
+
+
+
+<p id="modalArrangement">
+
+</p>
+
+
+
 
 
 
@@ -153,10 +130,13 @@ Photos
 
 
 <div
+
 id="modalPhotos"
+
 class="photo-grid">
 
 </div>
+
 
 
 
@@ -170,7 +150,9 @@ Videos
 
 
 <div
+
 id="modalVideos"
+
 class="video-grid">
 
 </div>
@@ -178,46 +160,13 @@ class="video-grid">
 
 
 
-</div>
-
-</div>
-
-
-
-
-
-
-
-<!-- Video Viewer -->
-
-
-<div
-id="videoViewer"
-class="video-viewer hidden">
-
-
-
-<button
-id="closeVideo">
-
-×
-
-</button>
-
-
-
-
-<iframe
-
-id="videoFrame"
-
-allowfullscreen>
-
-</iframe>
-
 
 
 </div>
+
+
+</div>
+
 
 
 
@@ -226,11 +175,12 @@ allowfullscreen>
 
 
 <script
+
 type="module"
+
 src="js/performances.js">
 
 </script>
-
 
 
 </body>
