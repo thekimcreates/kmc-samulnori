@@ -1,7 +1,6 @@
 // admin-dashboard.js
 
 
-
 import {
 
 auth,
@@ -54,6 +53,7 @@ from
 
 
 
+
 const welcome =
 
 document.getElementById(
@@ -77,12 +77,17 @@ document.getElementById(
 
 
 
+
+
+
+// CHECK LOGIN
+
+
 onAuthStateChanged(
 
 auth,
 
 (user)=>{
-
 
 
 if(user){
@@ -103,7 +108,9 @@ loadPerformances();
 else{
 
 
-window.location.href="login.html";
+window.location.href =
+
+"login.html";
 
 
 }
@@ -120,7 +127,7 @@ window.location.href="login.html";
 
 
 
-// ADD PERFORMANCE
+// ADD PERFORMANCE BUTTON
 
 
 document
@@ -134,7 +141,7 @@ document
 .onclick = ()=>{
 
 
-window.location.href=
+window.location.href =
 
 "performance-add.html";
 
@@ -148,7 +155,8 @@ window.location.href=
 
 
 
-// MANAGE TEAM
+
+// TEAM BUTTON
 
 
 document
@@ -162,11 +170,9 @@ document
 .onclick = ()=>{
 
 
-alert(
+window.location.href =
 
-"Team management coming next."
-
-);
+"../team.html";
 
 
 };
@@ -196,7 +202,8 @@ document
 await signOut(auth);
 
 
-window.location.href=
+
+window.location.href =
 
 "login.html";
 
@@ -211,11 +218,14 @@ window.location.href=
 
 
 
+// LOAD PERFORMANCE LIST
+
+
 async function loadPerformances(){
 
 
 
-const q =
+const performanceQuery =
 
 query(
 
@@ -241,14 +251,22 @@ orderBy(
 
 
 
+
+
 const snapshot =
 
-await getDocs(q);
+await getDocs(
+
+performanceQuery
+
+);
 
 
 
 
-list.innerHTML="";
+
+
+list.innerHTML = "";
 
 
 
@@ -261,13 +279,15 @@ snapshot.forEach(
 
 
 
-const data = item.data();
+const data =
+
+item.data();
 
 
 
 
 
-const box =
+const card =
 
 document.createElement(
 
@@ -277,7 +297,17 @@ document.createElement(
 
 
 
-box.innerHTML =
+card.className =
+
+"admin-performance-card";
+
+
+
+
+
+
+
+card.innerHTML =
 
 `
 
@@ -302,6 +332,14 @@ ${data.arrangement}
 </p>
 
 
+
+<button class="edit">
+
+Edit
+
+</button>
+
+
 <button class="delete">
 
 Delete
@@ -316,13 +354,62 @@ Delete
 
 
 
-box.querySelector(
+
+// EDIT
+
+
+card
+
+.querySelector(
+
+".edit"
+
+)
+
+.onclick = ()=>{
+
+
+window.location.href =
+
+"performance-add.html?id=" + item.id;
+
+
+};
+
+
+
+
+
+
+
+
+
+// DELETE
+
+
+card
+
+.querySelector(
 
 ".delete"
 
 )
 
 .onclick = async ()=>{
+
+
+
+const confirmDelete =
+
+confirm(
+
+"Delete this performance?"
+
+);
+
+
+
+if(confirmDelete){
 
 
 
@@ -342,7 +429,11 @@ item.id
 
 
 
-box.remove();
+card.remove();
+
+
+
+}
 
 
 
@@ -353,7 +444,8 @@ box.remove();
 
 
 
-list.appendChild(box);
+
+list.appendChild(card);
 
 
 
