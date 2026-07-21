@@ -8,8 +8,11 @@
 
 <title>Our Performances | KMC Samulnori</title>
 
+
 <link rel="stylesheet" href="css/style.css">
+
 <link rel="stylesheet" href="css/performances.css">
+
 
 </head>
 
@@ -23,6 +26,7 @@
 KMC Samulnori
 </h2>
 
+
 <ul>
 
 <li>
@@ -31,11 +35,13 @@ Home
 </a>
 </li>
 
+
 <li>
 <a href="performances.html">
 Performances
 </a>
 </li>
+
 
 <li>
 <a href="arrangements.html">
@@ -43,30 +49,38 @@ Arrangements
 </a>
 </li>
 
+
 <li>
 <a href="team.html">
 Team
 </a>
 </li>
 
+
 </ul>
+
 
 </nav>
 
 
 
+
 <header class="performance-header">
+
 
 <h1>
 Our Performances
 </h1>
 
+
 <p>
-Every stage tells a story.
-Every rhythm connects our community.
+Every rhythm tells a story.
 </p>
 
+
 </header>
+
+
 
 
 
@@ -76,37 +90,59 @@ Every rhythm connects our community.
 
 
 
-<!-- Expanded Viewer -->
 
-<div 
+
+
+
+<!-- Performance Expanded Viewer -->
+
+
+<div
 id="performanceModal"
-class="modal hidden"
->
+class="modal hidden">
 
 
-<div class="modal-content">
+<div
+class="modal-content">
 
 
-<button id="closeModal">
+
+<button
+id="closeModal">
+
 ×
+
 </button>
 
 
-<img 
+
+
+<img
 id="modalHighlight"
->
+class="modal-highlight">
+
+
+
+
 
 
 <h2 id="modalArrangement">
+
 </h2>
 
 
+
 <p id="modalDate">
+
 </p>
+
 
 
 <p id="modalLocation">
+
 </p>
+
+
 
 
 
@@ -115,10 +151,15 @@ Photos
 </h3>
 
 
-<div 
+
+<div
 id="modalPhotos"
 class="photo-grid">
+
 </div>
+
+
+
 
 
 
@@ -127,22 +168,69 @@ Videos
 </h3>
 
 
-<div 
-id="modalVideos">
-</div>
 
-
-
-</div>
+<div
+id="modalVideos"
+class="video-grid">
 
 </div>
 
 
 
-<script 
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+<!-- Video Viewer -->
+
+
+<div
+id="videoViewer"
+class="video-viewer hidden">
+
+
+
+<button
+id="closeVideo">
+
+×
+
+</button>
+
+
+
+
+<iframe
+
+id="videoFrame"
+
+allowfullscreen>
+
+</iframe>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script
 type="module"
 src="js/performances.js">
+
 </script>
+
 
 
 </body>
