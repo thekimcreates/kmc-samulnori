@@ -1,12 +1,22 @@
 // performance-add.js
 
-import { db, storage } from "./firebase.js";
+
+import {
+
+db
+
+}
+
+from "./firebase.js";
+
 
 
 import {
 
 collection,
+
 addDoc,
+
 serverTimestamp
 
 }
@@ -16,254 +26,137 @@ from
 "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 
-import {
-
-ref,
-uploadBytes,
-getDownloadURL
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-
-
-
-// Upload a file to Firebase Storage
-
-async function uploadFile(file, folder){
-
-
-const fileRef = ref(
-
-storage,
-
-`${folder}/${Date.now()}-${file.name}`
-
-);
-
-
-
-await uploadBytes(
-
-fileRef,
-
-file
-
-);
-
-
-
-return await getDownloadURL(
-
-fileRef
-
-);
-
-
-}
 
 
 
 
 
-const form =
+
+
+const submitButton =
+
 document.getElementById(
-"performanceForm"
+
+"submitPerformance"
+
+);
+
+
+
+const message =
+
+document.getElementById(
+
+"message"
+
 );
 
 
 
 
 
-form.addEventListener(
-
-"submit",
-
-async(event)=>{
 
 
-event.preventDefault();
+
+submitButton.onclick = async ()=>{
+
+
+
+const date =
+
+document.getElementById(
+
+"date"
+
+).value;
+
+
+
+
+const location =
+
+document.getElementById(
+
+"location"
+
+).value;
+
+
+
+
+const arrangement =
+
+document.getElementById(
+
+"arrangement"
+
+).value;
+
+
+
+
+
+const highlight =
+
+document.getElementById(
+
+"highlight"
+
+).value;
+
+
+
+
+
+const photos =
+
+document.getElementById(
+
+"photos"
+
+).value
+
+.split(",")
+
+.map(
+
+item=>item.trim()
+
+)
+
+.filter(Boolean);
+
+
+
+
+
+const videos =
+
+document.getElementById(
+
+"videos"
+
+).value
+
+.split(",")
+
+.map(
+
+item=>item.trim()
+
+)
+
+.filter(Boolean);
+
+
+
+
 
 
 
 
 try{
 
-
-
-// Basic information
-
-const date =
-document.getElementById(
-"date"
-).value;
-
-
-
-const location =
-document.getElementById(
-"location"
-).value;
-
-
-
-const arrangement =
-document.getElementById(
-"arrangement"
-).value;
-
-
-
-
-
-// -----------------------------
-// Upload Highlight Image
-// -----------------------------
-
-
-const highlightFile =
-document.getElementById(
-"highlightFile"
-).files[0];
-
-
-
-let highlightURL = "";
-
-
-
-if(highlightFile){
-
-
-highlightURL =
-await uploadFile(
-
-highlightFile,
-
-"performances/highlights"
-
-);
-
-
-}
-
-
-
-
-
-// -----------------------------
-// Upload Gallery Photos
-// -----------------------------
-
-
-const photoFiles = [
-
-...
-
-document.getElementById(
-"photoFiles"
-).files
-
-];
-
-
-
-const photoURLs = [];
-
-
-
-for(
-const photo of photoFiles
-){
-
-
-const url =
-await uploadFile(
-
-photo,
-
-"performances/photos"
-
-);
-
-
-
-photoURLs.push(url);
-
-
-}
-
-
-
-
-
-// -----------------------------
-// Add Video Information
-// -----------------------------
-
-
-const videos = [];
-
-
-
-const videoURL =
-document.getElementById(
-"videoURL"
-).value;
-
-
-
-if(videoURL){
-
-
-videos.push({
-
-
-title:
-
-document.getElementById(
-"videoTitle"
-).value,
-
-
-
-thumbnail:
-
-document.getElementById(
-"videoThumbnail"
-).value,
-
-
-
-url:
-
-videoURL,
-
-
-
-length:
-
-document.getElementById(
-"videoLength"
-).value
-
-
-
-});
-
-
-}
-
-
-
-
-
-// -----------------------------
-// Save Performance
-// -----------------------------
 
 
 await addDoc(
@@ -276,72 +169,44 @@ db,
 
 ),
 
+
 {
-
-
-date:
 
 
 date,
 
-
-
-location:
-
-
 location,
-
-
-
-arrangement:
-
 
 arrangement,
 
+highlight,
 
 
-highlight:
-
-
-highlightURL,
-
-
-
-photos:
-
-
-photoURLs,
-
-
-
-videos:
+photos,
 
 
 videos,
 
 
-
 created:
-
 
 serverTimestamp()
 
 
 }
 
-
 );
 
 
 
 
-alert(
-"Performance Published Successfully!"
-);
+
+message.textContent =
+
+"Performance added successfully!";
 
 
 
-form.reset();
 
 
 
@@ -352,25 +217,21 @@ form.reset();
 catch(error){
 
 
-console.error(
 
-"Error adding performance:",
-
-error
-
-);
+console.error(error);
 
 
 
-alert(
+message.textContent =
 
-"Failed to publish performance."
+"Error adding performance.";
 
-);
+
+
 
 
 }
 
 
 
-});
+};
