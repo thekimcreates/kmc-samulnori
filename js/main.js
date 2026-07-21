@@ -64,150 +64,280 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+/* ======================================
+   MOBILE MENU
+====================================== */
 
-    /* ======================================
-       MOBILE MENU
-    ====================================== */
+let menuScrollPosition = 0;
 
-    function openMenu() {
-
-        if (!mobileMenu || !menuButton) return;
-
-        mobileMenu.classList.add("open");
-
-        menuButton.classList.add("active");
-
-        document.body.style.overflow = "hidden";
-
-    }
+function isMenuOpen() {
+    return (
+        mobileMenu &&
+        mobileMenu.classList.contains("open")
+    );
+}
 
 
+function lockPageScroll() {
+    menuScrollPosition = window.scrollY;
 
-    function closeMenu() {
-
-        if (!mobileMenu || !menuButton) return;
-
-        mobileMenu.classList.remove("open");
-
-        menuButton.classList.remove("active");
-
-        document.body.style.overflow = "";
-
-    }
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${menuScrollPosition}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+}
 
 
+function unlockPageScroll() {
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
 
-    function toggleMenu() {
-
-        if (!mobileMenu) return;
-
-        if (mobileMenu.classList.contains("open")) {
-
-            closeMenu();
-
-        } else {
-
-            openMenu();
-
-        }
-
-    }
+    window.scrollTo(0, menuScrollPosition);
+}
 
 
+function openMenu() {
+    if (!mobileMenu || !menuButton) return;
+    if (isMenuOpen()) return;
 
-    if (menuButton && mobileMenu) {
+    mobileMenu.classList.add("open");
+    menuButton.classList.add("active");
 
-        menuButton.addEventListener(
-            "click",
-            toggleMenu
-        );
+    menuButton.setAttribute(
+        "aria-expanded",
+        "true"
+    );
 
+    menuButton.setAttribute(
+        "aria-label",
+        "Close navigation menu"
+    );
 
+    mobileMenu.setAttribute(
+        "aria-hidden",
+        "false"
+    );
 
-        mobileMenu
-            .querySelectorAll("a")
-            .forEach(link => {
+    lockPageScroll();
 
-                link.addEventListener(
-                    "click",
-                    closeMenu
-                );
+    const firstMenuLink =
+        mobileMenu.querySelector("a");
 
+    if (firstMenuLink) {
+        window.setTimeout(() => {
+            firstMenuLink.focus({
+                preventScroll: true
             });
+        }, 150);
+    }
+}
 
 
+function closeMenu(restoreFocus = false) {
+    if (!mobileMenu || !menuButton) return;
+    if (!isMenuOpen()) return;
 
-        document.addEventListener(
-            "keydown",
-            event => {
+    mobileMenu.classList.remove("open");
+    menuButton.classList.remove("active");
 
-                if (
-                    event.key === "Escape"
-                ) {
+    menuButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
 
-                    closeMenu();
+    menuButton.setAttribute(
+        "aria-label",
+        "Open navigation menu"
+    );
 
-                }
+    mobileMenu.setAttribute(
+        "aria-hidden",
+        "true"
+    );
 
-            }
-        );
+    unlockPageScroll();
 
-
-
-        window.addEventListener(
-            "resize",
-            () => {
-
-                if (
-                    window.innerWidth > 900
-                ) {
-
-                    closeMenu();
-
-                }
-
-            }
-        );
+    if (restoreFocus) {
+        menuButton.focus({
+            preventScroll: true
+        });
+    }
+}
 
 
-
-        document.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    !mobileMenu.classList.contains("open")
-                ) return;
-
+function toggleMenu() {
+    if (isMenuOpen()) {
+        closeMenu();
+    } else {
+        openMenu();
+    }
+}
 
 
-                const clickedMenu =
-                    mobileMenu.contains(
-                        event.target
-                    );
-
-                const clickedButton =
-                    menuButton.contains(
-                        event.target
-                    );
-
-                if (
-                    !clickedMenu &&
-                    !clickedButton
-                ) {
-
-                    closeMenu();
-
-                }
-
-            }
-        );
-
+function keepFocusInsideMenu(event) {
+    if (
+        event.key !== "Tab" ||
+        !isMenuOpen()
+    ) {
+        return;
     }
 
+    const focusableElements = [
+        menuButton,
+        ...mobileMenu.querySelectorAll("a")
+    ];
+
+    const firstElement =
+        focusableElements[0];
+
+    const lastElement =
+        focusableElements[
+            focusableElements.length - 1
+        ];
+
+    if (
+        event.shiftKey &&
+        document.activeElement === firstElement
+    ) {
+        event.preventDefault();
+        lastElement.focus();
+    }
+
+    if (
+        !event.shiftKey &&
+        document.activeElement === lastElement
+    ) {
+        event.preventDefault();
+        firstElement.focus();
+    }
+}
 
 
+if (menuButton && mobileMenu) {
+    /*
+    Add accessibility attributes in JavaScript
+    so the HTML remains simple.
+    */
 
+    menuButton.setAttribute(
+        "aria-controls",
+        "mobile-menu"
+    );
+
+    menuButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+    mobileMenu.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    /*
+    Open or close from the hamburger button.
+    */
+
+    menuButton.addEventListener(
+        "click",
+        event => {
+            event.stopPropagation();
+            toggleMenu();
+        }
+    );
+
+
+    /*
+    Close after selecting any navigation link.
+    */
+
+    mobileMenu
+        .querySelectorAll("a")
+        .forEach(link => {
+            link.addEventListener(
+                "click",
+                () => {
+                    closeMenu();
+                }
+            );
+        });
+
+
+    /*
+    Close when the empty menu background is tapped.
+    A click directly on a link will still follow it.
+    */
+
+    mobileMenu.addEventListener(
+        "click",
+        event => {
+            if (event.target === mobileMenu) {
+                closeMenu(true);
+            }
+        }
+    );
+
+
+    /*
+    Escape closes the menu.
+    Tab remains trapped inside while open.
+    */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+            if (
+                event.key === "Escape" &&
+                isMenuOpen()
+            ) {
+                event.preventDefault();
+                closeMenu(true);
+                return;
+            }
+
+            keepFocusInsideMenu(event);
+        }
+    );
+
+
+    /*
+    Automatically reset the mobile menu when
+    switching back to the desktop layout.
+    */
+
+    window.addEventListener(
+        "resize",
+        () => {
+            if (
+                window.innerWidth > 900 &&
+                isMenuOpen()
+            ) {
+                closeMenu();
+            }
+        },
+        { passive: true }
+    );
+
+
+    /*
+    Close the menu if browser history navigation
+    restores the page from cache.
+    */
+
+    window.addEventListener(
+        "pageshow",
+        () => {
+            if (isMenuOpen()) {
+                closeMenu();
+            }
+        }
+    );
+}
 
     /* ======================================
        HERO SLIDESHOW
