@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
 
 <meta charset="UTF-8">
@@ -9,11 +10,16 @@
 
 
 <title>
-Admin Dashboard | KMC Samulnori
+Admin Dashboard
 </title>
 
 
+<link rel="stylesheet" href="../css/style.css">
+
+
 </head>
+
+
 
 
 <body>
@@ -21,7 +27,7 @@ Admin Dashboard | KMC Samulnori
 
 
 <h1>
-KMC Samulnori Admin Dashboard
+KMC Samulnori Admin
 </h1>
 
 
@@ -36,6 +42,10 @@ Loading...
 
 
 
+
+<div class="admin-buttons">
+
+
 <button id="addPerformance">
 
 Add Performance
@@ -44,6 +54,12 @@ Add Performance
 
 
 
+<button id="manageTeam">
+
+Manage Team
+
+</button>
+
 
 
 <button id="logout">
@@ -51,6 +67,30 @@ Add Performance
 Logout
 
 </button>
+
+
+</div>
+
+
+
+
+
+
+
+
+<h2>
+Recent Performances
+</h2>
+
+
+
+<div id="performanceList">
+
+Loading...
+
+</div>
+
+
 
 
 
@@ -68,5 +108,6 @@ src="../js/admin-dashboard.js">
 
 
 </body>
+
 
 </html>
