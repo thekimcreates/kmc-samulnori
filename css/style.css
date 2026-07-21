@@ -1419,22 +1419,16 @@ button {
 /* Center Sogo */
 
 
-.arrangement-card:last-child {
-
+.arrangement-card.sogo {
 
     grid-column:
         1 / -1;
 
-
-
     max-width:
         calc(50% - 15px);
 
-
-
     margin:
         auto;
-
 
 }
 
