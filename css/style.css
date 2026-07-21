@@ -754,43 +754,74 @@ button {
 
 .mobile-menu {
 
-
-    display:
-        none;
-
-
-
     position:
         fixed;
-
-
 
     inset:
         0;
 
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    gap:
+        35px;
 
 
     background:
         var(--background);
 
 
-
-    padding:
-        120px 35px;
-
+    opacity:
+        0;
 
 
-    flex-direction:
-        column;
+    pointer-events:
+        none;
 
 
+    transform:
+        translateY(-20px);
 
-    gap:
-        30px;
 
+    transition:
+
+        opacity .35s ease,
+        transform .35s ease;
+
+
+    z-index:
+        9998;
 
 }
 
+
+
+
+.mobile-menu.open {
+
+
+    opacity:
+        1;
+
+
+    pointer-events:
+        auto;
+
+
+    transform:
+        translateY(0);
+
+
+}
 
 
 
@@ -957,6 +988,8 @@ button {
     position:
         absolute;
 
+    z-index:
+        1;
 
 
     inset:
@@ -1530,6 +1563,17 @@ button {
         transform .3s ease,
         background .3s ease;
 
+       position:
+        relative;
+
+
+    z-index:
+        20;
+
+
+    pointer-events:
+        auto;
+
 
 }
 
@@ -1939,3 +1983,29 @@ footer img {
 
 }
 
+/* ======================================
+   NAVIGATION CLICK FIX
+====================================== */
+
+
+.navbar {
+
+    z-index:
+        9999;
+
+}
+
+
+.nav-container,
+.nav-links,
+.logo,
+.nav-links a,
+.menu-toggle {
+
+    position:
+        relative;
+
+    z-index:
+        10000;
+
+}
