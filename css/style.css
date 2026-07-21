@@ -3,7 +3,10 @@
 
 KMC SAMULNORI
 Version 2.0
+
 Main Stylesheet
+
+Apple-inspired glass design system
 
 ========================================
 */
@@ -17,38 +20,47 @@ Main Stylesheet
 :root {
 
 
-    /* Colors */
+    /* Background */
 
     --background:
         #ffffff;
 
+
     --surface:
         #f5f5f7;
+
 
     --text:
         #1d1d1f;
 
+
     --secondary-text:
         #6e6e73;
 
+
+
+    /* Accent */
+
     --accent:
         #0071e3;
+
+
+
+    /* Borders */
 
     --border:
         rgba(0,0,0,0.08);
 
 
 
-    /* Dark mode */
+    /* Glass */
 
-    --dark-background:
-        #000000;
+    --glass:
+        rgba(255,255,255,0.55);
 
-    --dark-surface:
-        #161617;
 
-    --dark-text:
-        #f5f5f7;
+    --glass-border:
+        rgba(255,255,255,0.35);
 
 
 
@@ -63,14 +75,17 @@ Main Stylesheet
 
 
 
-    /* Effects */
+    /* Radius */
 
     --radius:
-        24px;
+        28px;
 
+
+
+    /* Shadow */
 
     --shadow:
-        0 20px 60px rgba(0,0,0,.12);
+        0 25px 70px rgba(0,0,0,.12);
 
 
 
@@ -78,7 +93,6 @@ Main Stylesheet
 
     --transition:
         cubic-bezier(.4,0,.2,1);
-
 
 }
 
@@ -98,29 +112,43 @@ Main Stylesheet
 
 
         --background:
-            var(--dark-background);
+            #000000;
 
 
         --surface:
-            var(--dark-surface);
+            #161617;
 
 
         --text:
-            var(--dark-text);
+            #f5f5f7;
 
 
         --secondary-text:
             #a1a1a6;
 
 
+
         --border:
             rgba(255,255,255,.12);
+
+
+
+        --glass:
+            rgba(30,30,30,.55);
+
+
+
+        --glass-border:
+            rgba(255,255,255,.15);
+
 
 
     }
 
 
 }
+
+
 
 
 
@@ -137,8 +165,10 @@ Main Stylesheet
 *::before,
 *::after {
 
+
     box-sizing:
         border-box;
+
 
 }
 
@@ -166,15 +196,41 @@ body {
         0;
 
 
+
+    min-height:
+        100vh;
+
+
+
     background:
+
+
+        radial-gradient(
+            circle at top left,
+            rgba(0,113,227,.08),
+            transparent 40%
+        ),
+
+
+        radial-gradient(
+            circle at bottom right,
+            rgba(255,150,0,.08),
+            transparent 40%
+        ),
+
+
         var(--background);
+
 
 
     color:
         var(--text);
 
 
+
     font-family:
+
+
         "Inter",
         -apple-system,
         BlinkMacSystemFont,
@@ -183,8 +239,10 @@ body {
         sans-serif;
 
 
+
     line-height:
         1.6;
+
 
 
     overflow-x:
@@ -204,6 +262,7 @@ img {
         100%;
 
 
+
     display:
         block;
 
@@ -217,12 +276,13 @@ img {
 a {
 
 
-    color:
-        inherit;
-
-
     text-decoration:
         none;
+
+
+
+    color:
+        inherit;
 
 
 }
@@ -238,12 +298,15 @@ button {
         inherit;
 
 
+
     border:
-        0;
+        none;
+
 
 
     background:
         none;
+
 
 
     cursor:
@@ -261,7 +324,7 @@ button {
 
 
 /* ======================================
-   GLOBAL LAYOUT
+   GLOBAL SECTIONS
 ====================================== */
 
 
@@ -269,6 +332,7 @@ button {
 
 
     padding:
+
         var(--section-padding)
         24px;
 
@@ -283,10 +347,12 @@ button {
 
 
     width:
+
         min(
             100%,
             var(--max-width)
         );
+
 
 
     margin:
@@ -303,11 +369,14 @@ button {
 
 
     max-width:
-        700px;
+        750px;
+
 
 
     margin:
+
         0 auto 60px;
+
 
 
     text-align:
@@ -323,11 +392,8 @@ button {
 .section-header h2 {
 
 
-    margin:
-        0 0 20px;
-
-
     font-size:
+
         clamp(
             2rem,
             5vw,
@@ -335,12 +401,19 @@ button {
         );
 
 
-    letter-spacing:
-        -0.04em;
-
 
     line-height:
         1.1;
+
+
+
+    letter-spacing:
+        -0.05em;
+
+
+
+    margin:
+        0 0 20px;
 
 
 }
@@ -356,15 +429,12 @@ button {
         var(--secondary-text);
 
 
+
     font-size:
         1.15rem;
 
 
 }
-
-
-
-
 
 /* ======================================
    NAVIGATION
@@ -395,6 +465,7 @@ button {
 
 
     transition:
+
         background .4s var(--transition),
         backdrop-filter .4s var(--transition);
 
@@ -409,19 +480,22 @@ button {
 
 
     background:
-        color-mix(
-            in srgb,
-            var(--background) 75%,
-            transparent
-        );
+        var(--glass);
+
 
 
     backdrop-filter:
-        blur(20px);
+        blur(25px);
+
+
+
+    -webkit-backdrop-filter:
+        blur(25px);
+
 
 
     border-bottom:
-        1px solid var(--border);
+        1px solid var(--glass-border);
 
 
 }
@@ -433,28 +507,34 @@ button {
 .nav-container {
 
 
-    height:
-        80px;
-
-
     max-width:
         var(--max-width);
+
+
+
+    height:
+        90px;
+
 
 
     margin:
         auto;
 
 
+
     padding:
-        0 24px;
+        0 30px;
+
 
 
     display:
         flex;
 
 
+
     align-items:
         center;
+
 
 
     justify-content:
@@ -467,33 +547,54 @@ button {
 
 
 
+/* Full logo */
+
 .logo img {
+
 
     width:
         180px;
 
+
+
     height:
         auto;
+
+
 
     object-fit:
         contain;
 
-}
 
 
-@media (max-width:600px){
+    transition:
+        transform .3s var(--transition);
 
-    .logo img {
-
-        width:
-            45px;
-
-    }
 
 }
 
 
 
+
+
+.logo:hover img {
+
+
+    transform:
+        scale(1.03);
+
+
+}
+
+
+
+
+
+
+
+
+
+/* Desktop links */
 
 
 .nav-links {
@@ -503,20 +604,25 @@ button {
         flex;
 
 
+
     align-items:
         center;
 
 
+
     gap:
-        40px;
+        42px;
+
 
 
     list-style:
         none;
 
 
+
     margin:
         0;
+
 
 
     padding:
@@ -532,16 +638,19 @@ button {
 .nav-links a {
 
 
-    color:
-        var(--text);
-
-
     font-size:
         .95rem;
 
 
+
     font-weight:
         500;
+
+
+
+    color:
+        var(--text);
+
 
 
     transition:
@@ -558,7 +667,7 @@ button {
 
 
     opacity:
-        .6;
+        .55;
 
 
 }
@@ -580,7 +689,11 @@ button {
 
 
 
-/* Mobile Menu Button */
+
+
+
+
+/* Mobile menu button */
 
 
 .menu-toggle {
@@ -590,20 +703,30 @@ button {
         none;
 
 
+
     width:
-        40px;
+        44px;
+
 
 
     height:
-        40px;
+        44px;
+
 
 
     flex-direction:
         column;
 
 
+
     justify-content:
         center;
+
+
+
+    align-items:
+        center;
+
 
 
     gap:
@@ -619,24 +742,23 @@ button {
 .menu-toggle span {
 
 
-    display:
-        block;
-
-
     width:
-        22px;
+        24px;
+
 
 
     height:
         2px;
 
 
+
     background:
         var(--text);
 
 
+
     transition:
-        transform .3s var(--transition);
+        .3s var(--transition);
 
 
 }
@@ -645,7 +767,11 @@ button {
 
 
 
-/* Mobile Menu */
+
+
+
+
+/* Mobile menu */
 
 
 .mobile-menu {
@@ -655,28 +781,34 @@ button {
         none;
 
 
+
     position:
         fixed;
+
 
 
     inset:
         0;
 
 
+
     padding:
-        120px 32px;
+        120px 35px;
+
 
 
     background:
         var(--background);
 
 
+
     flex-direction:
         column;
 
 
+
     gap:
-        30px;
+        35px;
 
 
 }
@@ -692,8 +824,10 @@ button {
         2rem;
 
 
+
     font-weight:
         700;
+
 
 
     letter-spacing:
@@ -718,32 +852,38 @@ button {
 .hero {
 
 
-    position:
-        relative;
-
-
     height:
         100vh;
+
 
 
     min-height:
         700px;
 
 
-    overflow:
-        hidden;
+
+    position:
+        relative;
+
 
 
     display:
         flex;
 
 
+
     align-items:
         center;
 
 
+
     justify-content:
         center;
+
+
+
+    overflow:
+        hidden;
 
 
 }
@@ -757,6 +897,7 @@ button {
 
     position:
         absolute;
+
 
 
     inset:
@@ -776,27 +917,34 @@ button {
         absolute;
 
 
+
     inset:
         0;
+
 
 
     background-size:
         cover;
 
 
+
     background-position:
         center;
+
 
 
     opacity:
         0;
 
 
+
     transform:
-        scale(1.05);
+        scale(1.08);
+
 
 
     transition:
+
         opacity 1.5s ease,
         transform 8s ease;
 
@@ -812,6 +960,7 @@ button {
 
     opacity:
         1;
+
 
 
     transform:
@@ -831,15 +980,22 @@ button {
         absolute;
 
 
+
     inset:
         0;
 
 
+
     background:
+
         linear-gradient(
+
             to bottom,
-            rgba(0,0,0,.35),
+
+            rgba(0,0,0,.25),
+
             rgba(0,0,0,.65)
+
         );
 
 
@@ -856,16 +1012,20 @@ button {
         relative;
 
 
+
     z-index:
         2;
+
+
+
+    color:
+        white;
+
 
 
     text-align:
         center;
 
-
-    color:
-        white;
 
 
     padding:
@@ -881,53 +1041,33 @@ button {
 .hero-content h1 {
 
 
+    margin:
+        0 0 20px;
+
+
+
     font-size:
+
         clamp(
-            3rem,
-            8vw,
-            7rem
+            4rem,
+            10vw,
+            8rem
         );
 
-
-    line-height:
-        1;
-
-
-    letter-spacing:
-        -.06em;
-
-
-    margin:
-        0 0 25px;
 
 
     font-weight:
         800;
 
 
-}
+
+    letter-spacing:
+        -.07em;
 
 
 
-
-
-.hero-content p {
-
-
-    font-size:
-        clamp(
-            1.1rem,
-            2vw,
-            1.5rem
-        );
-
-
-    margin:
-        0 auto;
-
-
-    max-width:
-        650px;
+    line-height:
+        .95;
 
 
 }
@@ -939,121 +1079,34 @@ button {
 .hero-description {
 
 
-    margin-top:
-        18px !important;
+    max-width:
+        650px;
 
-
-    opacity:
-        .85;
-
-
-}
-
-
-
-
-/* ======================================
-   ABOUT SECTION
-====================================== */
-
-
-.about-grid {
-
-
-    display:
-        grid;
-
-
-    grid-template-columns:
-        repeat(
-            2,
-            1fr
-        );
-
-
-    gap:
-        80px;
-
-
-    align-items:
-        center;
-
-
-}
-
-
-
-
-
-.about-image img {
-
-
-    width:
-        100%;
-
-
-    border-radius:
-        var(--radius);
-
-
-    box-shadow:
-        var(--shadow);
-
-
-}
-
-
-
-
-
-.about-text h3 {
-
-
-    font-size:
-        2rem;
-
-
-    letter-spacing:
-        -.04em;
 
 
     margin:
-        0 0 20px;
+        auto;
 
-
-}
-
-
-
-
-
-.about-text p {
-
-
-    color:
-        var(--secondary-text);
 
 
     font-size:
-        1.1rem;
+
+        clamp(
+            1rem,
+            2vw,
+            1.35rem
+        );
 
 
-    margin-bottom:
-        20px;
+
+    opacity:
+        .9;
 
 
 }
 
-
-
-
-
-
-
-
-
 /* ======================================
-   ARRANGEMENTS
+   ARRANGEMENTS SECTION
 ====================================== */
 
 
@@ -1064,11 +1117,14 @@ button {
         grid;
 
 
+
     grid-template-columns:
+
         repeat(
             2,
             1fr
         );
+
 
 
     gap:
@@ -1088,28 +1144,53 @@ button {
         relative;
 
 
+
+    min-height:
+        420px;
+
+
+
     overflow:
         hidden;
+
 
 
     border-radius:
         var(--radius);
 
 
+
     background:
-        var(--surface);
+        var(--glass);
 
 
-    min-height:
-        420px;
+
+    backdrop-filter:
+        blur(25px);
+
+
+
+    -webkit-backdrop-filter:
+        blur(25px);
+
+
+
+    border:
+
+        1px solid
+        var(--glass-border);
+
 
 
     box-shadow:
         var(--shadow);
 
 
+
     transition:
-        transform .5s var(--transition);
+
+        transform .5s var(--transition),
+        box-shadow .5s var(--transition);
 
 
 }
@@ -1122,7 +1203,12 @@ button {
 
 
     transform:
-        translateY(-10px);
+        translateY(-12px);
+
+
+
+    box-shadow:
+        0 35px 90px rgba(0,0,0,.18);
 
 
 }
@@ -1134,24 +1220,29 @@ button {
 .arrangement-card img {
 
 
+    position:
+        absolute;
+
+
+
+    inset:
+        0;
+
+
+
     width:
         100%;
+
 
 
     height:
         100%;
 
 
+
     object-fit:
         cover;
 
-
-    position:
-        absolute;
-
-
-    inset:
-        0;
 
 
 }
@@ -1167,18 +1258,27 @@ button {
         "";
 
 
+
     position:
         absolute;
+
 
 
     inset:
         0;
 
 
+
     background:
+
         linear-gradient(
-            transparent,
-            rgba(0,0,0,.7)
+
+            to top,
+
+            rgba(0,0,0,.75),
+
+            transparent
+
         );
 
 
@@ -1195,16 +1295,20 @@ button {
         absolute;
 
 
+
     bottom:
-        30px;
+        35px;
+
 
 
     left:
-        30px;
+        35px;
+
 
 
     z-index:
         2;
+
 
 
     color:
@@ -1220,16 +1324,18 @@ button {
 .card-content h3 {
 
 
-    font-size:
-        2rem;
-
-
     margin:
         0;
 
 
+
+    font-size:
+        2.2rem;
+
+
+
     letter-spacing:
-        -.04em;
+        -.05em;
 
 
 }
@@ -1245,8 +1351,14 @@ button {
         5px 0 0;
 
 
+
     opacity:
         .85;
+
+
+
+    font-size:
+        1.1rem;
 
 
 }
@@ -1255,7 +1367,8 @@ button {
 
 
 
-/* Center last arrangement */
+/* Center Sogo */
+
 
 .arrangement-card:last-child {
 
@@ -1264,8 +1377,10 @@ button {
         1 / -1;
 
 
+
     max-width:
         calc(50% - 15px);
+
 
 
     margin:
@@ -1294,11 +1409,14 @@ button {
         grid;
 
 
+
     grid-template-columns:
+
         repeat(
             3,
             1fr
         );
+
 
 
     gap:
@@ -1314,20 +1432,43 @@ button {
 .performance-card {
 
 
+    min-height:
+        360px;
+
+
+
     border-radius:
         var(--radius);
+
 
 
     overflow:
         hidden;
 
 
+
     background:
-        var(--surface);
+        var(--glass);
 
 
-    min-height:
-        350px;
+
+    backdrop-filter:
+        blur(20px);
+
+
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+
+
+    border:
+        1px solid var(--glass-border);
+
+
+
+    box-shadow:
+        var(--shadow);
 
 
 }
@@ -1343,6 +1484,11 @@ button {
         25px;
 
 
+
+    margin:
+        0;
+
+
 }
 
 
@@ -1356,13 +1502,10 @@ button {
         220px;
 
 
+
     background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,.2),
-            transparent
-        );
+        rgba(255,255,255,.08);
+
 
 
     animation:
@@ -1381,63 +1524,33 @@ button {
     from {
 
 
-        transform:
-            translateX(-100%);
+        opacity:
+            .3;
 
 
     }
+
+
+
+    50% {
+
+
+        opacity:
+            .8;
+
+
+    }
+
 
 
     to {
 
 
-        transform:
-            translateX(100%);
+        opacity:
+            .3;
 
 
     }
-
-
-}
-
-
-
-
-
-
-
-
-
-.section-button {
-
-
-    text-align:
-        center;
-
-
-    margin-top:
-        50px;
-
-
-}
-
-
-
-
-
-.text-link {
-
-
-    color:
-        var(--accent);
-
-
-    font-weight:
-        600;
-
-
-    font-size:
-        1.1rem;
 
 
 }
@@ -1451,7 +1564,7 @@ button {
 
 
 /* ======================================
-   TEAM PREVIEW
+   TEAM SECTION
 ====================================== */
 
 
@@ -1462,11 +1575,14 @@ button {
         grid;
 
 
+
     grid-template-columns:
+
         repeat(
             2,
             1fr
         );
+
 
 
     gap:
@@ -1482,32 +1598,54 @@ button {
 .team-feature-card {
 
 
-    background:
-        var(--surface);
-
-
-    border-radius:
-        var(--radius);
-
-
-    overflow:
-        hidden;
-
-
     padding:
-        30px;
+        35px;
+
 
 
     display:
         flex;
 
 
+
     align-items:
         center;
 
 
+
     gap:
-        30px;
+        35px;
+
+
+
+    border-radius:
+        var(--radius);
+
+
+
+    background:
+        var(--glass);
+
+
+
+    backdrop-filter:
+        blur(25px);
+
+
+
+    -webkit-backdrop-filter:
+        blur(25px);
+
+
+
+    border:
+        1px solid var(--glass-border);
+
+
+
+    box-shadow:
+        var(--shadow);
+
 
 
     transition:
@@ -1524,7 +1662,7 @@ button {
 
 
     transform:
-        translateY(-8px);
+        translateY(-10px);
 
 
 }
@@ -1537,15 +1675,18 @@ button {
 
 
     width:
-        140px;
+        150px;
+
 
 
     height:
-        140px;
+        150px;
+
 
 
     object-fit:
         cover;
+
 
 
     border-radius:
@@ -1562,39 +1703,53 @@ button {
 
 
     width:
-        140px;
+        150px;
+
 
 
     height:
-        140px;
+        150px;
+
+
+
+    flex-shrink:
+        0;
+
 
 
     border-radius:
         50%;
 
 
+
     background:
         var(--accent);
+
 
 
     color:
         white;
 
 
+
     display:
         flex;
 
-
-    align-items:
-        center;
 
 
     justify-content:
         center;
 
 
+
+    align-items:
+        center;
+
+
+
     font-size:
         3rem;
+
 
 
     font-weight:
@@ -1610,12 +1765,18 @@ button {
 .team-card-content h3 {
 
 
+    font-size:
+        1.8rem;
+
+
+
     margin:
         0 0 10px;
 
 
-    font-size:
-        1.6rem;
+
+    letter-spacing:
+        -.04em;
 
 
 }
@@ -1634,6 +1795,74 @@ button {
 }
 
 /* ======================================
+   SECTION LINKS
+====================================== */
+
+
+.section-button {
+
+
+    text-align:
+        center;
+
+
+
+    margin-top:
+        55px;
+
+
+}
+
+
+
+
+
+.text-link {
+
+
+    color:
+        var(--accent);
+
+
+
+    font-size:
+        1.1rem;
+
+
+
+    font-weight:
+        600;
+
+
+
+    transition:
+        opacity .3s var(--transition);
+
+
+}
+
+
+
+
+
+.text-link:hover {
+
+
+    opacity:
+        .65;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ======================================
    FOOTER
 ====================================== */
 
@@ -1642,11 +1871,17 @@ button {
 
 
     padding:
-        60px 24px 30px;
+        80px 24px 35px;
+
 
 
     background:
         var(--surface);
+
+
+
+    border-top:
+        1px solid var(--border);
 
 
 }
@@ -1662,8 +1897,10 @@ button {
         var(--max-width);
 
 
+
     margin:
         auto;
+
 
 
     text-align:
@@ -1678,14 +1915,21 @@ button {
 
 .footer-logo img {
 
+
     width:
         260px;
+
+
 
     height:
         auto;
 
+
+
     margin:
-        0 auto 30px;
+
+        0 auto 35px;
+
 
 }
 
@@ -1700,8 +1944,14 @@ button {
         var(--secondary-text);
 
 
+
+    font-size:
+        1rem;
+
+
+
     margin-bottom:
-        30px;
+        35px;
 
 
 }
@@ -1717,6 +1967,7 @@ button {
         var(--accent);
 
 
+
 }
 
 
@@ -1726,16 +1977,19 @@ button {
 .footer-bottom {
 
 
-    border-top:
-        1px solid var(--border);
-
-
     padding-top:
         25px;
 
 
+
+    border-top:
+        1px solid var(--border);
+
+
+
     color:
         var(--secondary-text);
+
 
 
     font-size:
@@ -1753,7 +2007,7 @@ button {
 
 
 /* ======================================
-   SCROLL REVEAL ANIMATION
+   SCROLL REVEAL
 ====================================== */
 
 
@@ -1764,11 +2018,14 @@ button {
         0;
 
 
+
     transform:
         translateY(40px);
 
 
+
     transition:
+
         opacity .8s var(--transition),
         transform .8s var(--transition);
 
@@ -1786,6 +2043,7 @@ button {
         1;
 
 
+
     transform:
         translateY(0);
 
@@ -1801,7 +2059,7 @@ button {
 
 
 /* ======================================
-   MOBILE RESPONSIVE
+   RESPONSIVE DESIGN
 ====================================== */
 
 
@@ -1848,15 +2106,24 @@ button {
 
 
 
+    .logo img {
+
+
+        width:
+            50px;
+
+
+    }
+
+
+
+
+
     .about-grid {
 
 
         grid-template-columns:
             1fr;
-
-
-        gap:
-            40px;
 
 
     }
@@ -1878,24 +2145,12 @@ button {
 
 
 
-    .arrangement-card {
-
-
-        min-height:
-            360px;
-
-
-    }
-
-
-
-
-
     .arrangement-card:last-child {
 
 
         grid-column:
             auto;
+
 
 
         max-width:
@@ -1931,9 +2186,6 @@ button {
     }
 
 
-
-
-
 }
 
 
@@ -1944,7 +2196,7 @@ button {
 
 
 
-@media (max-width: 600px) {
+@media (max-width:600px) {
 
 
 
@@ -1965,7 +2217,7 @@ button {
 
 
         height:
-            70px;
+            75px;
 
 
     }
@@ -1991,7 +2243,7 @@ button {
 
 
         font-size:
-            3.2rem;
+            3.8rem;
 
 
     }
@@ -2004,7 +2256,20 @@ button {
 
 
         font-size:
-            1rem !important;
+            1rem;
+
+
+    }
+
+
+
+
+
+    .arrangement-card {
+
+
+        min-height:
+            330px;
 
 
     }
@@ -2020,6 +2285,7 @@ button {
             column;
 
 
+
         text-align:
             center;
 
@@ -2028,6 +2294,35 @@ button {
 
 
 
+
+
+    .team-feature-card img,
+    .team-icon {
+
+
+        width:
+            120px;
+
+
+
+        height:
+            120px;
+
+
+    }
+
+
+
+
+
+    .footer-logo img {
+
+
+        width:
+            220px;
+
+
+    }
 
 
 }
@@ -2041,7 +2336,7 @@ button {
 
 
 /* ======================================
-   REDUCED MOTION SUPPORT
+   ACCESSIBILITY
 ====================================== */
 
 
@@ -2057,8 +2352,10 @@ button {
             .01ms !important;
 
 
+
         transition-duration:
             .01ms !important;
+
 
 
         scroll-behavior:
@@ -2066,6 +2363,5 @@ button {
 
 
     }
-
 
 }
