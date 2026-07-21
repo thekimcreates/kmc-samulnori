@@ -1,19 +1,70 @@
 /* =====================================================
    KMC SAMULNORI
-   Interactive Experience
+   Homepage v2 JavaScript
 ===================================================== */
 
 
 
 // =========================
-// SCROLL REVEAL ANIMATION
+// HERO IMAGE SLIDESHOW
 // =========================
 
 
-const revealElements = document.querySelectorAll(".reveal");
+const slides = document.querySelectorAll(".hero-slide");
 
 
-const revealObserver = new IntersectionObserver(
+let currentSlide = 0;
+
+
+
+function changeSlide(){
+
+
+    if(slides.length === 0) return;
+
+
+    slides[currentSlide].classList.remove("active");
+
+
+    currentSlide++;
+
+
+    if(currentSlide >= slides.length){
+
+        currentSlide = 0;
+
+    }
+
+
+    slides[currentSlide].classList.add("active");
+
+
+}
+
+
+
+setInterval(changeSlide,5000);
+
+
+
+
+
+
+
+
+// =========================
+// SCROLL REVEAL
+// =========================
+
+
+const revealElements =
+document.querySelectorAll(".reveal");
+
+
+
+const revealObserver =
+new IntersectionObserver(
+
 
 (entries)=>{
 
@@ -40,8 +91,9 @@ revealObserver.unobserve(entry.target);
 
 
 {
-    threshold:0.15
+threshold:.15
 }
+
 
 );
 
@@ -61,26 +113,29 @@ revealObserver.observe(element);
 
 
 
+
 // =========================
 // NAVIGATION EFFECT
 // =========================
 
 
-const navbar = document.querySelector(".navbar");
+const navbar =
+document.querySelector(".navbar");
+
 
 
 window.addEventListener("scroll",()=>{
 
 
-if(window.scrollY > 60){
+if(!navbar) return;
+
+
+
+if(window.scrollY > 50){
 
 
 navbar.style.background =
-"rgba(0,0,0,0.75)";
-
-
-navbar.style.padding =
-"10px 30px";
+"rgba(0,0,0,.75)";
 
 
 }
@@ -90,17 +145,14 @@ else{
 
 
 navbar.style.background =
-"rgba(255,255,255,0.08)";
-
-
-navbar.style.padding =
-"14px 30px";
+"rgba(255,255,255,.08)";
 
 
 }
 
 
 });
+
 
 
 
@@ -142,9 +194,7 @@ navLinks.classList.toggle("open");
 
 
 
-// =========================
-// CLOSE MENU AFTER CLICK
-// =========================
+// Close mobile menu after selection
 
 
 document.querySelectorAll(".nav-links a")
@@ -168,198 +218,17 @@ navLinks.classList.remove("open");
 
 
 
-// =========================
-// HERO PARALLAX
-// =========================
-
-
-const hero =
-document.querySelector(".hero");
-
-
-
-window.addEventListener("scroll",()=>{
-
-
-if(!hero) return;
-
-
-
-const scroll =
-window.scrollY;
-
-
-
-if(scroll < window.innerHeight){
-
-
-hero.style.backgroundPosition =
-`center ${scroll * .35}px`;
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-
-// =========================
-// BUTTON RIPPLE
-// =========================
-
-
-document.querySelectorAll(".primary-btn")
-.forEach(button=>{
-
-
-button.addEventListener("click",(event)=>{
-
-
-const ripple =
-document.createElement("span");
-
-
-
-const rect =
-button.getBoundingClientRect();
-
-
-
-ripple.style.left =
-`${event.clientX - rect.left}px`;
-
-
-
-ripple.style.top =
-`${event.clientY - rect.top}px`;
-
-
-
-ripple.className =
-"ripple";
-
-
-
-button.appendChild(ripple);
-
-
-
-setTimeout(()=>{
-
-
-ripple.remove();
-
-
-},600);
-
-
-
-});
-
-
-});
-
-
-
-
-
-
-
-
-// =========================
-// ACTIVE NAV LINK
-// =========================
-
-
-const sections =
-document.querySelectorAll("section[id]");
-
-
-const navItems =
-document.querySelectorAll(".nav-links a");
-
-
-
-window.addEventListener("scroll",()=>{
-
-
-let current="";
-
-
-
-sections.forEach(section=>{
-
-
-const sectionTop =
-section.offsetTop - 150;
-
-
-
-if(window.scrollY >= sectionTop){
-
-
-current =
-section.getAttribute("id");
-
-
-}
-
-
-});
-
-
-
-navItems.forEach(link=>{
-
-
-link.style.color="";
-
-
-
-if(link.getAttribute("href")
-===
-"#"+current){
-
-
-link.style.color="#ffffff";
-
-
-}
-
-
-});
-
-
-});
-
-
-
-
-
-
-
 
 // =========================
 // IMAGE LAZY LOADING
 // =========================
 
 
-const images =
-document.querySelectorAll("img");
+document.querySelectorAll("img")
+.forEach(image=>{
 
 
-
-images.forEach(img=>{
-
-
-img.loading="lazy";
+image.loading="lazy";
 
 
 });
@@ -372,7 +241,7 @@ img.loading="lazy";
 
 
 // =========================
-// PAGE LOAD EFFECT
+// PAGE LOAD
 // =========================
 
 
