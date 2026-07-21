@@ -1,15 +1,26 @@
 // arrangements.js
 
 
-import { db } from "./firebase.js";
+import {
+
+db
+
+}
+
+from "./firebase.js";
+
 
 
 import {
 
 collection,
+
 getDocs,
+
 query,
+
 orderBy,
+
 limit
 
 }
@@ -17,6 +28,8 @@ limit
 from
 
 "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
 
 
 
@@ -57,36 +70,27 @@ document.getElementById(
 
 
 
-// =========================
-// ARRANGEMENT DATA
-// =========================
-
-
 
 const arrangements = [
 
 
 {
 
-name:
+title:
 
 "Samulnori 사물놀이",
-
 
 image:
 
 "assets/arrangements/samulnori.jpg",
 
-
 instruments:
 
-"Janggu, Buk, Jing, Kkwaenggwari",
-
+"Kkwaenggwari, Jing, Janggu, Buk",
 
 description:
 
-"Samulnori is a traditional Korean percussion performance featuring four instruments that create powerful and energetic rhythms."
-
+"A traditional Korean percussion ensemble featuring four instruments working together to create powerful rhythms and energy."
 
 },
 
@@ -94,25 +98,21 @@ description:
 
 {
 
-name:
+title:
 
 "Nongak 농악",
-
 
 image:
 
 "assets/arrangements/nongak.jpg",
 
-
 instruments:
 
-"Percussion instruments, dance, and movement",
-
+"Samul instruments, dance, flags, and movement",
 
 description:
 
-"Nongak combines music, movement, and community celebration through dynamic outdoor performances."
-
+"A Korean farming music tradition combining percussion, dance, and community celebration."
 
 },
 
@@ -120,25 +120,21 @@ description:
 
 {
 
-name:
+title:
 
 "Ogomu 오고무",
-
 
 image:
 
 "assets/arrangements/ogomu.jpg",
 
-
 instruments:
 
-"Five-drum arrangement performed with sticks and coordinated movement",
-
+"Five-sided drum performance",
 
 description:
 
-"Ogomu is a visually powerful drum performance emphasizing precision, rhythm, and choreography."
-
+"A visually powerful drum performance featuring dancers playing multiple drums with synchronized movements."
 
 },
 
@@ -146,25 +142,21 @@ description:
 
 {
 
-name:
+title:
 
 "Nanta 난타",
-
 
 image:
 
 "assets/arrangements/nanta.jpg",
 
-
 instruments:
 
-"Kitchen percussion objects and drums",
-
+"Kitchen percussion, drums, and rhythmic objects",
 
 description:
 
-"Nanta combines Korean percussion with modern theatrical performance and storytelling."
-
+"A modern performance combining Korean percussion with energetic theatrical movement."
 
 },
 
@@ -172,27 +164,25 @@ description:
 
 {
 
-name:
+title:
 
 "Sogo 소고춤",
-
 
 image:
 
 "assets/arrangements/sogo.jpg",
 
-
 instruments:
 
 "Sogo small hand drum",
 
-
 description:
 
-"Sogo dance combines rhythmic patterns with movement, creating a colorful and energetic performance."
-
+"A traditional Korean dance featuring the sogo drum and graceful movements."
 
 }
+
+
 
 ];
 
@@ -214,6 +204,7 @@ arrangements.forEach(
 (arrangement)=>{
 
 
+
 const card =
 
 document.createElement(
@@ -232,38 +223,18 @@ card.className =
 
 
 
-card.style.backgroundImage =
-
-`
-
-linear-gradient(
-
-rgba(0,0,0,.2),
-
-rgba(0,0,0,.85)
-
-),
-
-url(${arrangement.image})
-
-`;
-
-
-
-
-
 
 card.innerHTML =
 
-
 `
 
-<div class="arrangement-overlay">
+<img src="${arrangement.image}">
+
 
 
 <h2>
 
-${arrangement.name}
+${arrangement.title}
 
 </h2>
 
@@ -271,15 +242,12 @@ ${arrangement.name}
 
 <div class="expand-arrow">
 
-↓
-
-
-</div>
-
+⌄
 
 </div>
 
 `;
+
 
 
 
@@ -296,6 +264,7 @@ arrangement
 );
 
 
+
 };
 
 
@@ -303,7 +272,12 @@ arrangement
 
 
 
-container.appendChild(card);
+
+container.appendChild(
+
+card
+
+);
 
 
 
@@ -322,6 +296,7 @@ container.appendChild(card);
 // =========================
 
 
+
 async function openArrangement(arrangement){
 
 
@@ -331,6 +306,9 @@ modal.classList.remove(
 "hidden"
 
 );
+
+
+
 
 
 
@@ -353,8 +331,19 @@ document.getElementById(
 
 ).textContent =
 
-arrangement.name;
+arrangement.title;
 
+
+
+
+
+document.getElementById(
+
+"arrangementDescription"
+
+).textContent =
+
+arrangement.description;
 
 
 
@@ -373,28 +362,19 @@ arrangement.instruments;
 
 
 
-document.getElementById(
-
-"arrangementDescription"
-
-).textContent =
-
-arrangement.description;
-
-
-
-
-
-// Get latest performance
 
 
 const latest =
 
 await getLatestPerformance(
 
-arrangement.name
+arrangement.title
 
 );
+
+
+
+
 
 
 
@@ -405,7 +385,18 @@ document.getElementById(
 ).textContent =
 
 
-latest;
+
+latest
+
+?
+
+`${latest.date} - ${latest.location}`
+
+:
+
+"No performances recorded yet.";
+
+
 
 
 
@@ -420,15 +411,12 @@ latest;
 
 
 // =========================
-// FIND MOST RECENT PERFORMANCE
+// GET MOST RECENT PERFORMANCE
 // =========================
 
 
-async function getLatestPerformance(name){
 
-
-
-try{
+async function getLatestPerformance(arrangementName){
 
 
 
@@ -454,9 +442,10 @@ orderBy(
 ),
 
 
-limit(10)
+limit(20)
 
 );
+
 
 
 
@@ -475,12 +464,16 @@ performanceQuery
 
 
 
+let result = null;
 
-for(
 
-const doc of snapshot.docs
 
-){
+
+
+
+snapshot.forEach(
+
+(doc)=>{
 
 
 
@@ -494,13 +487,15 @@ doc.data();
 
 if(
 
-data.arrangement === name
+!result &&
+
+data.arrangement === arrangementName
 
 ){
 
 
 
-return `${data.date} - ${data.location}`;
+result = data;
 
 
 
@@ -508,38 +503,18 @@ return `${data.date} - ${data.location}`;
 
 
 
-}
+});
 
 
 
 
 
-
-return "No performance recorded yet.";
-
-
-
-
-
-}
-
-catch(error){
-
-
-
-console.error(error);
-
-
-
-return "No performance recorded yet.";
+return result;
 
 
 
 }
 
-
-
-}
 
 
 
@@ -549,7 +524,7 @@ return "No performance recorded yet.";
 
 
 // =========================
-// CLOSE MODAL
+// CLOSE
 // =========================
 
 
@@ -557,11 +532,13 @@ return "No performance recorded yet.";
 closeButton.onclick = ()=>{
 
 
+
 modal.classList.add(
 
 "hidden"
 
 );
+
 
 
 };
@@ -571,7 +548,10 @@ modal.classList.add(
 
 
 
+
+
 modal.onclick = (event)=>{
+
 
 
 if(
@@ -581,11 +561,13 @@ event.target === modal
 ){
 
 
+
 modal.classList.add(
 
 "hidden"
 
 );
+
 
 
 }
