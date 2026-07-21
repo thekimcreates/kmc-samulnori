@@ -440,66 +440,41 @@ button {
    NAVIGATION
 ====================================== */
 
+/* ======================================
+   FLOATING APPLE STYLE NAVBAR
+====================================== */
+
 
 .navbar {
-
 
     position:
         fixed;
 
 
     top:
-        0;
+        20px;
 
 
     left:
-        0;
+        50%;
+
+
+    transform:
+        translateX(-50%);
 
 
     width:
-        100%;
+        min(
+            calc(100% - 40px),
+            1150px
+        );
 
 
     z-index:
         1000;
 
 
-    transition:
-
-        background .4s var(--transition),
-        backdrop-filter .4s var(--transition);
-
-
 }
-
-
-
-
-
-.navbar.scrolled {
-
-
-    background:
-        var(--glass);
-
-
-
-    backdrop-filter:
-        blur(25px);
-
-
-
-    -webkit-backdrop-filter:
-        blur(25px);
-
-
-
-    border-bottom:
-        1px solid var(--glass-border);
-
-
-}
-
 
 
 
@@ -507,41 +482,126 @@ button {
 .nav-container {
 
 
-    max-width:
-        var(--max-width);
-
-
-
     height:
-        90px;
-
-
-
-    margin:
-        auto;
-
+        78px;
 
 
     padding:
         0 30px;
 
 
-
     display:
         flex;
-
 
 
     align-items:
         center;
 
 
-
     justify-content:
         space-between;
 
 
+    border-radius:
+        999px;
+
+
+
+    background:
+        rgba(255,255,255,.55);
+
+
+
+    backdrop-filter:
+        blur(30px);
+
+
+
+    -webkit-backdrop-filter:
+        blur(30px);
+
+
+
+    border:
+        1px solid
+        rgba(255,255,255,.35);
+
+
+
+    box-shadow:
+
+        0 15px 50px
+        rgba(0,0,0,.15);
+
+
 }
+
+
+
+
+@media (prefers-color-scheme:dark){
+
+
+.nav-container {
+
+
+    background:
+        rgba(20,20,20,.55);
+
+
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+
+}
+}
+@media(max-width:600px){
+
+
+.navbar {
+
+
+    top:
+        12px;
+
+
+    width:
+        calc(100% - 24px);
+
+
+}
+
+
+
+.nav-container {
+
+
+    height:
+        65px;
+
+
+    padding:
+        0 20px;
+
+
+}
+
+
+
+.logo img {
+
+
+    width:
+        48px;
+
+
+}
+
+
+}
+
 
 
 
@@ -553,22 +613,11 @@ button {
 
 
     width:
-        180px;
-
+        170px;
 
 
     height:
         auto;
-
-
-
-    object-fit:
-        contain;
-
-
-
-    transition:
-        transform .3s var(--transition);
 
 
 }
