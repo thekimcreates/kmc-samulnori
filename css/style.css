@@ -1800,3 +1800,142 @@ button {
     </div>
 
 </article>
+
+/* ======================================
+   LINK FIX
+====================================== */
+
+a {
+    position: relative;
+    z-index: 5;
+}
+
+
+.nav-links a,
+.mobile-menu a,
+.learn-content a,
+.text-link {
+
+    cursor:
+        pointer;
+
+}
+
+
+.learn-content a {
+
+    pointer-events:
+        auto;
+
+}
+
+/* ======================================
+   FOOTER
+====================================== */
+
+
+footer,
+.footer {
+
+
+    padding:
+        80px 24px 35px;
+
+
+    background:
+        var(--surface);
+
+
+    border-top:
+        1px solid
+        rgba(0,0,0,.08);
+
+
+    text-align:
+        center;
+
+
+}
+
+
+
+.footer-container,
+footer .container {
+
+
+    max-width:
+        var(--max-width);
+
+
+    margin:
+        auto;
+
+
+}
+
+
+
+.footer-logo img,
+footer img {
+
+
+    width:
+        260px;
+
+
+    height:
+        auto;
+
+
+    margin:
+        0 auto 35px;
+
+
+}
+
+
+
+.footer-contact {
+
+
+    color:
+        var(--secondary-text);
+
+
+    margin-bottom:
+        35px;
+
+
+}
+
+
+
+.footer-contact a {
+
+
+    color:
+        var(--accent);
+
+
+}
+
+
+
+.footer-bottom {
+
+
+    padding-top:
+        25px;
+
+
+    border-top:
+        1px solid
+        rgba(0,0,0,.08);
+
+
+    color:
+        var(--secondary-text);
+
+
+}
+
