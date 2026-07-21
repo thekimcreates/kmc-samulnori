@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Add Performance | KMC Admin</title>
 
-<link rel="stylesheet" href="../css/admin.css">
+<title>
+Add Performance | KMC Samulnori
+</title>
+
 
 </head>
 
 
+
 <body>
 
-
-<div class="admin-container">
 
 
 <h1>
@@ -24,44 +27,55 @@ Add New Performance
 </h1>
 
 
-<form id="performanceForm">
 
-
-<!-- Date -->
 
 <label>
-Performance Date
+Date
 </label>
 
+<br>
+
 <input
+
 id="date"
+
 type="text"
-placeholder="March 15, 2026"
-required
->
+
+placeholder="Example: March 15, 2026">
+
+
+<br><br>
 
 
 
-<!-- Location -->
+
 
 <label>
 Location
 </label>
 
+<br>
+
 <input
+
 id="location"
+
 type="text"
-placeholder="Korean Cultural Festival"
-required
->
+
+placeholder="Example: Azusa High School">
+
+
+<br><br>
 
 
 
-<!-- Arrangement -->
+
 
 <label>
 Arrangement
 </label>
+
+<br>
 
 <select id="arrangement">
 
@@ -78,6 +92,140 @@ Nongak 농악
 
 <option>
 Ogomu 오고무
+</option>
+
+
+<option>
+Nanta 난타
+</option>
+
+
+<option>
+Sogo 소고춤
+</option>
+
+
+</select>
+
+
+
+<br><br>
+
+
+
+
+
+
+
+<label>
+Highlight Image URL
+</label>
+
+
+<br>
+
+
+<input
+
+id="highlight"
+
+type="text"
+
+placeholder="Image URL">
+
+
+<br><br>
+
+
+
+
+
+
+
+<label>
+Photos (comma separated URLs)
+</label>
+
+
+<br>
+
+
+<textarea
+
+id="photos"
+
+placeholder="photo1.jpg, photo2.jpg">
+
+</textarea>
+
+
+
+<br><br>
+
+
+
+
+
+
+
+<label>
+Videos (comma separated URLs)
+</label>
+
+
+<br>
+
+
+<textarea
+
+id="videos"
+
+placeholder="video1.mp4, video2.mp4">
+
+</textarea>
+
+
+
+<br><br>
+
+
+
+
+
+
+<button id="submitPerformance">
+
+Submit Performance
+
+</button>
+
+
+
+
+<p id="message">
+
+</p>
+
+
+
+
+
+
+
+
+<script
+
+type="module"
+
+src="../js/performance-add.js">
+
+</script>
+
+
+
+</body>
+
+</html>Ogomu 오고무
 </option>
 
 
