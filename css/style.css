@@ -469,14 +469,26 @@ button {
 
 .logo img {
 
-
     width:
-        55px;
-
+        150px;
 
     height:
         auto;
 
+    object-fit:
+        contain;
+
+}
+
+
+@media (max-width:600px){
+
+    .logo img {
+
+        width:
+            45px;
+
+    }
 
 }
 
