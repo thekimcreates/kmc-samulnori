@@ -681,40 +681,25 @@ button {
 
 .menu-toggle {
 
+    display: none;
 
-    display:
-        none;
+    width: 44px;
+    height: 44px;
 
+    padding: 0;
 
+    border: none;
+    background: transparent;
 
-    width:
-        42px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 
+    gap: 6px;
 
+    cursor: pointer;
 
-    height:
-        42px;
-
-
-
-    flex-direction:
-        column;
-
-
-
-    justify-content:
-        center;
-
-
-
-    align-items:
-        center;
-
-
-
-    gap:
-        7px;
-
+    z-index: 10001;
 
 }
 
@@ -724,26 +709,18 @@ button {
 
 .menu-toggle span {
 
+    display: block;
 
-    width:
-        23px;
+    width: 24px;
+    height: 2px;
 
+    background: var(--text);
 
+    border-radius: 999px;
 
-    height:
-        2px;
-
-
-
-    background:
-        var(--text);
-
+    transition: .3s ease;
 
 }
-
-
-
-
 
 
 
@@ -2274,6 +2251,22 @@ footer img {
             100%;
 
     }
+  .nav-links {
 
+        display: none;
+
+    }
+
+    .menu-toggle {
+
+        display: flex;
+
+    }
+
+    .logo img {
+
+        width: 48px;
+
+    }
 
 }
