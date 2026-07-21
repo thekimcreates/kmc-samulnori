@@ -72,88 +72,24 @@ document.addEventListener(
         /* ======================================
            MOBILE MENU
         ====================================== */
-const menuToggle = document.getElementById("menu-toggle");
-const mobileMenu = document.getElementById("mobile-menu");
+menuButton.addEventListener("click", () => {
 
-menuToggle.addEventListener("click", () => {
-    mobileMenu.classList.toggle("open");
+    const isOpen = mobileMenu.classList.toggle("open");
+
+    menuButton.classList.toggle("active", isOpen);
+
 });
 
-        const menuButton =
-            document.getElementById(
-                "menu-toggle"
-            );
+mobileLinks.forEach(link => {
 
+    link.addEventListener("click", () => {
 
-        const mobileMenu =
-            document.getElementById(
-                "mobile-menu"
-            );
+        mobileMenu.classList.remove("open");
+        menuButton.classList.remove("active");
 
+    });
 
-
-        if (
-            menuButton &&
-            mobileMenu
-        ) {
-
-
-
-            menuButton.addEventListener(
-                "click",
-                () => {
-
-
-                    mobileMenu.classList.toggle(
-                        "open"
-                    );
-
-
-                    menuButton.classList.toggle(
-                        "active"
-                    );
-
-
-                }
-            );
-
-
-
-            const mobileLinks =
-                mobileMenu.querySelectorAll(
-                    "a"
-                );
-
-
-
-            mobileLinks.forEach(
-                link => {
-
-
-                    link.addEventListener(
-                        "click",
-                        () => {
-
-
-                            mobileMenu.classList.remove(
-                                "open"
-                            );
-
-
-                        }
-                    );
-
-
-                }
-            );
-
-
-        }
-
-
-
-
-
+});
 
 
 
