@@ -2,103 +2,186 @@
 
 
 
+const membersContainer =
+
+document.getElementById(
+
+"membersContainer"
+
+);
+
+
+
+
+
+
+
+// =========================
+// INSTRUCTOR
+// =========================
+
+
+
+const instructorName =
+
+document.getElementById(
+
+"instructorName"
+
+);
+
+
+
+instructorName.textContent =
+
+"Name Here";
+
+
+
+
+
+
+
+
+
+// =========================
+// MEMBERS DATA
+// =========================
+//
+// Replace ages/names later
+// Photos automatically load
+// from assets/team/
+//
+
+
 
 const members = [
 
 
 {
-
-name:
-
-"Member Name",
-
-age:
-
-"Age 11",
-
-photo:
-
-"assets/members/member1.png"
-
-
+name:"Member 1",
+age:11
 },
 
 
-
 {
-
-name:
-
-"Member Name",
-
-age:
-
-"Age 12",
-
-photo:
-
-"assets/members/member2.png"
-
-
+name:"Member 2",
+age:11
 },
 
 
-
 {
-
-name:
-
-"Member Name",
-
-age:
-
-"Age 13",
-
-photo:
-
-"assets/members/member3.png"
-
-
+name:"Member 3",
+age:12
 },
 
 
-
 {
-
-name:
-
-"Member Name",
-
-age:
-
-"Age 14",
-
-photo:
-
-"assets/members/member4.png"
-
-
+name:"Member 4",
+age:12
 },
 
 
+{
+name:"Member 5",
+age:12
+},
+
 
 {
-
-name:
-
-"Member Name",
-
-age:
-
-"Age 15",
-
-photo:
-
-"assets/members/member5.png"
+name:"Member 6",
+age:13
+},
 
 
+{
+name:"Member 7",
+age:13
+},
+
+
+{
+name:"Member 8",
+age:13
+},
+
+
+{
+name:"Member 9",
+age:14
+},
+
+
+{
+name:"Member 10",
+age:14
+},
+
+
+{
+name:"Member 11",
+age:14
+},
+
+
+{
+name:"Member 12",
+age:15
+},
+
+
+{
+name:"Member 13",
+age:15
+},
+
+
+{
+name:"Member 14",
+age:15
+},
+
+
+{
+name:"Member 15",
+age:15
+},
+
+
+{
+name:"Member 16",
+age:14
+},
+
+
+{
+name:"Member 17",
+age:13
+},
+
+
+{
+name:"Member 18",
+age:12
+},
+
+
+{
+name:"Member 19",
+age:11
+},
+
+
+{
+name:"Member 20",
+age:11
+},
+
+
+{
+name:"Member 21",
+age:15
 }
-
 
 
 ];
@@ -109,25 +192,17 @@ photo:
 
 
 
-const memberGrid =
-
-document.getElementById(
-
-"memberGrid"
-
-);
 
 
-
-
-
-
+// =========================
+// CREATE MEMBER CARDS
+// =========================
 
 
 
 members.forEach(
 
-(member)=>{
+(member,index)=>{
 
 
 
@@ -150,20 +225,19 @@ card.className =
 
 
 
-card.innerHTML =
 
+card.innerHTML =
 
 `
 
 <img
 
-src="${member.photo}"
+src="assets/team/member${index+1}.png"
 
-alt="${member.name}">
+alt="${member.name}"
 
+>
 
-
-<div class="member-info">
 
 
 <h3>
@@ -173,14 +247,12 @@ ${member.name}
 </h3>
 
 
+
 <p>
 
-${member.age}
+Age: ${member.age}
 
 </p>
-
-
-</div>
 
 `;
 
@@ -189,7 +261,8 @@ ${member.age}
 
 
 
-memberGrid.appendChild(
+
+membersContainer.appendChild(
 
 card
 
