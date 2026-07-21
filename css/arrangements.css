@@ -1,37 +1,119 @@
+/* arrangements.css */
+
+
 /* =========================
-   ARRANGEMENTS HEADER
+GLOBAL
 ========================= */
 
 
-.arrangement-header{
+body{
 
-padding-top:160px;
+margin:0;
 
-padding-bottom:80px;
+background:#0d0d0d;
+
+color:white;
+
+font-family:
+
+'Poppins',
+Arial,
+sans-serif;
+
+}
+
+
+
+
+
+/* =========================
+NAV
+========================= */
+
+
+nav{
+
+position:fixed;
+
+top:0;
+
+left:0;
+
+width:100%;
+
+height:80px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 8%;
+
+background:
+
+rgba(0,0,0,.55);
+
+backdrop-filter:
+
+blur(15px);
+
+z-index:100;
+
+}
+
+
+
+nav h2{
+
+color:#ff4444;
+
+}
+
+
+
+nav a{
+
+color:white;
+
+text-decoration:none;
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+PAGE
+========================= */
+
+
+.arrangement-page{
+
+padding:
+
+130px 8% 80px;
+
+}
+
+
+
+.arrangement-page h1{
 
 text-align:center;
 
-}
-
-
-
-.arrangement-header h1{
-
 font-size:3.5rem;
 
-margin-bottom:20px;
+margin-bottom:60px;
 
 }
 
 
-
-.arrangement-header p{
-
-color:#bbb;
-
-font-size:1.15rem;
-
-}
 
 
 
@@ -40,18 +122,11 @@ font-size:1.15rem;
 
 
 /* =========================
-   ARRANGEMENT GRID
+CARDS
 ========================= */
 
 
-.arrangement-grid{
-
-width:90%;
-
-max-width:1300px;
-
-margin:auto;
-
+#arrangementContainer{
 
 display:grid;
 
@@ -59,11 +134,198 @@ grid-template-columns:
 
 repeat(4,1fr);
 
-
 gap:30px;
 
+}
 
-padding-bottom:100px;
+
+
+
+
+
+.arrangement-card{
+
+background:#161616;
+
+border-radius:30px;
+
+overflow:hidden;
+
+cursor:pointer;
+
+transition:.4s;
+
+text-align:center;
+
+}
+
+
+
+.arrangement-card:hover{
+
+transform:translateY(-10px);
+
+box-shadow:
+
+0 20px 40px rgba(255,0,0,.25);
+
+}
+
+
+
+
+
+.arrangement-card img{
+
+width:100%;
+
+height:280px;
+
+object-fit:cover;
+
+}
+
+
+
+
+
+.arrangement-card h2{
+
+padding:25px 15px 10px;
+
+}
+
+
+
+
+
+.expand-arrow{
+
+font-size:35px;
+
+padding-bottom:25px;
+
+}
+
+
+
+
+
+
+
+/* CENTER FIFTH CARD */
+
+
+
+.arrangement-card:nth-child(5){
+
+grid-column:
+
+2 / 4;
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================
+EXPANDED MODAL
+========================= */
+
+
+
+.hidden{
+
+display:none;
+
+}
+
+
+
+
+#arrangementModal{
+
+position:fixed;
+
+inset:0;
+
+background:
+
+rgba(0,0,0,.75);
+
+backdrop-filter:
+
+blur(18px);
+
+z-index:200;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+padding:30px;
+
+}
+
+
+
+
+
+.expanded-card{
+
+background:#111;
+
+width:90%;
+
+max-width:900px;
+
+max-height:90vh;
+
+overflow:auto;
+
+border-radius:35px;
+
+position:relative;
+
+padding-bottom:50px;
+
+animation:
+
+expand .35s ease;
+
+}
+
+
+
+
+
+
+@keyframes expand{
+
+
+from{
+
+transform:scale(.8);
+
+opacity:0;
+
+}
+
+
+to{
+
+transform:scale(1);
+
+opacity:1;
+
+}
 
 
 }
@@ -72,12 +334,197 @@ padding-bottom:100px;
 
 
 
-/* Fifth arrangement centered */
+
+
+
+.expanded-card img{
+
+width:100%;
+
+height:400px;
+
+object-fit:cover;
+
+border-radius:
+
+35px 35px 0 0;
+
+}
+
+
+
+
+
+
+
+
+.expanded-card h2{
+
+font-size:2.5rem;
+
+margin:35px 50px 15px;
+
+}
+
+
+
+.expanded-card p{
+
+margin:15px 50px;
+
+line-height:1.8;
+
+color:#ddd;
+
+}
+
+
+
+.expanded-card h3{
+
+margin:
+
+40px 50px 10px;
+
+font-size:1.8rem;
+
+}
+
+
+
+
+
+
+
+
+
+#closeArrangement{
+
+position:absolute;
+
+right:30px;
+
+top:20px;
+
+z-index:2;
+
+background:none;
+
+border:none;
+
+color:white;
+
+font-size:35px;
+
+cursor:pointer;
+
+}
+
+
+
+
+
+
+
+
+
+
+/* =========================
+MOBILE
+========================= */
+
+
+@media(max-width:900px){
+
+
+
+#arrangementContainer{
+
+
+grid-template-columns:
+
+repeat(2,1fr);
+
+
+}
+
+
+
 
 .arrangement-card:nth-child(5){
 
-grid-column:
+grid-column:auto;
 
+}
+
+
+
+}
+
+
+
+
+
+@media(max-width:600px){
+
+
+
+#arrangementContainer{
+
+
+grid-template-columns:
+
+1fr;
+
+
+}
+
+
+
+.arrangement-page h1{
+
+
+font-size:2.5rem;
+
+
+}
+
+
+
+.expanded-card img{
+
+
+height:250px;
+
+
+}
+
+
+
+.expanded-card h2{
+
+
+margin-left:25px;
+
+
+}
+
+
+
+.expanded-card p,
+.expanded-card h3{
+
+
+margin-left:25px;
+
+margin-right:25px;
+
+
+}
+
+
+
+}
 2 / 4;
 
 
