@@ -1,15 +1,26 @@
 // main.js
 
 
-import { db } from "./firebase.js";
+import {
+
+db
+
+}
+
+from "./firebase.js";
+
 
 
 import {
 
 collection,
+
 getDocs,
+
 query,
+
 orderBy,
+
 limit
 
 }
@@ -25,23 +36,50 @@ from
 
 
 
+
 // =========================
 // HERO SLIDESHOW
 // =========================
 
 
 
-const heroImages =
+const heroImages = [
 
-document.querySelectorAll(
 
-".hero-image"
+"assets/hero/hero1.jpg",
+
+
+"assets/hero/hero2.jpg",
+
+
+"assets/hero/hero3.jpg",
+
+
+"assets/hero/hero4.jpg",
+
+
+"assets/hero/hero5.jpg"
+
+
+
+];
+
+
+
+
+
+let heroIndex = 0;
+
+
+
+const heroBackground =
+
+document.getElementById(
+
+"heroBackground"
 
 );
 
-
-
-let currentHero = 0;
 
 
 
@@ -50,37 +88,27 @@ let currentHero = 0;
 function changeHero(){
 
 
-heroImages[currentHero]
-.classList.remove(
 
-"active"
+heroBackground.style.backgroundImage =
 
-);
+`
 
+url(${heroImages[heroIndex]})
 
-
-
-currentHero++;
+`;
 
 
 
-if(
-currentHero >= heroImages.length
-){
+heroIndex++;
 
-currentHero = 0;
+
+
+
+if(heroIndex >= heroImages.length){
+
+heroIndex = 0;
 
 }
-
-
-
-
-heroImages[currentHero]
-.classList.add(
-
-"active"
-
-);
 
 
 
@@ -88,6 +116,11 @@ heroImages[currentHero]
 
 
 
+
+
+
+
+changeHero();
 
 
 
@@ -98,6 +131,9 @@ changeHero,
 5000
 
 );
+
+
+
 
 
 
@@ -140,6 +176,7 @@ return;
 
 
 
+
 const performanceQuery =
 
 query(
@@ -172,6 +209,7 @@ limit(3)
 
 
 
+
 const snapshot =
 
 await getDocs(
@@ -185,39 +223,28 @@ performanceQuery
 
 
 
+performanceContainer.innerHTML="";
+
+
+
+
+
+
+
+
 snapshot.forEach(
 
 (doc)=>{
 
 
-const performance =
+
+const data =
 
 doc.data();
 
 
 
-createPerformancePreview(
 
-performance
-
-);
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-function createPerformancePreview(data){
 
 
 
@@ -233,7 +260,9 @@ document.createElement(
 
 card.className =
 
-"home-performance-card";
+"home-performance";
+
+
 
 
 
@@ -245,7 +274,7 @@ card.style.backgroundImage =
 
 linear-gradient(
 
-rgba(0,0,0,.3),
+rgba(0,0,0,.25),
 
 rgba(0,0,0,.85)
 
@@ -259,8 +288,9 @@ url(${data.highlight})
 
 
 
-card.innerHTML =
 
+
+card.innerHTML =
 
 `
 
@@ -269,10 +299,9 @@ card.innerHTML =
 
 <h3>
 
-${data.arrangement}
+${data.date}
 
 </h3>
-
 
 
 <p>
@@ -282,10 +311,9 @@ ${data.location}
 </p>
 
 
-
 <p>
 
-${data.date}
+${data.arrangement}
 
 </p>
 
@@ -299,11 +327,16 @@ ${data.date}
 
 
 
+
 performanceContainer.appendChild(
 
 card
 
 );
+
+
+
+});
 
 
 
