@@ -1,80 +1,150 @@
+/* performances.css */
+
+
 /* =========================
-   PERFORMANCE HEADER
+GLOBAL
 ========================= */
 
 
-.performance-header{
+body{
 
-padding-top:160px;
+margin:0;
 
-padding-bottom:80px;
+background:#0d0d0d;
+
+color:white;
+
+font-family:
+
+'Poppins',
+Arial,
+sans-serif;
+
+}
+
+
+
+
+/* =========================
+NAVIGATION
+========================= */
+
+
+nav{
+
+position:fixed;
+
+top:0;
+
+left:0;
+
+width:100%;
+
+height:80px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 8%;
+
+background:
+
+rgba(0,0,0,.55);
+
+backdrop-filter:
+
+blur(15px);
+
+z-index:100;
+
+}
+
+
+
+nav h2{
+
+color:#ff4444;
+
+}
+
+
+
+nav a{
+
+color:white;
+
+text-decoration:none;
+
+}
+
+
+
+
+
+
+/* =========================
+PAGE
+========================= */
+
+
+.performance-page{
+
+padding:
+
+130px 5% 80px;
+
+}
+
+
+
+.performance-page h1{
 
 text-align:center;
 
-}
-
-
-.performance-header h1{
-
 font-size:3.5rem;
 
-margin-bottom:20px;
+margin-bottom:60px;
 
 }
 
-
-.performance-header p{
-
-font-size:1.2rem;
-
-color:#bbb;
-
-}
 
 
 
 
 
 /* =========================
-   PERFORMANCE CARDS
+PERFORMANCE CARDS
 ========================= */
-
-
-#performanceContainer{
-
-width:90%;
-
-max-width:1400px;
-
-margin:auto;
-
-}
-
-
 
 
 .performance-card{
 
-height:600px;
+height:420px;
 
-margin:50px 0;
+width:100%;
+
+margin-bottom:35px;
 
 border-radius:30px;
 
 overflow:hidden;
 
+position:relative;
+
 background-size:cover;
 
 background-position:center;
-
-position:relative;
 
 cursor:pointer;
 
 transition:.4s;
 
-
 }
+
+
 
 
 
@@ -88,61 +158,79 @@ transform:scale(1.02);
 
 
 
-.performance-info{
+
+
+.performance-overlay{
 
 position:absolute;
 
+bottom:0;
 
-bottom:40px;
+left:0;
 
-left:40px;
+width:100%;
 
-
-padding:30px 40px;
+padding:40px;
 
 
 background:
 
-rgba(0,0,0,.45);
+linear-gradient(
+
+transparent,
+
+rgba(0,0,0,.85)
+
+);
 
 
+}
+
+
+
+
+
+.performance-overlay h2{
+
+margin:0;
+
+font-size:2rem;
+
+}
+
+
+
+.performance-overlay p{
+
+margin:8px 0;
+
+color:#ddd;
+
+}
+
+
+
+
+
+.performance-text{
+
+background:
+
+rgba(0,0,0,.35);
 
 backdrop-filter:
 
 blur(15px);
 
+padding:20px;
 
+border-radius:20px;
 
-border-radius:25px;
-
-
-}
-
-
-
-.performance-info h2{
-
-
-font-size:2.2rem;
-
-
-margin-bottom:15px;
-
+display:inline-block;
 
 }
 
 
-
-.performance-info p{
-
-
-margin:8px 0;
-
-
-color:#ddd;
-
-
-}
 
 
 
@@ -151,46 +239,8 @@ color:#ddd;
 
 
 /* =========================
-   PERFORMANCE MODAL
+MODAL
 ========================= */
-
-
-.modal{
-
-
-position:fixed;
-
-
-inset:0;
-
-
-background:
-
-rgba(0,0,0,.7);
-
-
-
-backdrop-filter:
-
-blur(20px);
-
-
-
-display:flex;
-
-
-justify-content:center;
-
-
-align-items:center;
-
-
-
-z-index:2000;
-
-
-
-}
 
 
 
@@ -204,29 +254,45 @@ display:none;
 
 
 
-.modal-content{
+#performanceModal{
 
+position:fixed;
 
-width:90%;
+inset:0;
 
+background:
 
-height:90%;
+rgba(0,0,0,.75);
 
+backdrop-filter:
 
-overflow-y:auto;
+blur(15px);
 
+z-index:200;
 
-background:#111;
-
-
-border-radius:35px;
-
+overflow:auto;
 
 padding:40px;
 
+}
 
-position:relative;
 
+
+
+
+.modal-content{
+
+max-width:1000px;
+
+margin:auto;
+
+background:#111;
+
+border-radius:30px;
+
+overflow:hidden;
+
+padding-bottom:50px;
 
 }
 
@@ -236,53 +302,51 @@ position:relative;
 
 #closeModal{
 
-
 position:absolute;
 
+right:40px;
 
-right:35px;
+top:30px;
 
-
-top:25px;
-
-
-font-size:40px;
-
+font-size:30px;
 
 background:none;
 
-
 border:none;
-
 
 color:white;
 
-
 cursor:pointer;
-
 
 }
 
 
 
 
-.modal-highlight{
 
+
+
+.modal-highlight{
 
 width:100%;
 
-
-max-height:600px;
-
+height:500px;
 
 object-fit:cover;
 
+}
 
-border-radius:25px;
 
 
-margin-bottom:30px;
 
+
+.modal-content h2,
+
+.modal-content p,
+
+.modal-content h3{
+
+margin-left:50px;
 
 }
 
@@ -292,26 +356,22 @@ margin-bottom:30px;
 
 .modal-content h2{
 
+margin-top:35px;
 
 font-size:2.5rem;
 
-
 }
-
-
 
 
 
 .modal-content h3{
 
-
-margin-top:45px;
-
-
 font-size:2rem;
 
+margin-top:50px;
 
 }
+
 
 
 
@@ -320,62 +380,39 @@ font-size:2rem;
 
 
 /* =========================
-   PHOTO GALLERY
+PHOTOS
 ========================= */
-
 
 
 .photo-grid{
 
-
 display:grid;
-
 
 grid-template-columns:
 
-repeat(auto-fit,minmax(220px,1fr));
-
-
+repeat(3,1fr);
 
 gap:20px;
 
-
+padding:40px 50px;
 
 }
+
 
 
 
 
 .photo-grid img{
 
-
 width:100%;
 
-
-height:220px;
-
+height:250px;
 
 object-fit:cover;
 
-
 border-radius:20px;
 
-
-transition:.3s;
-
-
 }
-
-
-
-.photo-grid img:hover{
-
-
-transform:scale(1.03);
-
-
-}
-
 
 
 
@@ -384,102 +421,62 @@ transform:scale(1.03);
 
 
 /* =========================
-   VIDEO SECTION
+VIDEOS
 ========================= */
-
 
 
 .video-grid{
 
-
 display:grid;
-
 
 grid-template-columns:
 
-repeat(auto-fit,minmax(300px,1fr));
+repeat(2,1fr);
 
+gap:20px;
 
-
-gap:25px;
-
+padding:40px 50px;
 
 }
 
 
 
-
-
-.video-card{
-
+.video-container{
 
 position:relative;
 
-
-border-radius:20px;
-
-
-overflow:hidden;
-
-
-cursor:pointer;
-
-
-background:#000;
-
-
 }
 
 
 
-
-
-.video-card img{
-
+.video-container video{
 
 width:100%;
 
-
-height:220px;
-
-
-object-fit:cover;
-
+border-radius:20px;
 
 }
-
-
 
 
 
 .video-duration{
 
-
 position:absolute;
-
-
-right:15px;
-
 
 bottom:15px;
 
+right:15px;
 
 background:
 
-rgba(0,0,0,.8);
+rgba(0,0,0,.75);
 
+padding:8px 12px;
 
-
-padding:7px 12px;
-
-
-border-radius:8px;
-
-
-font-size:.9rem;
-
+border-radius:10px;
 
 }
+
 
 
 
@@ -488,166 +485,55 @@ font-size:.9rem;
 
 
 /* =========================
-   VIDEO FULLSCREEN VIEWER
+MOBILE
 ========================= */
 
 
-
-.video-viewer{
-
-
-position:fixed;
+@media(max-width:700px){
 
 
-inset:0;
+.performance-page h1{
 
-
-
-background:
-
-rgba(0,0,0,.9);
-
-
-
-display:flex;
-
-
-justify-content:center;
-
-
-align-items:center;
-
-
-
-z-index:3000;
-
+font-size:2.5rem;
 
 }
-
-
-
-
-
-.video-viewer iframe{
-
-
-width:85%;
-
-
-height:75%;
-
-
-border-radius:25px;
-
-
-}
-
-
-
-
-
-#closeVideo{
-
-
-position:absolute;
-
-
-top:30px;
-
-
-right:50px;
-
-
-font-size:45px;
-
-
-color:white;
-
-
-background:none;
-
-
-border:none;
-
-
-cursor:pointer;
-
-
-}
-
-
-
-
-
-
-
-/* =========================
-   MOBILE
-========================= */
-
-
-
-@media(max-width:768px){
 
 
 
 .performance-card{
 
-
-height:450px;
-
+height:300px;
 
 }
 
 
 
-.performance-info{
+.modal-highlight{
 
-
-left:20px;
-
-
-bottom:20px;
-
-
-padding:20px;
-
+height:300px;
 
 }
 
 
 
-.performance-info h2{
+.photo-grid,
+.video-grid{
 
-
-font-size:1.6rem;
-
-
-}
-
-
-
-.modal-content{
-
+grid-template-columns:1fr;
 
 padding:25px;
 
-
 }
 
 
 
-.video-viewer iframe{
+.modal-content h2,
+.modal-content p,
+.modal-content h3{
 
-
-width:95%;
-
-
-height:60%;
-
+margin-left:25px;
 
 }
-
 
 
 }
