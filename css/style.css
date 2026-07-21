@@ -2009,3 +2009,168 @@ footer img {
         10000;
 
 }
+
+/* ======================================
+   TEAM MEMBER COUNT CIRCLE
+====================================== */
+
+
+.team-icon {
+
+
+    width:
+        150px;
+
+
+    height:
+        150px;
+
+
+    flex-shrink:
+        0;
+
+
+    border-radius:
+        50%;
+
+
+    background:
+        var(--kmc-primary);
+
+
+    color:
+        white;
+
+
+    display:
+        flex;
+
+
+    justify-content:
+        center;
+
+
+    align-items:
+        center;
+
+
+    font-size:
+        3rem;
+
+
+    font-weight:
+        800;
+
+
+    letter-spacing:
+        -.05em;
+
+
+    box-shadow:
+
+        0 20px 50px
+        rgba(139,0,0,.35);
+
+
+}
+
+/* ======================================
+   SECTION CTA LINKS
+====================================== */
+
+
+.section-button {
+
+
+    display:
+        flex;
+
+
+    justify-content:
+        center;
+
+
+    align-items:
+        center;
+
+
+    margin-top:
+        50px;
+
+
+}
+
+
+
+
+
+.text-link {
+
+
+    display:
+        inline-flex;
+
+
+    justify-content:
+        center;
+
+
+    align-items:
+        center;
+
+
+    padding:
+
+        14px 32px;
+
+
+    border-radius:
+        999px;
+
+
+    background:
+        var(--kmc-primary);
+
+
+    color:
+        white;
+
+
+    font-size:
+        1.05rem;
+
+
+    font-weight:
+        600;
+
+
+    letter-spacing:
+        -.02em;
+
+
+    transition:
+
+        transform .3s ease,
+        box-shadow .3s ease;
+
+
+}
+
+
+
+
+
+.text-link:hover {
+
+
+    transform:
+        translateY(-3px);
+
+
+    box-shadow:
+
+        0 15px 35px
+        rgba(139,0,0,.35);
+
+
+}
