@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
@@ -12,13 +13,10 @@ Arrangements | KMC Samulnori
 </title>
 
 
-<link rel="stylesheet" href="css/style.css">
-
 <link rel="stylesheet" href="css/arrangements.css">
 
 
 </head>
-
 
 
 <body>
@@ -32,37 +30,10 @@ KMC Samulnori
 </h2>
 
 
-<ul>
-
-<li>
 <a href="index.html">
 Home
 </a>
-</li>
 
-
-<li>
-<a href="performances.html">
-Performances
-</a>
-</li>
-
-
-<li>
-<a href="arrangements.html">
-Arrangements
-</a>
-</li>
-
-
-<li>
-<a href="team.html">
-Team
-</a>
-</li>
-
-
-</ul>
 
 </nav>
 
@@ -71,8 +42,7 @@ Team
 
 
 
-
-<header class="arrangement-header">
+<section class="arrangement-page">
 
 
 <h1>
@@ -80,23 +50,12 @@ Our Arrangements
 </h1>
 
 
-<p>
-Discover the rhythms, instruments, and traditions behind every performance.
-</p>
 
+<div id="arrangementContainer">
 
-</header>
+Loading...
 
-
-
-
-
-
-
-
-<section
-id="arrangementContainer"
-class="arrangement-grid">
+</div>
 
 
 
@@ -109,50 +68,40 @@ class="arrangement-grid">
 
 
 
-<!-- EXPANDED ARRANGEMENT VIEW -->
+<div id="arrangementModal"
 
-
-<div
-
-id="arrangementModal"
-
-class="arrangement-modal hidden">
-
-
-<div
-
-class="arrangement-modal-content">
+class="hidden">
 
 
 
-<button
+<div class="expanded-card">
 
-id="closeArrangement">
 
-×
+<button id="closeArrangement">
+
+✕
 
 </button>
 
 
 
-
-
 <img
 
-id="arrangementImage"
-
-class="expanded-image">
+id="arrangementImage">
 
 
 
 
 
-<h2
-
-id="arrangementTitle">
+<h2 id="arrangementTitle">
 
 </h2>
 
+
+
+<p id="arrangementDescription">
+
+</p>
 
 
 
@@ -161,31 +110,9 @@ Instruments
 </h3>
 
 
-
-<p
-
-id="arrangementInstruments">
+<p id="arrangementInstruments">
 
 </p>
-
-
-
-
-
-
-<h3>
-About
-</h3>
-
-
-
-<p
-
-id="arrangementDescription">
-
-</p>
-
-
 
 
 
@@ -195,14 +122,9 @@ Most Recent Performance
 </h3>
 
 
-
-<p
-
-id="arrangementPerformance">
+<p id="arrangementPerformance">
 
 </p>
-
-
 
 
 
