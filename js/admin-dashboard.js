@@ -4,7 +4,8 @@
 
 import {
 
-auth
+auth,
+db
 
 }
 
@@ -26,6 +27,28 @@ from
 
 
 
+import {
+
+collection,
+
+getDocs,
+
+query,
+
+orderBy,
+
+deleteDoc,
+
+doc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
 
 
 
@@ -41,25 +64,13 @@ document.getElementById(
 
 
 
-const logoutButton =
+const list =
 
 document.getElementById(
 
-"logout"
+"performanceList"
 
 );
-
-
-
-const addPerformanceButton =
-
-document.getElementById(
-
-"addPerformance"
-
-);
-
-
 
 
 
@@ -77,25 +88,22 @@ auth,
 if(user){
 
 
-
 welcome.textContent =
 
 "Logged in as: " + user.email;
 
 
 
+loadPerformances();
+
+
+
 }
-
-
 
 else{
 
 
-
-window.location.href =
-
-"login.html";
-
+window.location.href="login.html";
 
 
 }
@@ -111,10 +119,22 @@ window.location.href =
 
 
 
-addPerformanceButton.onclick = ()=>{
+
+// ADD PERFORMANCE
 
 
-window.location.href =
+document
+
+.getElementById(
+
+"addPerformance"
+
+)
+
+.onclick = ()=>{
+
+
+window.location.href=
 
 "performance-add.html";
 
@@ -128,18 +148,217 @@ window.location.href =
 
 
 
+// MANAGE TEAM
 
-logoutButton.onclick = async ()=>{
+
+document
+
+.getElementById(
+
+"manageTeam"
+
+)
+
+.onclick = ()=>{
+
+
+alert(
+
+"Team management coming next."
+
+);
+
+
+};
+
+
+
+
+
+
+
+
+
+// LOGOUT
+
+
+document
+
+.getElementById(
+
+"logout"
+
+)
+
+.onclick = async ()=>{
 
 
 await signOut(auth);
 
 
-
-window.location.href =
+window.location.href=
 
 "login.html";
 
 
+};
+
+
+
+
+
+
+
+
+
+async function loadPerformances(){
+
+
+
+const q =
+
+query(
+
+collection(
+
+db,
+
+"performances"
+
+),
+
+
+orderBy(
+
+"created",
+
+"desc"
+
+)
+
+);
+
+
+
+
+const snapshot =
+
+await getDocs(q);
+
+
+
+
+list.innerHTML="";
+
+
+
+
+
+
+snapshot.forEach(
+
+(item)=>{
+
+
+
+const data = item.data();
+
+
+
+
+
+const box =
+
+document.createElement(
+
+"div"
+
+);
+
+
+
+box.innerHTML =
+
+`
+
+<h3>
+
+${data.date}
+
+</h3>
+
+
+<p>
+
+${data.location}
+
+</p>
+
+
+<p>
+
+${data.arrangement}
+
+</p>
+
+
+<button class="delete">
+
+Delete
+
+</button>
+
+`;
+
+
+
+
+
+
+
+box.querySelector(
+
+".delete"
+
+)
+
+.onclick = async ()=>{
+
+
+
+await deleteDoc(
+
+doc(
+
+db,
+
+"performances",
+
+item.id
+
+)
+
+);
+
+
+
+box.remove();
+
+
 
 };
+
+
+
+
+
+
+list.appendChild(box);
+
+
+
+});
+
+
+
+}
