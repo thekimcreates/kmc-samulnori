@@ -675,6 +675,14 @@ button {
         translateX(-50%)
         rotate(-45deg);
 }
+.mobile-menu.open {
+    z-index: 10001;
+}
+
+.menu-toggle.active {
+    position: relative;
+    z-index: 10010;
+}
 
 
 /* ======================================
@@ -862,11 +870,20 @@ button {
         display: none;
     }
 
-    .menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+   .menu-toggle {
+       position: fixed;
+       top: 22px;
+       right: 24px;
+   
+       z-index: 10010;
+   
+       width: 46px;
+       height: 46px;
+   
+       display: none;
+       justify-content: center;
+       align-items: center;
+}
 
     .logo img {
         width: 48px;
@@ -881,6 +898,9 @@ button {
     .mobile-menu {
         display: none;
     }
+   .menu-toggle {
+    display: flex;
+}
 }
 
 
