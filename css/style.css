@@ -2174,3 +2174,106 @@ footer img {
 
 
 }
+
+
+/* ======================================
+   MOBILE CARD STACKING FIX
+====================================== */
+
+
+@media (max-width: 900px) {
+
+
+    /* Arrangements */
+
+    .arrangement-grid {
+
+        display:
+            grid;
+
+
+        grid-template-columns:
+            1fr;
+
+
+        gap:
+            25px;
+
+    }
+
+
+
+    .arrangement-card {
+
+        width:
+            100%;
+
+
+        max-width:
+            none;
+
+
+    }
+
+
+
+
+
+    /* Performances */
+
+    .performance-grid {
+
+        display:
+            grid;
+
+
+        grid-template-columns:
+            1fr;
+
+
+        gap:
+            25px;
+
+    }
+
+
+
+    .performance-card {
+
+        width:
+            100%;
+
+    }
+
+
+
+
+
+    /* Team */
+
+    .team-preview-grid {
+
+        display:
+            grid;
+
+
+        grid-template-columns:
+            1fr;
+
+
+        gap:
+            25px;
+
+    }
+
+
+
+    .team-feature-card {
+
+        width:
+            100%;
+
+    }
+
+
+}
