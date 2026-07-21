@@ -1,14 +1,24 @@
 // performances.js
 
 
-import { db } from "./firebase.js";
+import {
+
+db
+
+}
+
+from "./firebase.js";
+
 
 
 import {
 
 collection,
+
 getDocs,
+
 query,
+
 orderBy
 
 }
@@ -16,6 +26,9 @@ orderBy
 from
 
 "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
 
 
 
@@ -31,9 +44,7 @@ document.getElementById(
 
 
 
-
-
-const performanceModal =
+const modal =
 
 document.getElementById(
 
@@ -43,46 +54,13 @@ document.getElementById(
 
 
 
-const closeModal =
+const closeButton =
 
 document.getElementById(
 
 "closeModal"
 
 );
-
-
-
-
-
-const videoViewer =
-
-document.getElementById(
-
-"videoViewer"
-
-);
-
-
-
-const videoFrame =
-
-document.getElementById(
-
-"videoFrame"
-
-);
-
-
-
-const closeVideo =
-
-document.getElementById(
-
-"closeVideo"
-
-);
-
 
 
 
@@ -101,7 +79,7 @@ async function loadPerformances(){
 
 
 
-const performancesQuery =
+const performanceQuery =
 
 query(
 
@@ -128,11 +106,13 @@ orderBy(
 
 
 
+
+
 const snapshot =
 
 await getDocs(
 
-performancesQuery
+performanceQuery
 
 );
 
@@ -140,15 +120,25 @@ performancesQuery
 
 
 
+
+container.innerHTML="";
+
+
+
+
+
+
+
+
 snapshot.forEach(
 
-(document)=>{
+(doc)=>{
 
 
 
 const data =
 
-document.data();
+doc.data();
 
 
 
@@ -164,6 +154,9 @@ data
 });
 
 
+
+
+
 }
 
 
@@ -173,8 +166,9 @@ data
 
 
 
+
 // =========================
-// CREATE PERFORMANCE CARD
+// CREATE CARD
 // =========================
 
 
@@ -207,9 +201,9 @@ card.style.backgroundImage =
 
 linear-gradient(
 
-rgba(0,0,0,.2),
+rgba(0,0,0,.15),
 
-rgba(0,0,0,.85)
+rgba(0,0,0,.8)
 
 ),
 
@@ -221,11 +215,16 @@ url(${data.highlight})
 
 
 
+
 card.innerHTML =
+
 
 `
 
-<div class="performance-info">
+<div class="performance-overlay">
+
+
+<div class="performance-text">
 
 
 <h2>
@@ -246,14 +245,19 @@ ${data.location}
 
 <p>
 
-${data.date} ↗
+${data.date}
 
 </p>
 
 
 </div>
 
+
+</div>
+
 `;
+
+
 
 
 
@@ -269,7 +273,10 @@ data
 );
 
 
+
 };
+
+
 
 
 
@@ -303,7 +310,7 @@ function openPerformance(data){
 
 
 
-performanceModal.classList.remove(
+modal.classList.remove(
 
 "hidden"
 
@@ -319,22 +326,7 @@ document.getElementById(
 
 ).src =
 
-data.highlight;
-
-
-
-
-
-
-document.getElementById(
-
-"modalArrangement"
-
-).textContent =
-
-data.arrangement;
-
-
+data.highlight || "";
 
 
 
@@ -350,26 +342,33 @@ data.date;
 
 
 
-
-
 document.getElementById(
 
 "modalLocation"
 
 ).textContent =
 
-data.location;
+"Location: " + data.location;
+
+
+
+document.getElementById(
+
+"modalArrangement"
+
+).textContent =
+
+"Arrangement: " + data.arrangement;
 
 
 
 
 
 
-// LOAD PHOTOS
 
 
 
-const photosContainer =
+const photoBox =
 
 document.getElementById(
 
@@ -379,7 +378,9 @@ document.getElementById(
 
 
 
-photosContainer.innerHTML = "";
+photoBox.innerHTML="";
+
+
 
 
 
@@ -394,7 +395,8 @@ data.photos.forEach(
 (photo)=>{
 
 
-const image =
+
+const img =
 
 document.createElement(
 
@@ -404,19 +406,20 @@ document.createElement(
 
 
 
-image.src = photo;
+img.src = photo;
 
 
 
-photosContainer.appendChild(
+photoBox.appendChild(
 
-image
+img
 
 );
 
 
 
 });
+
 
 
 }
@@ -428,11 +431,8 @@ image
 
 
 
-// LOAD VIDEOS
 
-
-
-const videosContainer =
+const videoBox =
 
 document.getElementById(
 
@@ -442,7 +442,9 @@ document.getElementById(
 
 
 
-videosContainer.innerHTML = "";
+videoBox.innerHTML="";
+
+
 
 
 
@@ -458,7 +460,7 @@ data.videos.forEach(
 
 
 
-const videoCard =
+const wrapper =
 
 document.createElement(
 
@@ -468,43 +470,105 @@ document.createElement(
 
 
 
-videoCard.className =
+wrapper.className =
 
-"video-card";
-
-
-
-
-
-
-videoCard.innerHTML =
-
-`
-
-<img src="${video.thumbnail}">
-
-
-<div class="video-duration">
-
-${video.length}
-
-</div>
-
-`;
+"video-container";
 
 
 
 
 
+const element =
 
-videoCard.onclick = ()=>{
+document.createElement(
 
-
-openVideo(
-
-video.url
+"video"
 
 );
+
+
+
+element.src = video;
+
+
+
+element.controls = true;
+
+
+
+element.preload = "metadata";
+
+
+
+
+
+
+
+const duration =
+
+document.createElement(
+
+"span"
+
+);
+
+
+
+duration.className =
+
+"video-duration";
+
+
+
+duration.textContent =
+
+"--:--";
+
+
+
+
+
+
+
+
+element.onloadedmetadata = ()=>{
+
+
+
+const minutes =
+
+Math.floor(
+
+element.duration / 60
+
+);
+
+
+
+const seconds =
+
+Math.floor(
+
+element.duration % 60
+
+)
+
+.toString()
+
+.padStart(
+
+2,
+
+"0"
+
+);
+
+
+
+duration.textContent =
+
+`${minutes}:${seconds}`;
+
 
 
 };
@@ -514,9 +578,26 @@ video.url
 
 
 
-videosContainer.appendChild(
 
-videoCard
+wrapper.appendChild(
+
+element
+
+);
+
+
+
+wrapper.appendChild(
+
+duration
+
+);
+
+
+
+videoBox.appendChild(
+
+wrapper
 
 );
 
@@ -525,12 +606,12 @@ videoCard
 });
 
 
-}
-
-
 
 }
 
+
+
+}
 
 
 
@@ -541,46 +622,20 @@ videoCard
 
 
 // =========================
-// VIDEO VIEWER
+// CLOSE MODAL
 // =========================
 
 
 
-function openVideo(url){
+closeButton.onclick = ()=>{
 
 
 
-videoFrame.src = url;
-
-
-
-videoViewer.classList.remove(
+modal.classList.add(
 
 "hidden"
 
 );
-
-
-
-}
-
-
-
-
-
-
-closeVideo.onclick = ()=>{
-
-
-videoViewer.classList.add(
-
-"hidden"
-
-);
-
-
-
-videoFrame.src = "";
 
 
 
@@ -592,84 +647,30 @@ videoFrame.src = "";
 
 
 
-
-
-// =========================
-// CLOSE PERFORMANCE
-// =========================
+modal.onclick = (event)=>{
 
 
 
-closeModal.onclick = ()=>{
+if(
 
+event.target === modal
 
-performanceModal.classList.add(
-
-"hidden"
-
-);
-
-
-};
+){
 
 
 
-
-
-
-
-
-
-// CLOSE WHEN CLICKING OUTSIDE
-
-
-
-performanceModal.onclick = (event)=>{
-
-
-if(event.target === performanceModal){
-
-
-performanceModal.classList.add(
+modal.classList.add(
 
 "hidden"
 
 );
-
-
-}
-
-
-};
-
-
-
-
-
-
-
-
-videoViewer.onclick = (event)=>{
-
-
-if(event.target === videoViewer){
-
-
-videoViewer.classList.add(
-
-"hidden"
-
-);
-
-
-
-videoFrame.src = "";
 
 
 
 }
 
 
+
 };
 
 
@@ -678,8 +679,6 @@ videoFrame.src = "";
 
 
 
-
-// START
 
 
 loadPerformances();
