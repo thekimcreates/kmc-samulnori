@@ -1,5 +1,7 @@
-import { db } 
-from "./firebase.js";
+// performances.js
+
+
+import { db } from "./firebase.js";
 
 
 import {
@@ -17,83 +19,205 @@ from
 
 
 
+
+
 const container =
+
 document.getElementById(
+
 "performanceContainer"
+
 );
 
 
 
-const modal =
+
+
+const performanceModal =
+
 document.getElementById(
+
 "performanceModal"
+
 );
 
 
 
-const close =
+const closeModal =
+
 document.getElementById(
+
 "closeModal"
+
 );
+
+
+
+
+
+const videoViewer =
+
+document.getElementById(
+
+"videoViewer"
+
+);
+
+
+
+const videoFrame =
+
+document.getElementById(
+
+"videoFrame"
+
+);
+
+
+
+const closeVideo =
+
+document.getElementById(
+
+"closeVideo"
+
+);
+
+
+
+
+
+
+
+
+
+// =========================
+// LOAD PERFORMANCES
+// =========================
 
 
 
 async function loadPerformances(){
 
 
-const q =
+
+const performancesQuery =
+
 query(
 
 collection(
+
 db,
+
 "performances"
+
 ),
 
+
 orderBy(
+
 "created",
+
 "desc"
+
 )
 
 );
 
 
 
+
+
 const snapshot =
-await getDocs(q);
+
+await getDocs(
+
+performancesQuery
+
+);
+
+
 
 
 
 snapshot.forEach(
-(doc)=>{
+
+(document)=>{
+
 
 
 const data =
-doc.data();
+
+document.data();
+
+
+
+
+createPerformanceCard(
+
+data
+
+);
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+// =========================
+// CREATE PERFORMANCE CARD
+// =========================
+
+
+
+function createPerformanceCard(data){
 
 
 
 const card =
+
 document.createElement(
+
 "div"
+
 );
 
 
 
 card.className =
+
 "performance-card";
+
+
 
 
 
 card.style.backgroundImage =
 
 `
+
 linear-gradient(
+
 rgba(0,0,0,.2),
-rgba(0,0,0,.8)
+
+rgba(0,0,0,.85)
+
 ),
 
 url(${data.highlight})
+
 `;
+
+
 
 
 
@@ -105,17 +229,25 @@ card.innerHTML =
 
 
 <h2>
+
 ${data.arrangement}
+
 </h2>
 
 
+
 <p>
+
 ${data.location}
+
 </p>
 
 
+
 <p>
+
 ${data.date} ↗
+
 </p>
 
 
@@ -125,21 +257,45 @@ ${data.date} ↗
 
 
 
-card.onclick=()=>{
 
-openPerformance(data);
+
+card.onclick = ()=>{
+
+
+openPerformance(
+
+data
+
+);
+
 
 };
 
 
 
-container.appendChild(card);
 
 
-});
+container.appendChild(
+
+card
+
+);
+
 
 
 }
+
+
+
+
+
+
+
+
+
+// =========================
+// OPEN PERFORMANCE
+// =========================
 
 
 
@@ -147,66 +303,117 @@ function openPerformance(data){
 
 
 
-modal.classList.remove(
+performanceModal.classList.remove(
+
 "hidden"
+
 );
 
 
 
+
+
 document.getElementById(
+
 "modalHighlight"
+
 ).src =
+
 data.highlight;
 
 
 
+
+
+
 document.getElementById(
+
 "modalArrangement"
-).innerHTML =
+
+).textContent =
+
 data.arrangement;
 
 
 
+
+
+
 document.getElementById(
+
 "modalDate"
-).innerHTML =
+
+).textContent =
+
 data.date;
 
 
 
+
+
+
 document.getElementById(
+
 "modalLocation"
-).innerHTML =
+
+).textContent =
+
 data.location;
 
 
 
 
-const photos =
+
+
+// LOAD PHOTOS
+
+
+
+const photosContainer =
+
 document.getElementById(
+
 "modalPhotos"
+
 );
 
 
 
-photos.innerHTML="";
+photosContainer.innerHTML = "";
 
 
 
-data.photos?.forEach(
+
+
+if(data.photos){
+
+
+
+data.photos.forEach(
+
 (photo)=>{
 
 
-const img =
+const image =
+
 document.createElement(
+
 "img"
+
 );
 
 
-img.src=photo;
+
+image.src = photo;
 
 
-photos.appendChild(img);
+
+photosContainer.appendChild(
+
+image
+
+);
+
 
 
 });
@@ -216,14 +423,263 @@ photos.appendChild(img);
 
 
 
-close.onclick=()=>{
 
-modal.classList.add(
-"hidden"
+
+
+
+
+// LOAD VIDEOS
+
+
+
+const videosContainer =
+
+document.getElementById(
+
+"modalVideos"
+
 );
+
+
+
+videosContainer.innerHTML = "";
+
+
+
+
+
+if(data.videos){
+
+
+
+data.videos.forEach(
+
+(video)=>{
+
+
+
+const videoCard =
+
+document.createElement(
+
+"div"
+
+);
+
+
+
+videoCard.className =
+
+"video-card";
+
+
+
+
+
+
+videoCard.innerHTML =
+
+`
+
+<img src="${video.thumbnail}">
+
+
+<div class="video-duration">
+
+${video.length}
+
+</div>
+
+`;
+
+
+
+
+
+
+videoCard.onclick = ()=>{
+
+
+openVideo(
+
+video.url
+
+);
+
+
+};
+
+
+
+
+
+
+videosContainer.appendChild(
+
+videoCard
+
+);
+
+
+
+});
+
 
 }
 
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// =========================
+// VIDEO VIEWER
+// =========================
+
+
+
+function openVideo(url){
+
+
+
+videoFrame.src = url;
+
+
+
+videoViewer.classList.remove(
+
+"hidden"
+
+);
+
+
+
+}
+
+
+
+
+
+
+closeVideo.onclick = ()=>{
+
+
+videoViewer.classList.add(
+
+"hidden"
+
+);
+
+
+
+videoFrame.src = "";
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =========================
+// CLOSE PERFORMANCE
+// =========================
+
+
+
+closeModal.onclick = ()=>{
+
+
+performanceModal.classList.add(
+
+"hidden"
+
+);
+
+
+};
+
+
+
+
+
+
+
+
+
+// CLOSE WHEN CLICKING OUTSIDE
+
+
+
+performanceModal.onclick = (event)=>{
+
+
+if(event.target === performanceModal){
+
+
+performanceModal.classList.add(
+
+"hidden"
+
+);
+
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+videoViewer.onclick = (event)=>{
+
+
+if(event.target === videoViewer){
+
+
+videoViewer.classList.add(
+
+"hidden"
+
+);
+
+
+
+videoFrame.src = "";
+
+
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+// START
 
 
 loadPerformances();
