@@ -3,7 +3,8 @@
 
 import {
 
-db
+db,
+storage
 
 }
 
@@ -27,38 +28,79 @@ from
 
 
 
+import {
+
+ref,
+
+uploadBytes,
+
+getDownloadURL
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 
 
 
 
 
-const submitButton =
 
-document.getElementById(
+
+async function uploadFile(file,path){
+
+
+const fileRef =
+
+ref(
+
+storage,
+
+path
+
+);
+
+
+
+await uploadBytes(
+
+fileRef,
+
+file
+
+);
+
+
+
+return await getDownloadURL(
+
+fileRef
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+document
+
+.getElementById(
 
 "submitPerformance"
 
-);
+)
+
+.onclick = async ()=>{
 
 
-
-const message =
-
-document.getElementById(
-
-"message"
-
-);
-
-
-
-
-
-
-
-
-submitButton.onclick = async ()=>{
 
 
 
@@ -72,7 +114,6 @@ document.getElementById(
 
 
 
-
 const location =
 
 document.getElementById(
@@ -80,7 +121,6 @@ document.getElementById(
 "location"
 
 ).value;
-
 
 
 
@@ -96,57 +136,46 @@ document.getElementById(
 
 
 
-const highlight =
+const highlightFile =
 
 document.getElementById(
 
-"highlight"
+"highlightFile"
 
-).value;
-
-
-
-
-
-const photos =
-
-document.getElementById(
-
-"photos"
-
-).value
-
-.split(",")
-
-.map(
-
-item=>item.trim()
-
-)
-
-.filter(Boolean);
+).files[0];
 
 
 
 
 
-const videos =
+const photoFiles =
 
-document.getElementById(
+[
 
-"videos"
+...document.getElementById(
 
-).value
+"photoFiles"
 
-.split(",")
+).files
 
-.map(
+];
 
-item=>item.trim()
 
-)
 
-.filter(Boolean);
+
+
+const videoFiles =
+
+[
+
+...document.getElementById(
+
+"videoFiles"
+
+).files
+
+];
+
 
 
 
@@ -156,6 +185,86 @@ item=>item.trim()
 
 
 try{
+
+
+
+let highlight = "";
+
+
+
+if(highlightFile){
+
+
+
+highlight = await uploadFile(
+
+highlightFile,
+
+"performances/highlights/"+highlightFile.name
+
+);
+
+
+
+}
+
+
+
+
+
+const photos = [];
+
+
+
+for(const photo of photoFiles){
+
+
+const url = await uploadFile(
+
+photo,
+
+"performances/photos/"+photo.name
+
+);
+
+
+
+photos.push(url);
+
+
+}
+
+
+
+
+
+
+const videos = [];
+
+
+
+for(const video of videoFiles){
+
+
+const url = await uploadFile(
+
+video,
+
+"performances/videos/"+video.name
+
+);
+
+
+
+videos.push(url);
+
+
+}
+
+
+
+
+
 
 
 
@@ -181,12 +290,9 @@ arrangement,
 
 highlight,
 
-
 photos,
 
-
 videos,
-
 
 created:
 
@@ -201,17 +307,17 @@ serverTimestamp()
 
 
 
-message.textContent =
+alert(
 
-"Performance added successfully!";
+"Performance added!"
 
+);
 
 
 
 
 
 }
-
 
 
 catch(error){
@@ -222,11 +328,11 @@ console.error(error);
 
 
 
-message.textContent =
+alert(
 
-"Error adding performance.";
+"Upload failed."
 
-
+);
 
 
 
