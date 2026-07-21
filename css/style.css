@@ -1678,14 +1678,14 @@ button {
 
 .footer-logo img {
 
-
     width:
-        70px;
+        260px;
 
+    height:
+        auto;
 
     margin:
-        0 auto 25px;
-
+        0 auto 30px;
 
 }
 
