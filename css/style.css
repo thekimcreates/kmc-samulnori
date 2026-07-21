@@ -2,30 +2,21 @@
 ========================================
 
 KMC SAMULNORI
-Version 2.0
+Version 2.1
 
-Main Stylesheet
-
-Apple-inspired glass design system
+Apple Glass Design System
 
 ========================================
 */
 
 
 /* ======================================
-   ROOT VARIABLES
+   VARIABLES
 ====================================== */
 
 
 :root {
 
-    --kmc-primary:
-        #8B0000;
-
-    --kmc-secondary:
-        #C9A227;
-   
-    /* Background */
 
     --background:
         #ffffff;
@@ -44,6 +35,17 @@ Apple-inspired glass design system
 
 
 
+    /* KMC Brand Colors */
+
+    --kmc-primary:
+        #8B0000;
+
+
+    --kmc-secondary:
+        #C9A227;
+
+
+
     /* Accent */
 
     --accent:
@@ -51,21 +53,14 @@ Apple-inspired glass design system
 
 
 
-    /* Borders */
-
-    --border:
-        rgba(0,0,0,0.08);
-
-
-
     /* Glass */
 
-    --glass:
-        rgba(255,255,255,0.55);
+    --glass-light:
+        rgba(255,255,255,.55);
 
 
     --glass-border:
-        rgba(255,255,255,0.35);
+        rgba(255,255,255,.35);
 
 
 
@@ -80,24 +75,20 @@ Apple-inspired glass design system
 
 
 
-    /* Radius */
+    /* Cards */
 
     --radius:
         28px;
 
-
-
-    /* Shadow */
 
     --shadow:
         0 25px 70px rgba(0,0,0,.12);
 
 
 
-    /* Animation */
-
     --transition:
         cubic-bezier(.4,0,.2,1);
+
 
 }
 
@@ -106,50 +97,46 @@ Apple-inspired glass design system
 
 
 /* ======================================
-   AUTOMATIC DARK MODE
+   DARK MODE
 ====================================== */
 
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark){
 
 
-    :root {
+:root {
 
 
-        --background:
-            #000000;
-
-
-        --surface:
-            #161617;
-
-
-        --text:
-            #f5f5f7;
-
-
-        --secondary-text:
-            #a1a1a6;
+    --background:
+        #000000;
 
 
 
-        --border:
-            rgba(255,255,255,.12);
+    --surface:
+        #161617;
 
 
 
-        --glass:
-            rgba(30,30,30,.55);
+    --text:
+        #f5f5f7;
 
 
 
-        --glass-border:
-            rgba(255,255,255,.15);
-       
+    --secondary-text:
+        #a1a1a6;
 
 
 
-    }
+    --glass-light:
+        rgba(30,30,30,.55);
+
+
+
+    --glass-border:
+        rgba(255,255,255,.15);
+
+
+}
 
 
 }
@@ -218,11 +205,13 @@ body {
         ),
 
 
+
         radial-gradient(
             circle at bottom right,
-            rgba(255,150,0,.08),
+            rgba(201,162,39,.10),
             transparent 40%
         ),
+
 
 
         var(--background);
@@ -237,17 +226,12 @@ body {
     font-family:
 
 
-        "Inter",
         -apple-system,
         BlinkMacSystemFont,
         "SF Pro Display",
+        "Inter",
         "Segoe UI",
         sans-serif;
-
-
-
-    line-height:
-        1.6;
 
 
 
@@ -282,13 +266,13 @@ img {
 a {
 
 
-    text-decoration:
-        none;
-
-
-
     color:
         inherit;
+
+
+
+    text-decoration:
+        none;
 
 
 }
@@ -302,16 +286,6 @@ button {
 
     font:
         inherit;
-
-
-
-    border:
-        none;
-
-
-
-    background:
-        none;
 
 
 
@@ -374,19 +348,18 @@ button {
 .section-header {
 
 
+    text-align:
+        center;
+
+
+
     max-width:
         750px;
 
 
 
     margin:
-
         0 auto 60px;
-
-
-
-    text-align:
-        center;
 
 
 }
@@ -408,13 +381,13 @@ button {
 
 
 
+    letter-spacing:
+        -.05em;
+
+
+
     line-height:
         1.1;
-
-
-
-    letter-spacing:
-        -0.05em;
 
 
 
@@ -443,37 +416,40 @@ button {
 }
 
 /* ======================================
-   NAVIGATION
-====================================== */
-
-/* ======================================
-   FLOATING APPLE STYLE NAVBAR
+   FLOATING GLASS NAVBAR
 ====================================== */
 
 
 .navbar {
 
+
     position:
         fixed;
+
 
 
     top:
         20px;
 
 
+
     left:
         50%;
+
 
 
     transform:
         translateX(-50%);
 
 
+
     width:
+
         min(
             calc(100% - 40px),
             1150px
         );
+
 
 
     z-index:
@@ -485,27 +461,33 @@ button {
 
 
 
+
 .nav-container {
 
 
     height:
-        78px;
+        80px;
+
 
 
     padding:
         0 30px;
 
 
+
     display:
         flex;
+
 
 
     align-items:
         center;
 
 
+
     justify-content:
         space-between;
+
 
 
     border-radius:
@@ -514,7 +496,7 @@ button {
 
 
     background:
-        rgba(255,255,255,.55);
+        var(--glass-light);
 
 
 
@@ -529,8 +511,9 @@ button {
 
 
     border:
+
         1px solid
-        rgba(255,255,255,.35);
+        var(--glass-border);
 
 
 
@@ -545,75 +528,13 @@ button {
 
 
 
-@media (prefers-color-scheme:dark){
-
-
-.nav-container {
-
-
-    background:
-        rgba(20,20,20,.55);
-
-
-
-    border:
-        1px solid
-        rgba(255,255,255,.12);
-
-
-}
-}
-@media(max-width:600px){
-
-
-.navbar {
-
-
-    top:
-        12px;
-
-
-    width:
-        calc(100% - 24px);
-
-
-}
-
-
-
-.nav-container {
-
-
-    height:
-        65px;
-
-
-    padding:
-        0 20px;
-
-
-}
-
-
-
-.logo img {
-
-
-    width:
-        48px;
-
-
-}
-
-
-}
 
 
 
 
 
+/* Logo */
 
-/* Full logo */
 
 .logo img {
 
@@ -622,8 +543,15 @@ button {
         170px;
 
 
+
     height:
         auto;
+
+
+
+    object-fit:
+        contain;
+
 
 
 }
@@ -645,11 +573,24 @@ button {
 
 
 
+.logo img {
+
+
+    transition:
+        transform .3s ease;
+
+
+}
 
 
 
 
-/* Desktop links */
+
+
+
+
+
+/* Navigation Links */
 
 
 .nav-links {
@@ -666,7 +607,7 @@ button {
 
 
     gap:
-        42px;
+        40px;
 
 
 
@@ -709,7 +650,7 @@ button {
 
 
     transition:
-        opacity .3s var(--transition);
+        opacity .3s ease;
 
 
 }
@@ -731,24 +672,11 @@ button {
 
 
 
-.nav-links .active {
-
-
-    font-weight:
-        700;
-
-
-}
 
 
 
 
-
-
-
-
-
-/* Mobile menu button */
+/* Mobile Menu Button */
 
 
 .menu-toggle {
@@ -760,12 +688,12 @@ button {
 
 
     width:
-        44px;
+        42px;
 
 
 
     height:
-        44px;
+        42px;
 
 
 
@@ -798,7 +726,7 @@ button {
 
 
     width:
-        24px;
+        23px;
 
 
 
@@ -811,11 +739,6 @@ button {
         var(--text);
 
 
-
-    transition:
-        .3s var(--transition);
-
-
 }
 
 
@@ -826,7 +749,7 @@ button {
 
 
 
-/* Mobile menu */
+/* Mobile Menu */
 
 
 .mobile-menu {
@@ -847,13 +770,13 @@ button {
 
 
 
-    padding:
-        120px 35px;
-
-
-
     background:
         var(--background);
+
+
+
+    padding:
+        120px 35px;
 
 
 
@@ -863,7 +786,7 @@ button {
 
 
     gap:
-        35px;
+        30px;
 
 
 }
@@ -886,7 +809,7 @@ button {
 
 
     letter-spacing:
-        -.04em;
+        -.05em;
 
 
 }
@@ -900,11 +823,16 @@ button {
 
 
 /* ======================================
-   HERO SECTION
+   HERO
 ====================================== */
 
 
 .hero {
+
+
+    position:
+        relative;
+
 
 
     height:
@@ -917,22 +845,17 @@ button {
 
 
 
-    position:
-        relative;
-
-
-
     display:
         flex;
 
 
 
-    align-items:
+    justify-content:
         center;
 
 
 
-    justify-content:
+    align-items:
         center;
 
 
@@ -1049,7 +972,7 @@ button {
 
             rgba(0,0,0,.25),
 
-            rgba(0,0,0,.65)
+            rgba(0,0,0,.7)
 
         );
 
@@ -1073,13 +996,13 @@ button {
 
 
 
-    color:
-        white;
-
-
-
     text-align:
         center;
+
+
+
+    color:
+        white;
 
 
 
@@ -1096,11 +1019,6 @@ button {
 .hero-content h1 {
 
 
-    margin:
-        0 0 20px;
-
-
-
     font-size:
 
         clamp(
@@ -1111,8 +1029,8 @@ button {
 
 
 
-    font-weight:
-        800;
+    line-height:
+        .95;
 
 
 
@@ -1121,8 +1039,13 @@ button {
 
 
 
-    line-height:
-        .95;
+    margin:
+        0 0 20px;
+
+
+
+    font-weight:
+        800;
 
 
 }
@@ -1149,7 +1072,7 @@ button {
         clamp(
             1rem,
             2vw,
-            1.35rem
+            1.4rem
         );
 
 
@@ -1160,8 +1083,9 @@ button {
 
 }
 
+
 /* ======================================
-   ARRANGEMENTS SECTION
+   ARRANGEMENTS
 ====================================== */
 
 
@@ -1192,59 +1116,73 @@ button {
 
 
 
+
+
+
+
+/* Main Arrangement Cards */
+
+
 .arrangement-card {
+
 
     position:
         relative;
+
 
 
     min-height:
         420px;
 
 
+
     overflow:
         hidden;
+
 
 
     border-radius:
         var(--radius);
 
 
+
     background:
-        rgba(255,255,255,0.55);
+        var(--glass-light);
+
 
 
     backdrop-filter:
         blur(25px);
 
 
+
     -webkit-backdrop-filter:
         blur(25px);
 
 
+
     border:
-        1px solid rgba(255,255,255,.35);
+
+        1px solid
+        var(--glass-border);
+
 
 
     box-shadow:
         var(--shadow);
 
+
+
+    transition:
+
+        transform .5s ease,
+        box-shadow .5s ease;
+
+
 }
 
-@media (prefers-color-scheme: dark){
-
-    .arrangement-card {
-
-        background:
-            rgba(30,30,30,.55);
 
 
-        border-color:
-            rgba(255,255,255,.15);
-
-    }
-
-}
 
 
 .arrangement-card:hover {
@@ -1256,7 +1194,9 @@ button {
 
 
     box-shadow:
-        0 35px 90px rgba(0,0,0,.18);
+
+        0 35px 90px
+        rgba(0,0,0,.2);
 
 
 }
@@ -1290,7 +1230,6 @@ button {
 
     object-fit:
         cover;
-
 
 
 }
@@ -1336,6 +1275,13 @@ button {
 
 
 
+
+
+
+
+/* Arrangement Text */
+
+
 .card-content {
 
 
@@ -1372,18 +1318,28 @@ button {
 .card-content h3 {
 
 
-    margin:
-        0;
-
-
-
     font-size:
-        2.2rem;
+        2.5rem;
+
+
+
+    font-weight:
+        800;
 
 
 
     letter-spacing:
-        -.05em;
+        -.06em;
+
+
+
+    line-height:
+        1;
+
+
+
+    margin:
+        0;
 
 
 }
@@ -1395,41 +1351,19 @@ button {
 .card-content p {
 
 
+    font-size:
+        1.1rem;
+
+
+
     margin:
-        5px 0 0;
+        8px 0 0;
 
 
 
     opacity:
         .85;
 
-
-
-    font-size:
-        1.1rem;
-
-
-}
-
-
-
-
-
-/* Center Sogo */
-
-
-.sogo-card {
-
-    grid-column:
-        1 / -1;
-
-
-    max-width:
-        calc(50% - 15px);
-
-
-    margin:
-        auto;
 
 }
 
@@ -1442,7 +1376,192 @@ button {
 
 
 /* ======================================
-   PERFORMANCE PREVIEW
+   LEARN MORE CTA CARD
+====================================== */
+
+
+.learn-card {
+
+
+    display:
+        flex;
+
+
+
+    justify-content:
+        center;
+
+
+
+    align-items:
+        center;
+
+
+
+    text-align:
+        center;
+
+
+
+    color:
+        white;
+
+
+
+    background:
+
+        linear-gradient(
+
+            135deg,
+
+            var(--kmc-primary),
+
+            var(--kmc-secondary)
+
+        );
+
+
+
+    border:
+        none;
+
+
+}
+
+
+
+
+
+.learn-content {
+
+
+    padding:
+        40px;
+
+
+}
+
+
+
+
+
+.learn-content h3 {
+
+
+    font-size:
+        2.5rem;
+
+
+
+    font-weight:
+        800;
+
+
+
+    letter-spacing:
+        -.06em;
+
+
+
+    line-height:
+        1;
+
+
+
+    margin:
+        0 0 35px;
+
+
+}
+
+
+
+
+
+.learn-content a {
+
+
+    display:
+        inline-block;
+
+
+
+    padding:
+
+        13px 28px;
+
+
+
+    border-radius:
+        999px;
+
+
+
+    color:
+        white;
+
+
+
+    background:
+
+        rgba(255,255,255,.18);
+
+
+
+    border:
+
+        1px solid
+        rgba(255,255,255,.35);
+
+
+
+    backdrop-filter:
+        blur(20px);
+
+
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+
+
+    transition:
+
+        transform .3s ease,
+        background .3s ease;
+
+
+}
+
+
+
+
+
+.learn-content a:hover {
+
+
+    transform:
+        scale(1.05);
+
+
+
+    background:
+
+        rgba(255,255,255,.3);
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ======================================
+   PERFORMANCE CARDS
 ====================================== */
 
 
@@ -1492,7 +1611,7 @@ button {
 
 
     background:
-        var(--glass);
+        var(--glass-light);
 
 
 
@@ -1507,7 +1626,9 @@ button {
 
 
     border:
-        1px solid var(--glass-border);
+
+        1px solid
+        var(--glass-border);
 
 
 
@@ -1525,7 +1646,7 @@ button {
 
 
     padding:
-        25px;
+        30px;
 
 
 
@@ -1533,68 +1654,9 @@ button {
         0;
 
 
-}
 
-
-
-
-
-.loading-card div {
-
-
-    height:
-        220px;
-
-
-
-    background:
-        rgba(255,255,255,.08);
-
-
-
-    animation:
-        loading 2s infinite;
-
-
-}
-
-
-
-
-
-@keyframes loading {
-
-
-    from {
-
-
-        opacity:
-            .3;
-
-
-    }
-
-
-
-    50% {
-
-
-        opacity:
-            .8;
-
-
-    }
-
-
-
-    to {
-
-
-        opacity:
-            .3;
-
-
-    }
+    letter-spacing:
+        -.04em;
 
 
 }
@@ -1608,7 +1670,7 @@ button {
 
 
 /* ======================================
-   TEAM SECTION
+   TEAM PREVIEW
 ====================================== */
 
 
@@ -1668,7 +1730,7 @@ button {
 
 
     background:
-        var(--glass);
+        var(--glass-light);
 
 
 
@@ -1683,30 +1745,14 @@ button {
 
 
     border:
-        1px solid var(--glass-border);
+
+        1px solid
+        var(--glass-border);
 
 
 
     box-shadow:
         var(--shadow);
-
-
-
-    transition:
-        transform .4s var(--transition);
-
-
-}
-
-
-
-
-
-.team-feature-card:hover {
-
-
-    transform:
-        translateY(-10px);
 
 
 }
@@ -1739,701 +1785,18 @@ button {
 
 }
 
+<article class="arrangement-card learn-card reveal">
 
+    <div class="learn-content">
 
+        <h3>
+            Learn More
+        </h3>
 
+        <a href="arrangements.html">
+            View Arrangements →
+        </a>
 
-.team-icon {
+    </div>
 
-
-    width:
-        150px;
-
-
-
-    height:
-        150px;
-
-
-
-    flex-shrink:
-        0;
-
-
-
-    border-radius:
-        50%;
-
-
-
-    background:
-        var(--accent);
-
-
-
-    color:
-        white;
-
-
-
-    display:
-        flex;
-
-
-
-    justify-content:
-        center;
-
-
-
-    align-items:
-        center;
-
-
-
-    font-size:
-        3rem;
-
-
-
-    font-weight:
-        800;
-
-
-}
-
-
-
-
-
-.team-card-content h3 {
-
-
-    font-size:
-        1.8rem;
-
-
-
-    margin:
-        0 0 10px;
-
-
-
-    letter-spacing:
-        -.04em;
-
-
-}
-
-
-
-
-
-.team-card-content p {
-
-
-    color:
-        var(--secondary-text);
-
-
-}
-
-/* ======================================
-   SECTION LINKS
-====================================== */
-
-
-.section-button {
-
-
-    text-align:
-        center;
-
-
-
-    margin-top:
-        55px;
-
-
-}
-
-
-
-
-
-.text-link {
-
-
-    color:
-        var(--accent);
-
-
-
-    font-size:
-        1.1rem;
-
-
-
-    font-weight:
-        600;
-
-
-
-    transition:
-        opacity .3s var(--transition);
-
-
-}
-
-
-
-
-
-.text-link:hover {
-
-
-    opacity:
-        .65;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* ======================================
-   FOOTER
-====================================== */
-
-
-.footer {
-
-
-    padding:
-        80px 24px 35px;
-
-
-
-    background:
-        var(--surface);
-
-
-
-    border-top:
-        1px solid var(--border);
-
-
-}
-
-
-
-
-
-.footer-container {
-
-
-    max-width:
-        var(--max-width);
-
-
-
-    margin:
-        auto;
-
-
-
-    text-align:
-        center;
-
-
-}
-
-
-
-
-
-.footer-logo img {
-
-
-    width:
-        260px;
-
-
-
-    height:
-        auto;
-
-
-
-    margin:
-
-        0 auto 35px;
-
-
-}
-
-
-
-
-
-.footer-contact {
-
-
-    color:
-        var(--secondary-text);
-
-
-
-    font-size:
-        1rem;
-
-
-
-    margin-bottom:
-        35px;
-
-
-}
-
-
-
-
-
-.footer-contact a {
-
-
-    color:
-        var(--accent);
-
-
-
-}
-
-
-
-
-
-.footer-bottom {
-
-
-    padding-top:
-        25px;
-
-
-
-    border-top:
-        1px solid var(--border);
-
-
-
-    color:
-        var(--secondary-text);
-
-
-
-    font-size:
-        .9rem;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* ======================================
-   SCROLL REVEAL
-====================================== */
-
-
-.reveal {
-
-
-    opacity:
-        0;
-
-
-
-    transform:
-        translateY(40px);
-
-
-
-    transition:
-
-        opacity .8s var(--transition),
-        transform .8s var(--transition);
-
-
-}
-
-
-
-
-
-.reveal.visible {
-
-
-    opacity:
-        1;
-
-
-
-    transform:
-        translateY(0);
-
-
-}
-
-
-
-
-
-
-
-
-
-/* ======================================
-   RESPONSIVE DESIGN
-====================================== */
-
-
-@media (max-width: 900px) {
-
-
-
-    .nav-links {
-
-
-        display:
-            none;
-
-
-    }
-
-
-
-
-
-    .menu-toggle {
-
-
-        display:
-            flex;
-
-
-    }
-
-
-
-
-
-    .mobile-menu.open {
-
-
-        display:
-            flex;
-
-
-    }
-
-
-
-
-
-    .logo img {
-
-
-        width:
-            50px;
-
-
-    }
-
-
-
-
-
-    .about-grid {
-
-
-        grid-template-columns:
-            1fr;
-
-
-    }
-
-
-
-
-
-    .arrangement-grid {
-
-
-        grid-template-columns:
-            1fr;
-
-
-    }
-
-
-
-
-.learn-card {
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--kmc-primary),
-            var(--kmc-secondary)
-        );
-
-
-    display:
-        flex;
-
-
-    align-items:
-        center;
-
-
-    justify-content:
-        center;
-
-
-    color:
-        white;
-
-
-    border:
-        none;
-
-}
-
-
-
-
-
-    .performance-grid {
-
-
-        grid-template-columns:
-            1fr;
-
-
-    }
-
-
-
-
-
-    .team-preview-grid {
-
-
-        grid-template-columns:
-            1fr;
-
-
-    }
-
-
-}
-
-
-@media(max-width:900px){
-
-
-    .learn-card {
-
-
-        min-height:
-            330px;
-
-
-    }
-
-}
-
-
-
-
-
-
-@media (max-width:600px) {
-
-
-
-    :root {
-
-
-        --section-padding:
-            80px;
-
-
-    }
-
-
-
-
-
-    .nav-container {
-
-
-        height:
-            75px;
-
-
-    }
-
-
-
-
-
-    .hero {
-
-
-        min-height:
-            600px;
-
-
-    }
-
-
-
-
-
-    .hero-content h1 {
-
-
-        font-size:
-            3.8rem;
-
-
-    }
-
-
-
-
-
-    .hero-description {
-
-
-        font-size:
-            1rem;
-
-
-    }
-
-
-
-
-
-    .arrangement-card {
-
-
-        min-height:
-            330px;
-
-
-    }
-
-
-
-
-
-    .team-feature-card {
-
-
-        flex-direction:
-            column;
-
-
-
-        text-align:
-            center;
-
-
-    }
-
-
-
-
-
-    .team-feature-card img,
-    .team-icon {
-
-
-        width:
-            120px;
-
-
-
-        height:
-            120px;
-
-
-    }
-
-
-
-
-
-    .footer-logo img {
-
-
-        width:
-            220px;
-
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-/* ======================================
-   ACCESSIBILITY
-====================================== */
-
-
-@media (prefers-reduced-motion: reduce) {
-
-
-    *,
-    *::before,
-    *::after {
-
-
-        animation-duration:
-            .01ms !important;
-
-
-
-        transition-duration:
-            .01ms !important;
-
-
-
-        scroll-behavior:
-            auto !important;
-
-
-    }
-
-}
+</article>
