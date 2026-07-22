@@ -1668,11 +1668,7 @@ button {
 
 
     grid-template-columns:
-
-        repeat(
-            3,
-            1fr
-        );
+        repeat(2, minmax(0, 1fr));
 
 
 
@@ -2230,6 +2226,85 @@ footer img {
    MOBILE CARD STACKING FIX
 ====================================== */
 
+
+
+
+.performance-card {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-width: 0;
+    color: #ffffff;
+    background:
+        linear-gradient(145deg, rgba(104, 0, 20, .96), rgba(61, 0, 12, .94));
+    transition: transform .35s ease, box-shadow .35s ease;
+}
+
+.performance-card:hover {
+    transform: translateY(-6px);
+}
+
+.performance-card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.performance-card-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 34px;
+}
+
+.performance-card .performance-date {
+    margin: 0 0 12px;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    opacity: .76;
+}
+
+.performance-card .performance-location {
+    margin: 0;
+    font-size: clamp(1.55rem, 3vw, 2.35rem);
+    line-height: 1.05;
+}
+
+.performance-card .performance-arrangements {
+    margin: 16px 0 0;
+    line-height: 1.6;
+    opacity: .82;
+}
+
+.performance-card.loading-card {
+    color: var(--text);
+    background: var(--glass-light);
+}
+
+.performance-card.loading-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.48), transparent);
+    transform: translateX(-100%);
+    animation: performance-loading 1.4s infinite;
+}
+
+.performance-message {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 42px 24px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    text-align: center;
+    background: var(--glass-light);
+}
+
+@keyframes performance-loading {
+    to { transform: translateX(100%); }
+}
 
 @media (max-width: 900px) {
 
