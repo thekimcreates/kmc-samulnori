@@ -15,16 +15,14 @@
             <a class="admin-back-link" href="dashboard.html">← Dashboard</a>
         </header>
 
-        <div id="performances-loading" class="dashboard-loading">
-            Verifying administrator access…
-        </div>
+        <div id="performances-loading" class="dashboard-loading">Verifying administrator access…</div>
 
         <main id="performances-admin" class="admin-dashboard-main" hidden>
             <div class="admin-dashboard-header performance-page-header">
                 <div>
                     <p class="admin-eyebrow">Content manager</p>
                     <h1>Performances</h1>
-                    <p class="admin-page-copy">Add and manage the performance records shown on the KMC Samulnori website.</p>
+                    <p class="admin-page-copy">Add and manage performance details shown across the KMC Samulnori website.</p>
                 </div>
                 <div class="admin-user-meta">
                     <span id="admin-user-email"></span>
@@ -43,6 +41,10 @@
 
                     <form id="performance-form" class="admin-form">
                         <input id="performance-id" type="hidden">
+                        <input id="performance-highlight-existing" type="hidden">
+                        <input id="performance-location-place-id" type="hidden">
+                        <input id="performance-location-lat" type="hidden">
+                        <input id="performance-location-lng" type="hidden">
 
                         <div class="admin-field">
                             <label for="performance-date">Date</label>
@@ -51,21 +53,112 @@
                             </div>
                         </div>
 
-                        <div class="admin-field">
-                            <label for="performance-location">Location</label>
-                            <div class="admin-input-wrap">
-                                <input id="performance-location" type="text" maxlength="120" placeholder="Example: Korean Methodist Church" required>
+                        <fieldset class="admin-subsection">
+                            <legend>Time</legend>
+                            <label class="admin-toggle-row">
+                                <input id="performance-time-tbd" type="checkbox">
+                                <span>Time is TBD</span>
+                            </label>
+                            <div class="admin-split-fields">
+                                <div class="admin-field">
+                                    <label for="performance-time">Time</label>
+                                    <input id="performance-time" type="time">
+                                </div>
+                                <div class="admin-field">
+                                    <label for="performance-timezone">Time zone</label>
+                                    <select id="performance-timezone">
+                                        <option value="America/Los_Angeles">Pacific Time</option>
+                                        <option value="America/Denver">Mountain Time</option>
+                                        <option value="America/Chicago">Central Time</option>
+                                        <option value="America/New_York">Eastern Time</option>
+                                        <option value="America/Anchorage">Alaska Time</option>
+                                        <option value="Pacific/Honolulu">Hawaii Time</option>
+                                        <option value="Asia/Seoul">Korea Standard Time</option>
+                                        <option value="UTC">UTC</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
+                        </fieldset>
 
-                        <fieldset class="arrangement-fieldset">
+                        <fieldset class="admin-subsection">
+                            <legend>Location</legend>
+                            <label class="admin-toggle-row">
+                                <input id="performance-location-tbd" type="checkbox">
+                                <span>Location is TBD</span>
+                            </label>
+                            <div id="performance-location-fields">
+                                <div class="admin-field">
+                                    <label for="performance-location">Search Google Maps</label>
+                                    <input id="performance-location" type="text" maxlength="180" placeholder="Search for a venue or address" autocomplete="off">
+                                    <p class="admin-help-text">Choose a Google Maps suggestion so the address and map are saved correctly.</p>
+                                </div>
+                                <div id="performance-location-map" class="performance-location-map" aria-label="Selected location map"></div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="admin-subsection">
                             <legend>Arrangements</legend>
-                            <div class="arrangement-options">
-                                <label><input type="checkbox" name="arrangements" value="Samulnori 사물놀이"> <span>Samulnori 사물놀이</span></label>
-                                <label><input type="checkbox" name="arrangements" value="Nongak 농악"> <span>Nongak 농악</span></label>
-                                <label><input type="checkbox" name="arrangements" value="Ogomu 오고무"> <span>Ogomu 오고무</span></label>
-                                <label><input type="checkbox" name="arrangements" value="Nanta 난타"> <span>Nanta 난타</span></label>
-                                <label><input type="checkbox" name="arrangements" value="Sogo 소고춤"> <span>Sogo 소고춤</span></label>
+                            <label class="admin-toggle-row">
+                                <input id="performance-arrangements-tbd" type="checkbox">
+                                <span>Arrangements are TBD</span>
+                            </label>
+                            <div id="performance-arrangement-fields">
+                                <div class="arrangement-options">
+                                    <label><input type="checkbox" name="arrangements" value="Samulnori 사물놀이"> <span>Samulnori 사물놀이</span></label>
+                                    <label><input type="checkbox" name="arrangements" value="Nongak 농악"> <span>Nongak 농악</span></label>
+                                    <label><input type="checkbox" name="arrangements" value="Ogomu 오고무"> <span>Ogomu 오고무</span></label>
+                                    <label><input type="checkbox" name="arrangements" value="Nanta 난타"> <span>Nanta 난타</span></label>
+                                    <label><input type="checkbox" name="arrangements" value="Sogo 소고춤"> <span>Sogo 소고춤</span></label>
+                                </div>
+                                <div class="admin-field admin-custom-field">
+                                    <label for="performance-custom-arrangements">Other arrangements</label>
+                                    <input id="performance-custom-arrangements" type="text" maxlength="300" placeholder="Separate multiple arrangements with commas">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="admin-subsection">
+                            <legend>Members</legend>
+                            <label class="admin-toggle-row">
+                                <input id="performance-members-tbd" type="checkbox">
+                                <span>Attending members are TBD</span>
+                            </label>
+                            <div id="performance-member-fields">
+                                <div id="performance-members-list" class="member-options">
+                                    <p class="admin-help-text">Loading members…</p>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="admin-subsection">
+                            <legend>Highlight photo</legend>
+                            <label class="admin-toggle-row">
+                                <input id="performance-highlight-tbd" type="checkbox">
+                                <span>Highlight photo is TBD</span>
+                            </label>
+                            <div id="performance-highlight-fields">
+                                <div class="admin-field">
+                                    <label for="performance-highlight">Upload one image</label>
+                                    <input id="performance-highlight" type="file" accept="image/jpeg,image/png,image/webp">
+                                    <p class="admin-help-text">Recommended: landscape image, at least 1600 × 900. Maximum 10 MB.</p>
+                                </div>
+                                <div id="performance-highlight-preview-wrap" class="highlight-preview-wrap" hidden>
+                                    <img id="performance-highlight-preview" alt="Highlight preview">
+                                    <button id="performance-highlight-remove" class="admin-secondary-button admin-small-button" type="button">Remove photo</button>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="admin-subsection">
+                            <legend>External links</legend>
+                            <label class="admin-toggle-row">
+                                <input id="performance-links-tbd" type="checkbox">
+                                <span>External links are TBD</span>
+                            </label>
+                            <div id="performance-links-fields">
+                                <div id="performance-links-list" class="external-links-list"></div>
+                                <button id="performance-link-add" class="admin-secondary-button" type="button">+ Add Link</button>
+                                <p class="admin-help-text">Examples: Google Photos album, YouTube playlist, event page, or news article.</p>
                             </div>
                         </fieldset>
 
@@ -99,7 +192,9 @@
     <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
     <script src="../js/firebase.js"></script>
     <script src="../js/admin-performances.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=REPLACE_WITH_GOOGLE_MAPS_API_KEY&libraries=places&callback=initializeKmcPerformanceMap"></script>
 </body>
 </html>
