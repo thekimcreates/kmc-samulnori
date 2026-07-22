@@ -2257,25 +2257,20 @@ footer img {
     padding: 34px;
 }
 
-.performance-card .performance-date {
-    margin: 0 0 12px;
-    font-size: .8rem;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    opacity: .76;
-}
-
 .performance-card .performance-location {
     margin: 0;
-    font-size: clamp(1.55rem, 3vw, 2.35rem);
+    font-size: clamp(1.75rem, 3.2vw, 2.65rem);
+    font-weight: 750;
     line-height: 1.05;
+    letter-spacing: -.035em;
 }
 
-.performance-card .performance-arrangements {
-    margin: 16px 0 0;
-    line-height: 1.6;
-    opacity: .82;
+.performance-card .performance-meta {
+    margin: 14px 0 0;
+    font-size: clamp(.86rem, 1.25vw, 1rem);
+    font-weight: 600;
+    line-height: 1.55;
+    opacity: .8;
 }
 
 .performance-card.loading-card {
