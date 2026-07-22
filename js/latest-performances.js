@@ -41,24 +41,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const link = document.createElement("a");
         link.className = "performance-card-link";
         link.href = `performances.html#${documentSnapshot.id}`;
-        const locationText = performance.locationTbd ? "Location TBD" : performance.location || "Location unavailable";
+        const locationText = performance.locationTbd
+            ? "Location TBD"
+            : performance.locationName || performance.location || "Location unavailable";
         link.setAttribute("aria-label", `View the ${formatDate(performance.date)} performance at ${locationText}`);
 
         const content = document.createElement("div");
         content.className = "performance-card-content";
+
+        const dateTime = document.createElement("p");
+        dateTime.className = "performance-date-time";
+        const timeText = formatTime(performance);
+        dateTime.textContent = [formatDate(performance.date), timeText].filter(Boolean).join(" • ");
+
         const location = document.createElement("h3");
         location.className = "performance-location";
         location.textContent = locationText;
 
         const details = document.createElement("p");
         details.className = "performance-meta";
-        const arrangementText = performance.arrangementsTbd
+        details.textContent = performance.arrangementsTbd
             ? "Arrangements TBD"
-            : arrangements.length ? arrangements.join(", ") : "Arrangement details coming soon";
-        const timeText = formatTime(performance);
-        details.textContent = [formatDate(performance.date), timeText, arrangementText].filter(Boolean).join(" • ");
+            : arrangements.length ? arrangements.join(" • ") : "Arrangement details coming soon";
 
-        content.append(location, details);
+        content.append(dateTime, location, details);
         article.append(link, content);
         return article;
     }

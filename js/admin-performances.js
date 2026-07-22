@@ -7,7 +7,9 @@ let kmcPerformanceAutocomplete = null;
 window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
     const mapElement = document.getElementById("performance-location-map");
     const locationInput = document.getElementById("performance-location");
-    if (!mapElement || !locationInput || !window.google?.maps?.places) return;
+    const locationNameInput = document.getElementById("performance-location-name");
+    const locationAddressInput = document.getElementById("performance-location-address");
+    if (!mapElement || !locationInput || !locationNameInput || !locationAddressInput || !window.google?.maps?.places) return;
 
     kmcPerformanceMap = new google.maps.Map(mapElement, {
         center: { lat: 34.0522, lng: -118.2437 },
@@ -28,11 +30,13 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
 
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        const displayName = place.name && place.formatted_address
-            ? `${place.name}, ${place.formatted_address}`
-            : place.formatted_address || place.name || locationInput.value;
+        const locationName = place.name || place.formatted_address || locationInput.value.trim();
+        const locationAddress = place.formatted_address || "";
 
-        locationInput.value = displayName;
+        // Show only the venue/place name in the form and across the website.
+        locationInput.value = locationName;
+        locationNameInput.value = locationName;
+        locationAddressInput.value = locationAddress;
         document.getElementById("performance-location-place-id").value = place.place_id || "";
         document.getElementById("performance-location-lat").value = String(lat);
         document.getElementById("performance-location-lng").value = String(lng);
@@ -40,6 +44,17 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
         kmcPerformanceMap.setCenter({ lat, lng });
         kmcPerformanceMap.setZoom(16);
         kmcPerformanceMarker.setPosition({ lat, lng });
+    });
+
+    // If the administrator edits the text after choosing a suggestion,
+    // clear the saved Google place details so an outdated address is not stored.
+    locationInput.addEventListener("input", () => {
+        if (locationInput.value === locationNameInput.value) return;
+        locationNameInput.value = "";
+        locationAddressInput.value = "";
+        document.getElementById("performance-location-place-id").value = "";
+        document.getElementById("performance-location-lat").value = "";
+        document.getElementById("performance-location-lng").value = "";
     });
 };
 
@@ -206,6 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
         form.reset();
         idInput.value = "";
         highlightExisting.value = "";
+        get("performance-location-name").value = "";
+        get("performance-location-address").value = "";
         get("performance-location-place-id").value = "";
         get("performance-location-lat").value = "";
         get("performance-location-lng").value = "";
@@ -257,7 +274,9 @@ document.addEventListener("DOMContentLoaded", () => {
         date.className = "performance-admin-date";
         date.textContent = `${formatDate(record.date)} · ${formatTime(record)}`;
         const location = document.createElement("h3");
-        location.textContent = record.locationTbd ? "Location TBD" : record.location;
+        location.textContent = record.locationTbd
+            ? "Location TBD"
+            : record.locationName || record.location || "Location unavailable";
         const arrangements = document.createElement("p");
         arrangements.className = "performance-admin-arrangements";
         arrangements.textContent = record.arrangementsTbd ? "Arrangements TBD" : record.arrangements.join(" · ");
@@ -296,7 +315,10 @@ document.addEventListener("DOMContentLoaded", () => {
         timezoneInput.value = record.timezone || "America/Los_Angeles";
         timeTbd.checked = Boolean(record.timeTbd);
         locationTbd.checked = Boolean(record.locationTbd);
-        locationInput.value = record.location || "";
+        const savedLocationName = record.locationName || record.location || "";
+        locationInput.value = savedLocationName;
+        get("performance-location-name").value = savedLocationName;
+        get("performance-location-address").value = record.locationAddress || "";
         get("performance-location-place-id").value = record.locationPlaceId || "";
         get("performance-location-lat").value = record.locationLat ?? "";
         get("performance-location-lng").value = record.locationLng ?? "";
@@ -404,6 +426,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!dateInput.value) return setStatus("Enter a date.", "error");
         if (!timeTbd.checked && !timeInput.value) return setStatus("Enter a time or select Time is TBD.", "error");
         if (!locationTbd.checked && !locationInput.value.trim()) return setStatus("Choose a location or select Location is TBD.", "error");
+        if (!locationTbd.checked && !get("performance-location-name").value.trim()) {
+            return setStatus("Choose a location from the Google Maps suggestions.", "error");
+        }
         if (!arrangementsTbd.checked && arrangements.length === 0) return setStatus("Select or enter an arrangement, or choose TBD.", "error");
         if (!membersTbd.checked && members.length === 0) return setStatus("Select attending members or choose TBD.", "error");
         if (!highlightTbd.checked && !highlightInput.files[0] && !highlightExisting.value) return setStatus("Upload a highlight photo or choose TBD.", "error");
@@ -439,7 +464,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 time: timeTbd.checked ? "" : timeInput.value,
                 timeTbd: timeTbd.checked,
                 timezone: timeTbd.checked ? "" : timezoneInput.value,
-                location: locationTbd.checked ? "" : locationInput.value.trim(),
+                // Keep the legacy location field for older pages, but store the
+                // place name and full address separately from now on.
+                location: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
+                locationName: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
+                locationAddress: locationTbd.checked ? "" : get("performance-location-address").value.trim(),
                 locationTbd: locationTbd.checked,
                 locationPlaceId: locationTbd.checked ? "" : get("performance-location-place-id").value,
                 locationLat: locationTbd.checked ? null : Number(get("performance-location-lat").value) || null,
