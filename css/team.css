@@ -1,0 +1,232 @@
+/* ========================================
+   KMC SAMULNORI — TEAM PAGE
+======================================== */
+
+.team-page {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.team-page main {
+    position: relative;
+    z-index: 1;
+}
+
+.team-page .team-hero {
+    padding-top: 190px;
+    padding-bottom: 58px;
+}
+
+.team-page-header h1 {
+    margin: 0;
+    font-size: clamp(3.5rem, 9vw, 7.5rem);
+    font-weight: 800;
+    line-height: 0.94;
+    letter-spacing: -0.075em;
+}
+
+/* Instructor */
+.instructor-section {
+    padding: 18px 24px 132px;
+}
+
+.instructor-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: clamp(44px, 7vw, 92px);
+    align-items: start;
+}
+
+.instructor-photo-wrap {
+    position: sticky;
+    top: 118px;
+    overflow: hidden;
+    min-height: 640px;
+    border: 1px solid var(--glass-border);
+    border-radius: clamp(24px, 3vw, 36px);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.instructor-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 640px;
+    object-fit: cover;
+}
+
+.instructor-copy {
+    padding-top: clamp(12px, 2vw, 28px);
+}
+
+.team-eyebrow {
+    margin: 0 0 14px;
+    color: var(--kmc-primary);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.instructor-copy h2,
+.members-header h2 {
+    margin: 0;
+    font-size: clamp(2.7rem, 5.5vw, 5rem);
+    font-weight: 800;
+    line-height: 0.96;
+    letter-spacing: -0.065em;
+}
+
+.instructor-korean {
+    margin: 14px 0 42px;
+    color: var(--secondary-text);
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-weight: 600;
+}
+
+.teacher-message {
+    padding-top: 34px;
+    border-top: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+}
+
+.teacher-message h3 {
+    margin: 0 0 20px;
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+}
+
+.teacher-message p {
+    margin: 0 0 22px;
+    color: var(--secondary-text);
+    font-size: clamp(1rem, 1.35vw, 1.15rem);
+    line-height: 1.8;
+}
+
+/* Members */
+.members-section {
+    padding: 0 24px 150px;
+}
+
+.members-header {
+    margin-bottom: 48px;
+}
+
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(22px, 2.8vw, 34px);
+}
+
+.member-card {
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    border-radius: clamp(22px, 2.3vw, 30px);
+    background: var(--surface);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.09);
+    transform: translateZ(0);
+    transition: transform 550ms var(--transition), box-shadow 550ms var(--transition);
+}
+
+.member-card > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 4.35;
+    object-fit: cover;
+    background: var(--surface);
+}
+
+.member-details {
+    padding: 24px 25px 27px;
+}
+
+.member-details h3 {
+    margin: 0 0 12px;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 750;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+}
+
+.member-details p {
+    margin: 5px 0 0;
+    color: var(--secondary-text);
+    font-size: 0.98rem;
+    font-weight: 550;
+    line-height: 1.45;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .member-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 30px 72px rgba(0, 0, 0, 0.15);
+    }
+}
+
+@media (max-width: 900px) {
+    .team-page .team-hero {
+        padding-top: 155px;
+        padding-bottom: 44px;
+    }
+
+    .instructor-layout {
+        grid-template-columns: 1fr;
+        gap: 44px;
+    }
+
+    .instructor-photo-wrap {
+        position: relative;
+        top: auto;
+        min-height: 0;
+    }
+
+    .instructor-photo {
+        min-height: 0;
+        aspect-ratio: 4 / 4.5;
+    }
+
+    .members-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .team-page .team-hero {
+        padding-top: 132px;
+        padding-bottom: 34px;
+    }
+
+    .instructor-section,
+    .members-section {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .instructor-section {
+        padding-bottom: 94px;
+    }
+
+    .members-section {
+        padding-bottom: 110px;
+    }
+
+    .members-header {
+        margin-bottom: 30px;
+    }
+
+    .members-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .member-card > img {
+        aspect-ratio: 4 / 4.1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .member-card {
+        transition: none;
+    }
+}
