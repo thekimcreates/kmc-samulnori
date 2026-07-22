@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ======================================
+         KMC SAMULNORI WEBSITE
+         Version 3.0
+         Arrangements Page
+    ======================================= -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Arrangements | KMC Samulnori</title>
+
+    <meta
+        name="description"
+        content="Explore KMC Samulnori's five Korean percussion arrangements and the instruments used in each performance."
+    >
+
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/arrangements.css">
+</head>
+
+<body class="arrangements-page">
+
+<!-- ======================================
+     NAVIGATION
+======================================= -->
+
+<header class="navbar" id="navbar">
+    <nav class="nav-container" aria-label="Main navigation">
+
+        <a href="index.html" class="logo" aria-label="KMC Samulnori home">
+            <picture>
+                <source
+                    media="(max-width: 600px)"
+                    srcset="assets/logo/circle.png"
+                >
+                <img
+                    src="assets/logo/full.png"
+                    alt="KMC Samulnori Logo"
+                >
+            </picture>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="performances.html">Performances</a></li>
+            <li><a href="arrangements.html" class="active" aria-current="page">Arrangements</a></li>
+            <li><a href="team.html">Team</a></li>
+            <li><a href="admin/login.html">Admin Login</a></li>
+        </ul>
+
+        <button
+            class="menu-toggle"
+            id="menu-toggle"
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+        >
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="index.html">Home</a>
+        <a href="performances.html">Performances</a>
+        <a href="arrangements.html" class="active" aria-current="page">Arrangements</a>
+        <a href="team.html">Team</a>
+        <a href="admin/login.html">Admin Login</a>
+    </div>
+</header>
+
+<main>
+
+    <!-- ======================================
+         PAGE HEADING
+    ======================================= -->
+
+    <section class="arrangements-hero section" aria-labelledby="arrangements-page-title">
+        <div class="section-container">
+            <header class="arrangements-page-header reveal">
+                <h1 id="arrangements-page-title">Arrangements</h1>
+            </header>
+        </div>
+    </section>
+
+    <!-- ======================================
+         ARRANGEMENT CARDS
+    ======================================= -->
+
+    <section class="arrangements-list-section" aria-label="KMC Samulnori arrangements">
+        <div class="section-container">
+            <div class="arrangements-list">
+
+                <button
+                    class="arrangement-card arrangement-page-card reveal"
+                    type="button"
+                    data-arrangement="samulnori"
+                    aria-haspopup="dialog"
+                    aria-controls="arrangement-samulnori"
+                    aria-expanded="false"
+                >
+                    <img
+                        src="assets/arrangements/samulnori.jpg"
+                        alt="KMC Samulnori performers playing Samulnori"
+                        loading="eager"
+                    >
+                    <span class="card-content">
+                        <span class="arrangement-title">Samulnori</span>
+                        <span class="arrangement-korean">사물놀이</span>
+                    </span>
+                    <span class="arrangement-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <button
+                    class="arrangement-card arrangement-page-card reveal"
+                    type="button"
+                    data-arrangement="nongak"
+                    aria-haspopup="dialog"
+                    aria-controls="arrangement-nongak"
+                    aria-expanded="false"
+                >
+                    <img
+                        src="assets/arrangements/nongak.jpg"
+                        alt="KMC Samulnori performers presenting Nongak"
+                        loading="lazy"
+                    >
+                    <span class="card-content">
+                        <span class="arrangement-title">Nongak</span>
+                        <span class="arrangement-korean">농악</span>
+                    </span>
+                    <span class="arrangement-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <button
+                    class="arrangement-card arrangement-page-card reveal"
+                    type="button"
+                    data-arrangement="ogomu"
+                    aria-haspopup="dialog"
+                    aria-controls="arrangement-ogomu"
+                    aria-expanded="false"
+                >
+                    <img
+                        src="assets/arrangements/ogomu.jpg"
+                        alt="KMC Samulnori performers presenting Ogomu"
+                        loading="lazy"
+                    >
+                    <span class="card-content">
+                        <span class="arrangement-title">Ogomu</span>
+                        <span class="arrangement-korean">오고무</span>
+                    </span>
+                    <span class="arrangement-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <button
+                    class="arrangement-card arrangement-page-card reveal"
+                    type="button"
+                    data-arrangement="nanta"
+                    aria-haspopup="dialog"
+                    aria-controls="arrangement-nanta"
+                    aria-expanded="false"
+                >
+                    <img
+                        src="assets/arrangements/nanta.jpg"
+                        alt="KMC Samulnori performers presenting Nanta"
+                        loading="lazy"
+                    >
+                    <span class="card-content">
+                        <span class="arrangement-title">Nanta</span>
+                        <span class="arrangement-korean">난타</span>
+                    </span>
+                    <span class="arrangement-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <button
+                    class="arrangement-card arrangement-page-card reveal"
+                    type="button"
+                    data-arrangement="sogo"
+                    aria-haspopup="dialog"
+                    aria-controls="arrangement-sogo"
+                    aria-expanded="false"
+                >
+                    <img
+                        src="assets/arrangements/sogo.jpg"
+                        alt="KMC Samulnori performers presenting Sogo Dance"
+                        loading="lazy"
+                    >
+                    <span class="card-content">
+                        <span class="arrangement-title">Sogo Dance</span>
+                        <span class="arrangement-korean">소고춤</span>
+                    </span>
+                    <span class="arrangement-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </span>
+                </button>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ======================================
+     EXPANDED ARRANGEMENT BACKDROP
+======================================= -->
+
+<div class="arrangement-backdrop" id="arrangement-backdrop" aria-hidden="true"></div>
+
+<!-- ======================================
+     SAMULNORI DETAIL PANEL
+======================================= -->
+
+<section
+    class="arrangement-detail"
+    id="arrangement-samulnori"
+    data-arrangement-panel="samulnori"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="samulnori-detail-title"
+    aria-hidden="true"
+    tabindex="-1"
+>
+    <div class="arrangement-detail-shell">
+        <button class="arrangement-close" type="button" aria-label="Close Samulnori details">
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="arrangement-detail-scroll">
+            <header class="arrangement-detail-hero">
+                <img src="assets/arrangements/samulnori.jpg" alt="Samulnori performance">
+                <div class="arrangement-detail-overlay">
+                    <h2 id="samulnori-detail-title">Samulnori</h2>
+                    <p>사물놀이</p>
+                </div>
+                <span class="arrangement-detail-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false"><path d="M6 9l6 6 6-6"></path></svg>
+                </span>
+            </header>
+
+            <div class="arrangement-detail-content">
+                <h3>Instruments Used</h3>
+                <div class="instrument-list">
+                    <article class="instrument-row">
+                        <div class="instrument-image"><img src="assets/instruments/kkwaenggwari.jpg" alt="Kkwaenggwari" loading="lazy"></div>
+                        <div class="instrument-copy"><h4>Kkwaenggwari <span>꽹과리</span></h4><p>A small hand-held brass gong that leads the ensemble with bright, sharp rhythmic signals.</p></div>
+                    </article>
+                    <article class="instrument-row">
+                        <div class="instrument-image"><img src="assets/instruments/jing.jpg" alt="Jing" loading="lazy"></div>
+                        <div class="instrument-copy"><h4>Jing <span>징</span></h4><p>A large gong with a deep, sustained sound that supports the ensemble and marks important beats.</p></div>
+                    </article>
+                    <article class="instrument-row">
+                        <div class="instrument-image"><img src="assets/instruments/janggu.jpg" alt="Janggu" loading="lazy"></div>
+                        <div class="instrument-copy"><h4>Janggu <span>장구</span></h4><p>An hourglass-shaped drum played on both sides to create contrasting tones and detailed rhythms.</p></div>
+                    </article>
+                    <article class="instrument-row">
+                        <div class="instrument-image"><img src="assets/instruments/buk.jpg" alt="Buk" loading="lazy"></div>
+                        <div class="instrument-copy"><h4>Buk <span>북</span></h4><p>A barrel drum that provides a strong, grounded pulse and adds weight to the ensemble.</p></div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================
+     NONGAK DETAIL PANEL
+======================================= -->
+
+<section
+    class="arrangement-detail"
+    id="arrangement-nongak"
+    data-arrangement-panel="nongak"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="nongak-detail-title"
+    aria-hidden="true"
+    tabindex="-1"
+>
+    <div class="arrangement-detail-shell">
+        <button class="arrangement-close" type="button" aria-label="Close Nongak details"><span></span><span></span></button>
+        <div class="arrangement-detail-scroll">
+            <header class="arrangement-detail-hero">
+                <img src="assets/arrangements/nongak.jpg" alt="Nongak performance">
+                <div class="arrangement-detail-overlay"><h2 id="nongak-detail-title">Nongak</h2><p>농악</p></div>
+                <span class="arrangement-detail-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 9l6 6 6-6"></path></svg></span>
+            </header>
+            <div class="arrangement-detail-content">
+                <h3>Instruments Used</h3>
+                <div class="instrument-list">
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/kkwaenggwari.jpg" alt="Kkwaenggwari" loading="lazy"></div><div class="instrument-copy"><h4>Kkwaenggwari <span>꽹과리</span></h4><p>The lead gong guides tempo changes, cues formations, and drives the energetic character of Nongak.</p></div></article>
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/jing.jpg" alt="Jing" loading="lazy"></div><div class="instrument-copy"><h4>Jing <span>징</span></h4><p>The large gong adds broad, resonant tones that balance the sharper sounds of the ensemble.</p></div></article>
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/janggu.jpg" alt="Janggu" loading="lazy"></div><div class="instrument-copy"><h4>Janggu <span>장구</span></h4><p>The double-headed drum performs flowing rhythmic patterns while supporting movement and dance.</p></div></article>
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/buk.jpg" alt="Buk" loading="lazy"></div><div class="instrument-copy"><h4>Buk <span>북</span></h4><p>The barrel drum reinforces the central beat with powerful, steady strokes.</p></div></article>
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/sogo.jpg" alt="Sogo" loading="lazy"></div><div class="instrument-copy"><h4>Sogo <span>소고</span></h4><p>A small hand drum used while dancing, combining percussion with expressive movement.</p></div></article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================
+     OGOMU DETAIL PANEL
+======================================= -->
+
+<section
+    class="arrangement-detail"
+    id="arrangement-ogomu"
+    data-arrangement-panel="ogomu"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ogomu-detail-title"
+    aria-hidden="true"
+    tabindex="-1"
+>
+    <div class="arrangement-detail-shell">
+        <button class="arrangement-close" type="button" aria-label="Close Ogomu details"><span></span><span></span></button>
+        <div class="arrangement-detail-scroll">
+            <header class="arrangement-detail-hero">
+                <img src="assets/arrangements/ogomu.jpg" alt="Ogomu performance">
+                <div class="arrangement-detail-overlay"><h2 id="ogomu-detail-title">Ogomu</h2><p>오고무</p></div>
+                <span class="arrangement-detail-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 9l6 6 6-6"></path></svg></span>
+            </header>
+            <div class="arrangement-detail-content">
+                <h3>Instruments Used</h3>
+                <div class="instrument-list">
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/fivebuk.jpg" alt="Five Buk" loading="lazy"></div><div class="instrument-copy"><h4>Five Buk <span>오북</span></h4><p>Description coming soon.</p></div></article>
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/buk.jpg" alt="Buk" loading="lazy"></div><div class="instrument-copy"><h4>Buk <span>북</span></h4><p>Description coming soon.</p></div></article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================
+     NANTA DETAIL PANEL
+======================================= -->
+
+<section
+    class="arrangement-detail"
+    id="arrangement-nanta"
+    data-arrangement-panel="nanta"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="nanta-detail-title"
+    aria-hidden="true"
+    tabindex="-1"
+>
+    <div class="arrangement-detail-shell">
+        <button class="arrangement-close" type="button" aria-label="Close Nanta details"><span></span><span></span></button>
+        <div class="arrangement-detail-scroll">
+            <header class="arrangement-detail-hero">
+                <img src="assets/arrangements/nanta.jpg" alt="Nanta performance">
+                <div class="arrangement-detail-overlay"><h2 id="nanta-detail-title">Nanta</h2><p>난타</p></div>
+                <span class="arrangement-detail-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 9l6 6 6-6"></path></svg></span>
+            </header>
+            <div class="arrangement-detail-content">
+                <h3>Instruments Used</h3>
+                <div class="instrument-list">
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/buk.jpg" alt="Buk" loading="lazy"></div><div class="instrument-copy"><h4>Buk <span>북</span></h4><p>Description coming soon.</p></div></article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================
+     SOGO DETAIL PANEL
+======================================= -->
+
+<section
+    class="arrangement-detail"
+    id="arrangement-sogo"
+    data-arrangement-panel="sogo"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="sogo-detail-title"
+    aria-hidden="true"
+    tabindex="-1"
+>
+    <div class="arrangement-detail-shell">
+        <button class="arrangement-close" type="button" aria-label="Close Sogo Dance details"><span></span><span></span></button>
+        <div class="arrangement-detail-scroll">
+            <header class="arrangement-detail-hero">
+                <img src="assets/arrangements/sogo.jpg" alt="Sogo Dance performance">
+                <div class="arrangement-detail-overlay"><h2 id="sogo-detail-title">Sogo Dance</h2><p>소고춤</p></div>
+                <span class="arrangement-detail-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 9l6 6 6-6"></path></svg></span>
+            </header>
+            <div class="arrangement-detail-content">
+                <h3>Instruments Used</h3>
+                <div class="instrument-list">
+                    <article class="instrument-row"><div class="instrument-image"><img src="assets/instruments/sogo.jpg" alt="Sogo" loading="lazy"></div><div class="instrument-copy"><h4>Sogo <span>소고</span></h4><p>Description coming soon.</p></div></article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================
+     FOOTER
+======================================= -->
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-logo">
+            <img src="assets/logo/full.png" alt="KMC Samulnori Logo">
+        </div>
+        <div class="footer-contact">
+            <p>
+                Contact:
+                <a href="mailto:kmc-samulnori@gmail.com">kmc-samulnori@gmail.com</a>
+            </p>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 KMC Samulnori. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/arrangements.js"></script>
+
+</body>
+</html>
