@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manage Performances | KMC Samulnori</title>
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+    <div class="admin-shell">
+        <header class="admin-topbar">
+            <a class="admin-brand" href="../index.html">
+                <img src="../assets/logo/full.png" alt="KMC Samulnori">
+            </a>
+            <a class="admin-back-link" href="dashboard.html">← Dashboard</a>
+        </header>
+
+        <div id="performances-loading" class="dashboard-loading">
+            Verifying administrator access…
+        </div>
+
+        <main id="performances-admin" class="admin-dashboard-main" hidden>
+            <div class="admin-dashboard-header performance-page-header">
+                <div>
+                    <p class="admin-eyebrow">Content manager</p>
+                    <h1>Performances</h1>
+                    <p class="admin-page-copy">Add and manage the performance records shown on the KMC Samulnori website.</p>
+                </div>
+                <div class="admin-user-meta">
+                    <span id="admin-user-email"></span>
+                    <button id="admin-logout" class="admin-logout" type="button">Sign Out</button>
+                </div>
+            </div>
+
+            <div class="performance-manager-layout">
+                <section class="admin-panel performance-form-panel">
+                    <div class="admin-panel-heading">
+                        <div>
+                            <p class="admin-eyebrow">Performance details</p>
+                            <h2 id="performance-form-title">Add Performance</h2>
+                        </div>
+                    </div>
+
+                    <form id="performance-form" class="admin-form">
+                        <input id="performance-id" type="hidden">
+
+                        <div class="admin-field">
+                            <label for="performance-date">Date</label>
+                            <div class="admin-input-wrap">
+                                <input id="performance-date" type="date" required>
+                            </div>
+                        </div>
+
+                        <div class="admin-field">
+                            <label for="performance-location">Location</label>
+                            <div class="admin-input-wrap">
+                                <input id="performance-location" type="text" maxlength="120" placeholder="Example: Korean Methodist Church" required>
+                            </div>
+                        </div>
+
+                        <fieldset class="arrangement-fieldset">
+                            <legend>Arrangements</legend>
+                            <div class="arrangement-options">
+                                <label><input type="checkbox" name="arrangements" value="Samulnori 사물놀이"> <span>Samulnori 사물놀이</span></label>
+                                <label><input type="checkbox" name="arrangements" value="Nongak 농악"> <span>Nongak 농악</span></label>
+                                <label><input type="checkbox" name="arrangements" value="Ogomu 오고무"> <span>Ogomu 오고무</span></label>
+                                <label><input type="checkbox" name="arrangements" value="Nanta 난타"> <span>Nanta 난타</span></label>
+                                <label><input type="checkbox" name="arrangements" value="Sogo 소고춤"> <span>Sogo 소고춤</span></label>
+                            </div>
+                        </fieldset>
+
+                        <p id="performance-status" class="login-status" role="status" aria-live="polite"></p>
+
+                        <div class="performance-form-actions">
+                            <button id="performance-submit" class="admin-submit" type="submit">Add Performance</button>
+                            <button id="performance-cancel" class="admin-secondary-button" type="button" hidden>Cancel Edit</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="admin-panel performance-list-panel">
+                    <div class="admin-panel-heading performance-list-heading">
+                        <div>
+                            <p class="admin-eyebrow">Published records</p>
+                            <h2>All Performances</h2>
+                        </div>
+                        <span id="performance-count" class="admin-count-badge">0</span>
+                    </div>
+
+                    <div id="performance-list" class="performance-admin-list"></div>
+                    <p id="performance-empty" class="admin-empty-state" hidden>No performances have been added yet.</p>
+                </section>
+            </div>
+        </main>
+
+        <footer class="admin-footer">© 2026 KMC Samulnori</footer>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/admin-performances.js"></script>
+</body>
+</html>
