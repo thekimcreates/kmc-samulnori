@@ -2407,3 +2407,30 @@ footer img {
 .performance-card.has-highlight-photo:hover::before{transform:scale(1.06)}
 .performance-card-content{display:block!important;align-items:initial!important}
 .performance-card .performance-location,.performance-card .performance-meta{box-sizing:border-box!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;text-indent:0!important;transform:none!important}
+
+
+/* ======================================
+   PERFORMANCE CARD TEXT HIERARCHY
+====================================== */
+.performance-card .performance-date-time {
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 0;
+    color: rgba(255, 255, 255, .74);
+    font-size: clamp(.78rem, 1.2vw, .92rem);
+    font-weight: 650;
+    line-height: 1.35;
+    letter-spacing: .035em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.performance-card .performance-location {
+    margin: 0;
+    color: #ffffff;
+}
+
+.performance-card .performance-meta {
+    margin: 12px 0 0;
+    color: rgba(255, 255, 255, .68);
+}
