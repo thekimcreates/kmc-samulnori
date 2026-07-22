@@ -42,6 +42,8 @@
                     <form id="performance-form" class="admin-form">
                         <input id="performance-id" type="hidden">
                         <input id="performance-highlight-existing" type="hidden">
+                        <input id="performance-location-name" type="hidden">
+                        <input id="performance-location-address" type="hidden">
                         <input id="performance-location-place-id" type="hidden">
                         <input id="performance-location-lat" type="hidden">
                         <input id="performance-location-lng" type="hidden">
@@ -195,6 +197,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
     <script src="../js/firebase.js"></script>
     <script src="../js/admin-performances.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-MVpD9Qvsag1sJKHblNsBdQXZDXPTbMI&libraries=places&callback=initializeKmcPerformanceMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=REPLACE_WITH_GOOGLE_MAPS_API_KEY&libraries=places&callback=initializeKmcPerformanceMap"></script>
 </body>
 </html>
