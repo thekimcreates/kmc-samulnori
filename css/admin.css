@@ -4,3 +4,30 @@
    PERFORMANCE MANAGER
 ======================================== */
 .admin-dashboard-card-link{display:block;color:inherit;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.admin-dashboard-card-link:hover{transform:translateY(-4px);border-color:rgba(127,29,45,.28);box-shadow:0 24px 60px rgba(41,28,28,.13)}.admin-page-copy{max-width:650px;margin:18px 0 0;color:#6f6f73;line-height:1.65}.performance-manager-layout{display:grid;grid-template-columns:minmax(310px,.72fr) minmax(0,1.28fr);gap:24px;align-items:start}.admin-panel{padding:clamp(24px,4vw,36px);border:1px solid rgba(22,22,22,.1);border-radius:28px;background:rgba(255,255,255,.76);box-shadow:0 20px 60px rgba(41,28,28,.08);backdrop-filter:blur(20px)}.performance-form-panel{position:sticky;top:24px}.admin-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px}.admin-panel-heading h2{margin:0;font-size:clamp(1.55rem,3vw,2.25rem);letter-spacing:-.035em}.arrangement-fieldset{margin:0;padding:0;border:0}.arrangement-fieldset legend{margin-bottom:10px;font-size:.82rem;font-weight:700}.arrangement-options{display:grid;gap:10px}.arrangement-options label{display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 13px;border:1px solid rgba(22,22,22,.1);border-radius:13px;background:rgba(255,255,255,.65);cursor:pointer}.arrangement-options input{width:17px;height:17px;accent-color:#7f1d2d}.arrangement-options span{font-size:.88rem;font-weight:650}.performance-form-actions{display:flex;flex-wrap:wrap;gap:10px}.admin-secondary-button,.admin-danger-button{min-height:46px;padding:0 17px;border-radius:13px;font:inherit;font-weight:750;cursor:pointer}.admin-secondary-button{border:1px solid rgba(22,22,22,.14);background:rgba(255,255,255,.7);color:#171717}.admin-danger-button{border:1px solid rgba(160,25,47,.2);background:rgba(160,25,47,.08);color:#a0192f}.admin-secondary-button:disabled,.admin-danger-button:disabled{opacity:.55}.performance-list-heading{align-items:center}.admin-count-badge{display:grid;place-items:center;min-width:38px;height:38px;padding:0 11px;border-radius:999px;background:rgba(127,29,45,.1);color:#7f1d2d;font-weight:800}.performance-admin-list{display:grid;gap:14px}.performance-admin-card{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:20px;border:1px solid rgba(22,22,22,.09);border-radius:18px;background:rgba(255,255,255,.62)}.performance-admin-card-content{min-width:0}.performance-admin-date{margin:0 0 7px;color:#7f1d2d;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.performance-admin-card h3{margin:0 0 8px;font-size:1.08rem}.performance-admin-arrangements{margin:0;color:#6f6f73;font-size:.82rem;line-height:1.5}.performance-card-actions{display:flex;flex-shrink:0;gap:8px}.admin-small-button{min-height:40px;padding:0 13px;font-size:.78rem}.admin-empty-state{margin:0;padding:38px 16px;border:1px dashed rgba(22,22,22,.15);border-radius:18px;color:#6f6f73;text-align:center}.admin-empty-state[hidden]{display:none!important}@media(max-width:900px){.performance-manager-layout{grid-template-columns:1fr}.performance-form-panel{position:static}}@media(max-width:600px){.performance-page-header{margin-bottom:36px}.admin-panel{padding:22px;border-radius:22px}.performance-admin-card{align-items:flex-start;flex-direction:column}.performance-card-actions{width:100%}.performance-card-actions button{flex:1}}
+
+/* ========================================
+   ADVANCED PERFORMANCE FORM
+======================================== */
+.admin-subsection{margin:0;padding:20px;border:1px solid rgba(22,22,22,.1);border-radius:18px;background:rgba(255,255,255,.48)}
+.admin-subsection legend{padding:0 7px;font-size:.86rem;font-weight:800}
+.admin-toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:15px;font-size:.86rem;font-weight:750;cursor:pointer}
+.admin-toggle-row input{width:18px;height:18px;accent-color:#7f1d2d}
+.admin-split-fields{display:grid;grid-template-columns:1fr 1.25fr;gap:14px}
+.admin-field select,.admin-field input[type=time],.admin-field input[type=file]{width:100%;min-height:54px;padding:0 16px;border:1px solid rgba(22,22,22,.12);border-radius:15px;background:rgba(255,255,255,.8);font:inherit;outline:none}
+.admin-field input[type=file]{padding:14px}
+.admin-field select:focus,.admin-field input[type=time]:focus,.admin-field input[type=file]:focus{border-color:#7f1d2d;box-shadow:0 0 0 4px rgba(127,29,45,.1)}
+.admin-help-text{margin:8px 0 0;color:#6f6f73;font-size:.75rem;line-height:1.5}
+.admin-custom-field{margin-top:14px}
+.performance-location-map{width:100%;height:240px;margin-top:14px;border-radius:16px;background:#e7e3df;overflow:hidden}
+.member-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.member-options label{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;border:1px solid rgba(22,22,22,.1);border-radius:12px;background:rgba(255,255,255,.65);font-size:.84rem;font-weight:650;cursor:pointer}
+.member-options input{width:17px;height:17px;accent-color:#7f1d2d}
+.highlight-preview-wrap{display:grid;gap:12px;margin-top:12px}
+.highlight-preview-wrap img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:16px;border:1px solid rgba(22,22,22,.1)}
+.external-links-list{display:grid;gap:10px;margin-bottom:12px}
+.external-link-row{display:grid;grid-template-columns:.8fr 1.4fr auto;gap:8px;align-items:center}
+.external-link-row input{width:100%;min-height:46px;padding:0 13px;border:1px solid rgba(22,22,22,.12);border-radius:12px;background:rgba(255,255,255,.8);font:inherit}
+.fieldset-disabled{opacity:.5;pointer-events:none}
+.performance-admin-photo{width:92px;height:64px;flex:0 0 auto;object-fit:cover;border-radius:12px}
+.performance-admin-card-main{display:flex;align-items:center;gap:14px;min-width:0}
+@media(max-width:700px){.admin-split-fields,.member-options{grid-template-columns:1fr}.external-link-row{grid-template-columns:1fr}.performance-admin-card-main{align-items:flex-start}.performance-admin-photo{width:72px;height:54px}}

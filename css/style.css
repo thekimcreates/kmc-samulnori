@@ -2397,3 +2397,13 @@ footer img {
  
 
 }
+
+/* ======================================
+   PERFORMANCE HIGHLIGHT PHOTOS
+====================================== */
+.performance-card{isolation:isolate;background:linear-gradient(145deg,rgba(104,0,20,.96),rgba(61,0,12,.94))}
+.performance-card::before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--performance-image);background-size:cover;background-position:center;transform:scale(1.01);transition:transform .55s ease}
+.performance-card::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(8,0,2,.9) 0%,rgba(8,0,2,.48) 48%,rgba(8,0,2,.12) 100%)}
+.performance-card.has-highlight-photo:hover::before{transform:scale(1.06)}
+.performance-card-content{display:block!important;align-items:initial!important}
+.performance-card .performance-location,.performance-card .performance-meta{box-sizing:border-box!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;text-indent:0!important;transform:none!important}
