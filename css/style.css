@@ -1733,22 +1733,9 @@ button {
 
 
 .performance-card h3 {
-
-
-    padding:
-        30px;
-
-
-
-    margin:
-        0;
-
-
-
-    letter-spacing:
-        -.04em;
-
-
+    margin: 0;
+    padding: 0;
+    letter-spacing: -.04em;
 }
 
 
@@ -2252,19 +2239,18 @@ footer img {
 
 .performance-card-content {
     position: relative;
-    z-index: 1;
+    z-index: 3;
 
     width: 100%;
     padding: 34px;
 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    text-align: left;
 }
 
 .performance-card .performance-location {
-    margin: 0;
     width: 100%;
+    margin: 0;
+    padding: 0;
 
     text-align: left;
 
@@ -2276,11 +2262,8 @@ footer img {
 
 .performance-card .performance-meta {
     width: 100%;
-    margin-top: 10px;
-
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    margin: 10px 0 0;
+    padding: 0;
 
     text-align: left;
 
