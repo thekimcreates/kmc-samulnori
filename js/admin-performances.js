@@ -7,37 +7,97 @@ let kmcPerformanceAutocomplete = null;
 window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
     const mapElement = document.getElementById("performance-location-map");
     const locationInput = document.getElementById("performance-location");
-    if (!mapElement || !locationInput || !window.google?.maps?.places) return;
 
-    kmcPerformanceMap = new google.maps.Map(mapElement, {
-        center: { lat: 34.0522, lng: -118.2437 },
-        zoom: 10,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false
-    });
+    if (!mapElement || !locationInput) {
+        window.setTimeout(window.initializeKmcPerformanceMap, 100);
+        return;
+    }
 
-    kmcPerformanceMarker = new google.maps.Marker({ map: kmcPerformanceMap });
-    kmcPerformanceAutocomplete = new google.maps.places.Autocomplete(locationInput, {
-        fields: ["formatted_address", "geometry", "name", "place_id"]
-    });
+    if (!window.google?.maps?.places?.Autocomplete) {
+        console.error(
+            "Google Maps Places did not load. Confirm that Maps JavaScript API " +
+            "and Places API are enabled for the API key."
+        );
+        return;
+    }
+
+    if (!kmcPerformanceMap) {
+        kmcPerformanceMap = new google.maps.Map(mapElement, {
+            center: { lat: 34.0522, lng: -118.2437 },
+            zoom: 10,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false
+        });
+
+        kmcPerformanceMarker = new google.maps.Marker({
+            map: kmcPerformanceMap
+        });
+    }
+
+    if (kmcPerformanceAutocomplete) return;
+
+    kmcPerformanceAutocomplete = new google.maps.places.Autocomplete(
+        locationInput,
+        {
+            fields: [
+                "formatted_address",
+                "geometry",
+                "name",
+                "place_id"
+            ],
+            types: ["establishment", "geocode"]
+        }
+    );
 
     kmcPerformanceAutocomplete.addListener("place_changed", () => {
         const place = kmcPerformanceAutocomplete.getPlace();
-        if (!place.geometry?.location) return;
+
+        if (!place.geometry?.location) {
+            console.warn("No map location was returned for this search.");
+            return;
+        }
 
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        const locationNameInput = document.getElementById("performance-location-name");
-        const locationAddressInput = document.getElementById("performance-location-address");
-        const displayName = place.name || place.formatted_address || locationInput.value;
+        const locationNameInput =
+            document.getElementById("performance-location-name");
+        const locationAddressInput =
+            document.getElementById("performance-location-address");
+        const placeIdInput =
+            document.getElementById("performance-location-place-id");
+        const latInput =
+            document.getElementById("performance-location-lat");
+        const lngInput =
+            document.getElementById("performance-location-lng");
+
+        const displayName =
+            place.name ||
+            place.formatted_address ||
+            locationInput.value;
 
         locationInput.value = displayName;
-        if (locationNameInput) locationNameInput.value = displayName;
-        if (locationAddressInput) locationAddressInput.value = place.formatted_address || "";
-        document.getElementById("performance-location-place-id").value = place.place_id || "";
-        document.getElementById("performance-location-lat").value = String(lat);
-        document.getElementById("performance-location-lng").value = String(lng);
+
+        if (locationNameInput) {
+            locationNameInput.value = displayName;
+        }
+
+        if (locationAddressInput) {
+            locationAddressInput.value =
+                place.formatted_address || "";
+        }
+
+        if (placeIdInput) {
+            placeIdInput.value = place.place_id || "";
+        }
+
+        if (latInput) {
+            latInput.value = String(lat);
+        }
+
+        if (lngInput) {
+            lngInput.value = String(lng);
+        }
 
         kmcPerformanceMap.setCenter({ lat, lng });
         kmcPerformanceMap.setZoom(16);
