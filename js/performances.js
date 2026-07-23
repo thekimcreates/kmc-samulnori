@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
             detailClose.focus({ preventScroll: true });
         });
 
-        history.replaceState(null, "", `#${record.id}`);
+        history.replaceState(null, "", `#${encodeURIComponent(record.id)}`);
     }
 
     function closeDetail({ restoreHash = true } = {}) {
@@ -508,11 +508,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function openHashRecord() {
-        const id = location.hash.slice(1);
-        if (!id) return;
+        const rawId = location.hash.slice(1);
+        if (!rawId) return;
+
+        let id = rawId;
+
+        try {
+            id = decodeURIComponent(rawId);
+        } catch (error) {
+            console.warn("Unable to decode performance link:", error);
+        }
 
         const record = records.find((item) => item.id === id);
-        if (record) openDetail(record, null);
+        if (!record) return;
+
+        const matchingCard = [...grid.querySelectorAll(".performance-card")]
+            .find((card) => card.dataset.performanceId === id);
+
+        matchingCard?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        window.setTimeout(() => {
+            openDetail(record, matchingCard || null);
+        }, matchingCard ? 360 : 0);
     }
 
     detailClose?.addEventListener("click", () => closeDetail());
@@ -542,6 +562,8 @@ document.addEventListener("DOMContentLoaded", () => {
             arrangementTrigger.focus();
         }
     });
+
+    window.addEventListener("hashchange", openHashRecord);
 
     if (!db) {
         showLoadError();

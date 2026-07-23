@@ -120,6 +120,15 @@ Version 1.1
 
             panel.classList.add("is-open");
 
+            const arrangementName = card.getAttribute("data-arrangement");
+            if (arrangementName) {
+                history.replaceState(
+                    null,
+                    "",
+                    `${location.pathname}${location.search}#${encodeURIComponent(arrangementName)}`
+                );
+            }
+
             const closeButton = panel.querySelector(".arrangement-close");
 
             window.setTimeout(() => {
@@ -161,6 +170,10 @@ Version 1.1
                 closeTimer = null;
             }, 700);
 
+            if (location.hash) {
+                history.replaceState(null, "", location.pathname + location.search);
+            }
+
             if (restoreFocus && card) {
                 window.setTimeout(() => {
                     card.focus({ preventScroll: true });
@@ -191,6 +204,37 @@ Version 1.1
                 event.preventDefault();
                 first.focus({ preventScroll: true });
             }
+        }
+
+
+        function openArrangementFromHash() {
+            const rawHash = location.hash.slice(1);
+            if (!rawHash) return;
+
+            let arrangementName = rawHash;
+
+            try {
+                arrangementName = decodeURIComponent(rawHash);
+            } catch (error) {
+                console.warn("Unable to decode arrangement link:", error);
+            }
+
+            const matchingCard = cards.find(card => {
+                return card.getAttribute("data-arrangement") === arrangementName;
+            });
+
+            if (!matchingCard) return;
+
+            window.requestAnimationFrame(() => {
+                matchingCard.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                window.setTimeout(() => {
+                    openPanel(matchingCard);
+                }, 380);
+            });
         }
 
         cards.forEach(card => {
@@ -233,6 +277,10 @@ Version 1.1
 
             trapFocus(event);
         });
+
+        window.addEventListener("hashchange", openArrangementFromHash);
+
+        window.setTimeout(openArrangementFromHash, 80);
 
         window.addEventListener("pageshow", () => {
             panels.forEach(panel => {

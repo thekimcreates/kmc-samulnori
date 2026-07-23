@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const link = document.createElement("a");
         link.className = "performance-card-link";
-        link.href = `performances.html#${documentSnapshot.id}`;
+        link.href = `performances.html#${encodeURIComponent(documentSnapshot.id)}`;
         const locationText = performance.locationTbd
             ? "Location TBD"
             : performance.locationName || performance.location || "Location unavailable";
