@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let records = [];
     let arrangementRecords = [];
+    let memberRecords = [];
     let activeRecord = null;
     let lastFocusedElement = null;
     let closeTimer = null;
@@ -187,9 +188,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderMembers(record) {
-        const members = Array.isArray(record.members)
+        const ids = Array.isArray(record.memberIds) ? record.memberIds : [];
+        const resolved = ids.map(id => memberRecords.find(member => member.id === id)).filter(Boolean).map(member => member.name);
+        const members = resolved.length ? resolved : (Array.isArray(record.members)
             ? record.members.map((member) => String(member || "").trim()).filter(Boolean)
-            : [];
+            : []);
 
         detailMembers.replaceChildren();
 
@@ -599,13 +602,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     Promise.all([
         db.collection("performances").orderBy("date", "desc").get(),
-        db.collection("siteContent").doc("arrangements").get()
+        db.collection("siteContent").doc("arrangements").get(),
+        db.collection("siteContent").doc("team").get()
     ])
-        .then(([snapshot, arrangementSnapshot]) => {
+        .then(([snapshot, arrangementSnapshot, teamSnapshot]) => {
             const arrangementData = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
             arrangementRecords = Array.isArray(arrangementData.arrangements)
                 ? [...arrangementData.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                 : [];
+            const teamData = teamSnapshot.exists ? teamSnapshot.data() : {};
+            memberRecords = Array.isArray(teamData.members) ? teamData.members.map((member,index)=>({ ...member, id:member.id || `legacy-member-${index}` })) : [];
             records = snapshot.docs.map((documentSnapshot) => ({
                 id: documentSnapshot.id,
                 ...documentSnapshot.data()

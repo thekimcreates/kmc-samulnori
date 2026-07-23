@@ -41,8 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
         instructorName.textContent = data.instructorName || fallback.instructorName;
         instructorKoreanName.textContent = data.instructorKoreanName || "";
         instructorKoreanName.hidden = !instructorKoreanName.textContent;
-        renderParagraphs(koreanMessage, data.teacherMessageKo);
-        renderParagraphs(englishMessage, data.teacherMessageEn);
+        renderMessage(koreanMessage, data.teacherMessageKoHtml, data.teacherMessageKo);
+        renderMessage(englishMessage, data.teacherMessageEnHtml, data.teacherMessageEn);
 
         const members = Array.isArray(data.members) ? [...data.members] : [];
         members.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));

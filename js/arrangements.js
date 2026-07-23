@@ -22,6 +22,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const arrangements = [...(data.arrangements || [])].sort((a,b)=>(a.order ?? 0)-(b.order ?? 0));
 
     const escapeId = value => String(value || "arrangement").replace(/[^a-zA-Z0-9_-]/g, "-");
+    const allowedTags = new Set(["P","BR","STRONG","B","EM","I","U","UL","OL","LI","A"]);
+    const sanitizeHtml = html => {
+        const template = document.createElement("template"); template.innerHTML = String(html || "");
+        const walk = node => [...node.childNodes].forEach(child => {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+                if (!allowedTags.has(child.tagName)) { child.replaceWith(...child.childNodes); return; }
+                const href = child.tagName === "A" ? child.getAttribute("href") || "" : "";
+                [...child.attributes].forEach(attribute => child.removeAttribute(attribute.name));
+                if (child.tagName === "A" && (/^https?:\/\//i.test(href) || /^mailto:/i.test(href))) { child.setAttribute("href",href); child.setAttribute("target","_blank"); child.setAttribute("rel","noopener noreferrer"); }
+                walk(child);
+            } else if (child.nodeType !== Node.TEXT_NODE) child.remove();
+        });
+        walk(template.content); return template.innerHTML;
+    };
     arrangements.forEach((arrangement, index) => {
         const id = escapeId(arrangement.id);
         const card = document.createElement("button");
@@ -53,7 +67,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const image = article.querySelector("img"); image.src = instrument.photoUrl || ""; image.alt = `${instrument.name || 'Instrument'} ${instrument.koreanName || ''}`.trim();
             const h4 = article.querySelector("h4"); h4.append(document.createTextNode(instrument.name || "Instrument"));
             if (instrument.koreanName) { const span=document.createElement("span"); span.textContent=instrument.koreanName; h4.append(" ",span); }
-            article.querySelector("p").textContent = selection.description || "Description coming soon.";
+            const description = article.querySelector("p");
+            if (selection.descriptionHtml) description.innerHTML = sanitizeHtml(selection.descriptionHtml);
+            else description.textContent = selection.description || "Description coming soon.";
             return article.outerHTML;
         }).join("");
         panel.innerHTML = `<div class="arrangement-detail-shell"><button class="arrangement-close" type="button" aria-label="Close details"><span></span><span></span></button><div class="arrangement-detail-scroll"><header class="arrangement-detail-hero"><img alt=""><div class="arrangement-detail-overlay"><h2></h2><p></p></div><span class="arrangement-detail-arrow" aria-hidden="true">↓</span></header><div class="arrangement-detail-content"><h3>Instruments Used</h3><div class="instrument-list">${instrumentRows}</div></div></div></div>`;

@@ -57,6 +57,42 @@ document.addEventListener("DOMContentLoaded", () => {
         throw lastError;
     }
 
+
+    async function loadActivity() {
+        const container = document.getElementById("admin-activity-list");
+        if (!container) return;
+        try {
+            const snapshot = await db.collection("adminActivity").orderBy("createdAt", "desc").limit(20).get();
+            container.replaceChildren();
+            if (snapshot.empty) {
+                const empty = document.createElement("p");
+                empty.className = "activity-empty";
+                empty.textContent = "No administrator activity has been recorded yet.";
+                container.appendChild(empty);
+                return;
+            }
+            snapshot.forEach(document => {
+                const data = document.data();
+                const article = document.createElement("article");
+                article.className = "activity-item";
+                const copy = document.createElement("div");
+                const title = document.createElement("strong");
+                title.textContent = `${data.action || "Updated"} ${data.entity || "content"}${data.label ? `: ${data.label}` : ""}`;
+                const byline = document.createElement("p");
+                byline.textContent = data.userEmail || "Administrator";
+                const time = document.createElement("time");
+                const date = data.createdAt?.toDate?.();
+                time.textContent = date ? date.toLocaleString() : "Just now";
+                copy.append(title, byline);
+                article.append(copy, time);
+                container.appendChild(article);
+            });
+        } catch (error) {
+            console.error("Unable to load activity:", error);
+            container.innerHTML = '<p class="activity-empty">Activity history could not be loaded. Add the included Firestore rule before publishing.</p>';
+        }
+    }
+
     if (!auth || !db) {
         showVerificationError(
             new Error("Firebase Auth or Firestore did not initialize.")
@@ -95,6 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (page) {
                 page.hidden = false;
             }
+
+            await loadActivity();
         } catch (error) {
             /*
              * A temporary Firestore/network/rules error must not sign the user

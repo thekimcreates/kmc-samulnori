@@ -2,6 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const { auth, db, storage } = window.kmcFirebase || {};
+  const tools = window.kmcAdminTools;
   const defaults = window.KMC_ARRANGEMENT_DEFAULTS || { arrangements: [], instruments: [] };
   const docRef = db?.collection("siteContent").doc("arrangements");
   const q = id => document.getElementById(id);
@@ -28,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const upload = async (file, folder, id, oldPath = "") => {
     if (!file) return null;
     if (file.size > 10 * 1024 * 1024) throw new Error("Photos must be 10 MB or smaller.");
-    if (oldPath) await storage.ref(oldPath).delete().catch(() => {});
     const path = `${folder}/${id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
     const snapshot = await storage.ref(path).put(file, { contentType: file.type });
     return { photoUrl: await snapshot.ref.getDownloadURL(), photoPath: path };
@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await saveState();
       status(pageStatus, "Arrangement order saved.", "success");
+      await tools.logActivity(db, auth, "Reordered", "arrangements", "arrangements", "Arrangement order");
     } catch (error) {
       console.error(error);
       status(pageStatus, "Unable to save arrangement order.", "error");
@@ -63,13 +64,17 @@ document.addEventListener("DOMContentLoaded", () => {
       card.querySelector("p").textContent = `${(item.instruments || []).length} instrument${(item.instruments || []).length === 1 ? "" : "s"}`;
       card.querySelector("[data-edit]").onclick = () => editArrangement(item.id);
       card.querySelector("[data-delete]").onclick = async () => {
-        if (!confirm(`Delete ${item.name}?`)) return;
-        if (item.photoPath) await storage.ref(item.photoPath).delete().catch(() => {});
+        if (!await tools.confirmAction({ title:"Delete arrangement?", message:`Delete ${item.name}? You can undo this for a few seconds.`, confirmText:"Delete" })) return;
+        const index = state.arrangements.findIndex(entry => entry.id === item.id);
         state.arrangements = state.arrangements.filter(entry => entry.id !== item.id);
         normalizeArrangementOrder();
         await saveState();
         renderList();
-        status(pageStatus, "Arrangement deleted.", "success");
+        await tools.logActivity(db, auth, "Deleted", "arrangement", item.id, item.name);
+        tools.showUndo(`${item.name} deleted.`, async () => {
+          state.arrangements.splice(Math.max(0,index),0,item); normalizeArrangementOrder(); await saveState(); renderList();
+          await tools.logActivity(db, auth, "Restored", "arrangement", item.id, item.name);
+        }, { onExpire: () => tools.deleteStoragePath(storage, item.photoPath) });
       };
       list.appendChild(card);
     });
@@ -232,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderSelectedInstruments() {
     const box = q("selected-instruments");
-    const existing = new Map([...box.querySelectorAll("[data-instrument-id]")].map(row => [row.dataset.instrumentId, row.querySelector("textarea").value]));
+    const existing = new Map([...box.querySelectorAll("[data-instrument-id]")].map(row => [row.dataset.instrumentId, row._richEditor?.getHtml?.() || ""]));
     box.replaceChildren();
     [...q("instrument-checklist").querySelectorAll("input:checked")].forEach(input => {
       const inst = instrumentById(input.value);
@@ -240,11 +245,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const row = document.createElement("article");
       row.className = "selected-instrument-card";
       row.dataset.instrumentId = inst.id;
-      row.innerHTML = `<img alt=""><div class="selected-instrument-copy"><h3></h3><label>Description for this arrangement<textarea rows="4" placeholder="Describe how this instrument is used in this arrangement."></textarea></label></div>`;
+      row.innerHTML = `<img alt=""><div class="selected-instrument-copy"><h3></h3><label>Description for this arrangement</label><div data-editor-host></div></div>`;
       row.querySelector("img").src = displayUrl(inst.photoUrl);
       row.querySelector("img").alt = inst.name || "Instrument";
       row.querySelector("h3").textContent = `${inst.name} ${inst.koreanName || ""}`.trim();
-      row.querySelector("textarea").value = existing.get(inst.id) || "";
+      const editor = tools.createRichEditor(existing.get(inst.id) || "", `Description of ${inst.name} for this arrangement`);
+      row.querySelector("[data-editor-host]").replaceWith(editor);
+      row._richEditor = editor;
       box.appendChild(row);
     });
   }
@@ -264,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderSelectedInstruments();
     [...q("selected-instruments").children].forEach(row => {
       const match = (item.instruments || []).find(entry => entry.instrumentId === row.dataset.instrumentId);
-      row.querySelector("textarea").value = match?.description || "";
+      row._richEditor?.setHtml(match?.descriptionHtml || tools.plainTextToHtml(match?.description || ""));
     });
     status(q("arrangement-form-status"), "");
     openModal(editor);
@@ -282,14 +289,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const uploaded = await upload(q("arrangement-photo").files[0], "arrangement-photos", id, photoPath);
       if (uploaded) ({ photoUrl, photoPath } = uploaded);
       if (!photoUrl) throw new Error("Please upload an arrangement photo.");
-      const instruments = [...q("selected-instruments").children].map((row, order) => ({ instrumentId: row.dataset.instrumentId, description: row.querySelector("textarea").value.trim(), order }));
+      const instruments = [...q("selected-instruments").children].map((row, order) => ({ instrumentId: row.dataset.instrumentId, descriptionHtml: row._richEditor?.getHtml() || "", description: row._richEditor?.getText() || "", order }));
       const record = { id, name: q("arrangement-name").value.trim(), koreanName: q("arrangement-korean").value.trim(), photoUrl, photoPath, order: old?.order ?? state.arrangements.length, instruments };
       state.arrangements = old ? state.arrangements.map(item => item.id === oldId ? record : item) : [...state.arrangements, record];
       normalizeArrangementOrder();
       await saveState();
+      if (uploaded && old?.photoPath && old.photoPath !== uploaded.photoPath) await tools.deleteStoragePath(storage, old.photoPath);
+      if (removeArrangementPhoto && old?.photoPath) await tools.deleteStoragePath(storage, old.photoPath);
       renderList();
       closeModal(editor);
       status(pageStatus, "Arrangement saved.", "success");
+      await tools.logActivity(db, auth, old ? "Updated" : "Created", "arrangement", id, record.name);
     } catch (error) {
       console.error(error);
       status(q("arrangement-form-status"), error.message || "Unable to save.", "error");
@@ -317,6 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const record = { id, name: name.trim(), koreanName: koreanName.trim(), photoUrl, photoPath };
     state.instruments = oldId ? state.instruments.map(item => item.id === oldId ? record : item) : [...state.instruments, record];
     await saveState();
+    if (uploaded && existingPath && existingPath !== uploaded.photoPath) await tools.deleteStoragePath(storage, existingPath);
+    await tools.logActivity(db, auth, oldId ? "Updated" : "Created", "instrument", id, record.name);
   }
 
   function renderInstrumentLibrary(expandedId = "") {
@@ -333,11 +345,15 @@ document.addEventListener("DOMContentLoaded", () => {
       row.querySelector("[data-edit]").onclick = () => renderInstrumentLibrary(expandedId === inst.id ? "" : inst.id);
       row.querySelector("[data-delete]").onclick = async () => {
         if (state.arrangements.some(arrangement => (arrangement.instruments || []).some(entry => entry.instrumentId === inst.id))) return status(q("instrument-status"), "Remove this instrument from all arrangements before deleting it.", "error");
-        if (!confirm(`Delete ${inst.name}?`)) return;
-        if (inst.photoPath) await storage.ref(inst.photoPath).delete().catch(() => {});
+        if (!await tools.confirmAction({ title:"Delete instrument?", message:`Delete ${inst.name}? You can undo this for a few seconds.`, confirmText:"Delete" })) return;
+        const index = state.instruments.findIndex(item => item.id === inst.id);
         state.instruments = state.instruments.filter(item => item.id !== inst.id);
-        await saveState();
-        renderInstrumentLibrary();
+        await saveState(); renderInstrumentLibrary();
+        await tools.logActivity(db, auth, "Deleted", "instrument", inst.id, inst.name);
+        tools.showUndo(`${inst.name} deleted.`, async () => {
+          state.instruments.splice(Math.max(0,index),0,inst); await saveState(); renderInstrumentLibrary();
+          await tools.logActivity(db, auth, "Restored", "instrument", inst.id, inst.name);
+        }, { onExpire: () => tools.deleteStoragePath(storage, inst.photoPath) });
       };
       const form = row.querySelector("form");
       form.querySelector("[data-name]").value = inst.name;

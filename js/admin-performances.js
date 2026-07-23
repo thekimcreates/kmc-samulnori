@@ -60,6 +60,7 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
 
 document.addEventListener("DOMContentLoaded", () => {
     const { auth, db, storage } = window.kmcFirebase || {};
+    const tools = window.kmcAdminTools;
     const get = (id) => document.getElementById(id);
 
     const page = get("performances-admin");
@@ -229,23 +230,29 @@ document.addEventListener("DOMContentLoaded", () => {
             .replaceAll(">", "&gt;");
     }
 
+    function getRecordMemberIds(record) {
+        if (Array.isArray(record.memberIds)) return record.memberIds;
+        const legacyNames = Array.isArray(record.members) ? record.members : [];
+        return memberRecords.filter(member => legacyNames.includes(member.name)).map(member => member.id);
+    }
+
     function renderMembers(selected = []) {
         membersList.replaceChildren();
         if (!memberRecords.length) {
             const message = document.createElement("p");
             message.className = "admin-help-text";
-            message.textContent = "No member records were found. Add member documents to the Firestore members collection.";
+            message.textContent = "No members were found. Add members on the Admin Team page.";
             membersList.appendChild(message);
             return;
         }
-
+        const selectedIds = selected.map(String);
         memberRecords.forEach((member) => {
             const label = document.createElement("label");
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.name = "members";
-            checkbox.value = member.name;
-            checkbox.checked = selected.includes(member.name);
+            checkbox.value = member.id;
+            checkbox.checked = selectedIds.includes(member.id) || selectedIds.includes(member.name);
             const span = document.createElement("span");
             span.textContent = member.name;
             label.append(checkbox, span);
@@ -255,8 +262,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadMembers() {
         try {
-            const snapshot = await db.collection("members").orderBy("name", "asc").get();
-            memberRecords = snapshot.docs.map((doc) => ({ id: doc.id, name: doc.data().name || "Unnamed member" }));
+            const snapshot = await db.collection("siteContent").doc("team").get();
+            const data = snapshot.exists ? snapshot.data() : {};
+            memberRecords = Array.isArray(data.members) ? [...data.members].sort((a,b)=>(a.order??0)-(b.order??0)).map((member,index)=>({ ...member, id:member.id || `legacy-member-${index}` })) : [];
         } catch (error) {
             console.error("Unable to load members:", error);
             memberRecords = [];
@@ -466,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
         linksTbd.checked = Boolean(record.linksTbd);
 
         renderArrangementOptions(getRecordArrangementIds(record));
-        renderMembers(record.members || []);
+        renderMembers(getRecordMemberIds(record));
 
         highlightExisting.value = record.highlightPhotoUrl || "";
         if (record.highlightPhotoUrl) showPreview(record.highlightPhotoUrl);
@@ -490,13 +498,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function deletePerformance(record) {
-        if (!window.confirm(`Delete the ${formatDate(record.date)} performance?`)) return;
+        const label = `${formatDate(record.date)} performance`;
+        if (!await tools.confirmAction({ title:"Delete performance?", message:`Delete the ${label}? You can undo this for a few seconds.`, confirmText:"Delete" })) return;
         try {
             await db.collection("performances").doc(record.id).delete();
-            if (record.highlightPhotoPath) {
-                await storage.ref(record.highlightPhotoPath).delete().catch(() => {});
-            }
             if (idInput.value === record.id) resetForm();
+            await tools.logActivity(db, auth, "Deleted", "performance", record.id, label);
+            tools.showUndo(`${label} deleted.`, async () => {
+                const restored = { ...record }; delete restored.id;
+                await db.collection("performances").doc(record.id).set(restored);
+                await tools.logActivity(db, auth, "Restored", "performance", record.id, label);
+            }, { onExpire: () => tools.deleteStoragePath(storage, record.highlightPhotoPath) });
         } catch (error) {
             console.error("Unable to delete performance:", error);
             setStatus("The performance could not be deleted.", "error");
@@ -520,7 +532,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!file.type.startsWith("image/")) throw new Error("Select an image file.");
         if (file.size > 10 * 1024 * 1024) throw new Error("The highlight photo must be 10 MB or smaller.");
 
-        if (existingPath) await storage.ref(existingPath).delete().catch(() => {});
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
         const path = `performance-highlights/${documentId}/${Date.now()}-${safeName}`;
         const snapshot = await storage.ref(path).put(file, { contentType: file.type });
@@ -556,7 +567,8 @@ document.addEventListener("DOMContentLoaded", () => {
             .map((id) => arrangementRecords.find((item) => item.id === id))
             .filter(Boolean)
             .map(arrangementLabel);
-        const members = selectedValues("members");
+        const memberIds = selectedValues("members");
+        const members = memberIds.map(id => memberRecords.find(member => member.id === id)).filter(Boolean).map(member => member.name);
         const links = externalLinks();
 
         if (!dateInput.value) return setStatus("Enter a date.", "error");
@@ -566,7 +578,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return setStatus("Choose a location from the Google Maps suggestions.", "error");
         }
         if (!arrangementsTbd.checked && arrangementIds.length === 0) return setStatus("Select an arrangement or choose TBD.", "error");
-        if (!membersTbd.checked && members.length === 0) return setStatus("Select attending members or choose TBD.", "error");
+        if (!membersTbd.checked && memberIds.length === 0) return setStatus("Select attending members or choose TBD.", "error");
         if (!highlightTbd.checked && !highlightInput.files[0] && !highlightExisting.value) return setStatus("Upload a highlight photo or choose TBD.", "error");
         if (!linksTbd.checked && links.some((link) => !link.label || !link.url)) return setStatus("Each external link needs both a name and URL.", "error");
 
@@ -583,8 +595,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let highlightPhotoUrl = highlightTbd.checked ? "" : highlightExisting.value;
             let highlightPhotoPath = highlightTbd.checked ? "" : oldRecord.highlightPhotoPath || "";
 
+            const pathToDeleteAfterSave = (highlightTbd.checked || removeExistingHighlight) ? oldRecord.highlightPhotoPath || "" : "";
             if (highlightTbd.checked || removeExistingHighlight) {
-                if (oldRecord.highlightPhotoPath) await storage.ref(oldRecord.highlightPhotoPath).delete().catch(() => {});
                 highlightPhotoUrl = "";
                 highlightPhotoPath = "";
             }
@@ -593,6 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const uploaded = await uploadHighlight(reference.id, oldRecord.highlightPhotoPath || "");
                 highlightPhotoUrl = uploaded.url;
                 highlightPhotoPath = uploaded.path;
+                if (oldRecord.highlightPhotoPath && oldRecord.highlightPhotoPath !== uploaded.path) await tools.deleteStoragePath(storage, oldRecord.highlightPhotoPath);
             }
 
             const data = {
@@ -613,6 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Keep a readable snapshot for backwards compatibility; public pages resolve IDs first.
                 arrangements: arrangementsTbd.checked ? [] : arrangementNames,
                 arrangementsTbd: arrangementsTbd.checked,
+                memberIds: membersTbd.checked ? [] : memberIds,
                 members: membersTbd.checked ? [] : members,
                 membersTbd: membersTbd.checked,
                 highlightPhotoUrl,
@@ -629,6 +643,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                 await reference.set(data);
             }
+            if (pathToDeleteAfterSave) await tools.deleteStoragePath(storage, pathToDeleteAfterSave);
+            await tools.logActivity(db, auth, documentId ? "Updated" : "Created", "performance", reference.id, `${formatDate(data.date)} performance`);
 
             resetForm();
             setStatus(documentId ? "Performance updated successfully." : "Performance added successfully.", "success");
