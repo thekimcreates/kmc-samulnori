@@ -4,7 +4,7 @@ let kmcPerformanceMap = null;
 let kmcPerformanceMarker = null;
 let kmcPerformanceAutocomplete = null;
 
-window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
+window.initializeKmcPerformanceMap = async function initializeKmcPerformanceMap() {
     const mapElement = document.getElementById("performance-location-map");
     const locationInput = document.getElementById("performance-location");
 
@@ -13,16 +13,26 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
         return;
     }
 
-    if (!window.google?.maps?.places?.Autocomplete) {
-        console.error(
-            "Google Maps Places did not load. Confirm that Maps JavaScript API " +
-            "and Places API are enabled for the API key."
-        );
+    if (!window.google?.maps?.importLibrary) {
+        console.error("Google Maps JavaScript API did not load correctly.");
         return;
     }
 
-    if (!kmcPerformanceMap) {
-        kmcPerformanceMap = new google.maps.Map(mapElement, {
+    if (kmcPerformanceAutocomplete) return;
+
+    try {
+        const [{ Map }, { Marker }, placesLibrary] = await Promise.all([
+            google.maps.importLibrary("maps"),
+            google.maps.importLibrary("marker"),
+            google.maps.importLibrary("places")
+        ]);
+
+        const {
+            AutocompleteSuggestion,
+            AutocompleteSessionToken
+        } = placesLibrary;
+
+        kmcPerformanceMap = new Map(mapElement, {
             center: { lat: 34.0522, lng: -118.2437 },
             zoom: 10,
             mapTypeControl: false,
@@ -30,79 +40,238 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
             fullscreenControl: false
         });
 
-        kmcPerformanceMarker = new google.maps.Marker({
+        kmcPerformanceMarker = new Marker({
             map: kmcPerformanceMap
         });
+
+        const wrapper = locationInput.closest(".admin-field") || locationInput.parentElement;
+        wrapper.classList.add("maps-search-field");
+
+        const results = document.createElement("div");
+        results.className = "maps-search-results";
+        results.hidden = true;
+        results.setAttribute("role", "listbox");
+        results.setAttribute("aria-label", "Google Maps search results");
+        wrapper.appendChild(results);
+
+        let sessionToken = new AutocompleteSessionToken();
+        let debounceTimer = null;
+        let requestNumber = 0;
+        let activeIndex = -1;
+        let currentSuggestions = [];
+
+        function closeResults() {
+            results.hidden = true;
+            results.replaceChildren();
+            activeIndex = -1;
+            currentSuggestions = [];
+            locationInput.setAttribute("aria-expanded", "false");
+        }
+
+        function updateActiveResult() {
+            [...results.querySelectorAll(".maps-search-result")].forEach(
+                (button, index) => {
+                    const active = index === activeIndex;
+                    button.classList.toggle("is-active", active);
+                    button.setAttribute("aria-selected", String(active));
+                }
+            );
+        }
+
+        async function selectSuggestion(suggestion) {
+            closeResults();
+
+            const place = suggestion.placePrediction.toPlace();
+
+            await place.fetchFields({
+                fields: [
+                    "id",
+                    "displayName",
+                    "formattedAddress",
+                    "location",
+                    "viewport"
+                ]
+            });
+
+            if (!place.location) {
+                throw new Error("Google Maps did not return a location.");
+            }
+
+            const lat = place.location.lat();
+            const lng = place.location.lng();
+            const displayName =
+                place.displayName ||
+                place.formattedAddress ||
+                locationInput.value;
+
+            locationInput.value = displayName;
+            document.getElementById("performance-location-name").value =
+                displayName;
+            document.getElementById("performance-location-address").value =
+                place.formattedAddress || "";
+            document.getElementById("performance-location-place-id").value =
+                place.id || "";
+            document.getElementById("performance-location-lat").value =
+                String(lat);
+            document.getElementById("performance-location-lng").value =
+                String(lng);
+
+            if (place.viewport) {
+                kmcPerformanceMap.fitBounds(place.viewport);
+            } else {
+                kmcPerformanceMap.setCenter({ lat, lng });
+                kmcPerformanceMap.setZoom(16);
+            }
+
+            kmcPerformanceMarker.setPosition({ lat, lng });
+            sessionToken = new AutocompleteSessionToken();
+
+            locationInput.dispatchEvent(new Event("change", {
+                bubbles: true
+            }));
+        }
+
+        async function searchPlaces() {
+            const query = locationInput.value.trim();
+            const thisRequest = ++requestNumber;
+
+            if (query.length < 2 || locationInput.disabled) {
+                closeResults();
+                return;
+            }
+
+            try {
+                const response =
+                    await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+                        input: query,
+                        sessionToken,
+                        locationBias: kmcPerformanceMap.getBounds() || {
+                            center: kmcPerformanceMap.getCenter(),
+                            radius: 50000
+                        }
+                    });
+
+                if (thisRequest !== requestNumber) return;
+
+                currentSuggestions = response.suggestions || [];
+                results.replaceChildren();
+                activeIndex = -1;
+
+                if (!currentSuggestions.length) {
+                    closeResults();
+                    return;
+                }
+
+                currentSuggestions.forEach((suggestion, index) => {
+                    const prediction = suggestion.placePrediction;
+                    const button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "maps-search-result";
+                    button.setAttribute("role", "option");
+                    button.setAttribute("aria-selected", "false");
+
+                    const primary = document.createElement("span");
+                    primary.className = "maps-search-result-primary";
+                    primary.textContent =
+                        prediction.mainText?.text ||
+                        prediction.text?.text ||
+                        "Unnamed place";
+
+                    const secondaryText =
+                        prediction.secondaryText?.text || "";
+
+                    button.appendChild(primary);
+
+                    if (secondaryText) {
+                        const secondary = document.createElement("span");
+                        secondary.className = "maps-search-result-secondary";
+                        secondary.textContent = secondaryText;
+                        button.appendChild(secondary);
+                    }
+
+                    button.addEventListener("pointerdown", (event) => {
+                        event.preventDefault();
+                    });
+
+                    button.addEventListener("click", async () => {
+                        try {
+                            await selectSuggestion(suggestion);
+                        } catch (error) {
+                            console.error("Unable to select this place:", error);
+                        }
+                    });
+
+                    results.appendChild(button);
+                });
+
+                results.hidden = false;
+                locationInput.setAttribute("aria-expanded", "true");
+            } catch (error) {
+                if (thisRequest !== requestNumber) return;
+                closeResults();
+                console.error("Google Maps place search failed:", error);
+            }
+        }
+
+        locationInput.setAttribute("role", "combobox");
+        locationInput.setAttribute("aria-autocomplete", "list");
+        locationInput.setAttribute("aria-expanded", "false");
+
+        locationInput.addEventListener("input", () => {
+            window.clearTimeout(debounceTimer);
+            debounceTimer = window.setTimeout(searchPlaces, 220);
+        });
+
+        locationInput.addEventListener("keydown", async (event) => {
+            if (results.hidden || !currentSuggestions.length) return;
+
+            if (event.key === "ArrowDown") {
+                event.preventDefault();
+                activeIndex =
+                    (activeIndex + 1) % currentSuggestions.length;
+                updateActiveResult();
+            } else if (event.key === "ArrowUp") {
+                event.preventDefault();
+                activeIndex =
+                    (activeIndex - 1 + currentSuggestions.length) %
+                    currentSuggestions.length;
+                updateActiveResult();
+            } else if (event.key === "Enter" && activeIndex >= 0) {
+                event.preventDefault();
+                try {
+                    await selectSuggestion(
+                        currentSuggestions[activeIndex]
+                    );
+                } catch (error) {
+                    console.error("Unable to select this place:", error);
+                }
+            } else if (event.key === "Escape") {
+                closeResults();
+            }
+        });
+
+        locationInput.addEventListener("focus", () => {
+            if (locationInput.value.trim().length >= 2) {
+                searchPlaces();
+            }
+        });
+
+        document.addEventListener("pointerdown", (event) => {
+            if (!wrapper.contains(event.target)) {
+                closeResults();
+            }
+        });
+
+        kmcPerformanceAutocomplete = {
+            close: closeResults,
+            refresh: searchPlaces
+        };
+    } catch (error) {
+        console.error(
+            "Google Maps place search could not be initialized:",
+            error
+        );
     }
-
-    if (kmcPerformanceAutocomplete) return;
-
-    kmcPerformanceAutocomplete = new google.maps.places.Autocomplete(
-        locationInput,
-        {
-            fields: [
-                "formatted_address",
-                "geometry",
-                "name",
-                "place_id"
-            ],
-            types: ["establishment", "geocode"]
-        }
-    );
-
-    kmcPerformanceAutocomplete.addListener("place_changed", () => {
-        const place = kmcPerformanceAutocomplete.getPlace();
-
-        if (!place.geometry?.location) {
-            console.warn("No map location was returned for this search.");
-            return;
-        }
-
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const locationNameInput =
-            document.getElementById("performance-location-name");
-        const locationAddressInput =
-            document.getElementById("performance-location-address");
-        const placeIdInput =
-            document.getElementById("performance-location-place-id");
-        const latInput =
-            document.getElementById("performance-location-lat");
-        const lngInput =
-            document.getElementById("performance-location-lng");
-
-        const displayName =
-            place.name ||
-            place.formatted_address ||
-            locationInput.value;
-
-        locationInput.value = displayName;
-
-        if (locationNameInput) {
-            locationNameInput.value = displayName;
-        }
-
-        if (locationAddressInput) {
-            locationAddressInput.value =
-                place.formatted_address || "";
-        }
-
-        if (placeIdInput) {
-            placeIdInput.value = place.place_id || "";
-        }
-
-        if (latInput) {
-            latInput.value = String(lat);
-        }
-
-        if (lngInput) {
-            lngInput.value = String(lng);
-        }
-
-        kmcPerformanceMap.setCenter({ lat, lng });
-        kmcPerformanceMap.setZoom(16);
-        kmcPerformanceMarker.setPosition({ lat, lng });
-    });
 };
 
 document.addEventListener("DOMContentLoaded", () => {
