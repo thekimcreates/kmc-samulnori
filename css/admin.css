@@ -1356,3 +1356,97 @@ body.performance-modal-open {
         color: #e38a9c;
     }
 }
+
+
+/* ========================================
+   GOOGLE MAPS PLACE SEARCH — PLACES API NEW
+======================================== */
+
+.maps-search-field {
+    position: relative;
+    z-index: 20;
+}
+
+.maps-search-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    z-index: 30000;
+    max-height: 310px;
+    padding: 7px;
+    overflow-y: auto;
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 18px 48px rgba(24, 18, 19, 0.20);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+.maps-search-result {
+    width: 100%;
+    min-height: 56px;
+    padding: 11px 13px;
+    display: grid;
+    gap: 3px;
+    border: 0;
+    border-radius: 11px;
+    background: transparent;
+    color: var(--admin-text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.maps-search-result:hover,
+.maps-search-result.is-active {
+    background: rgba(127, 29, 45, 0.10);
+}
+
+.maps-search-result-primary {
+    font-size: 0.88rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.maps-search-result-secondary {
+    color: var(--admin-muted);
+    font-size: 0.76rem;
+    line-height: 1.35;
+}
+
+@media (max-width: 600px) {
+    .maps-search-results {
+        position: fixed;
+        top: auto;
+        right: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        left: 16px;
+        max-height: min(52vh, 420px);
+        padding: 9px;
+        border-radius: 20px;
+    }
+
+    .maps-search-result {
+        min-height: 62px;
+        padding: 13px 14px;
+        border-radius: 14px;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .maps-search-results {
+        border-color: rgba(255, 255, 255, 0.13);
+        background: rgba(30, 30, 33, 0.98);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.48);
+    }
+
+    .maps-search-result {
+        color: var(--admin-text);
+    }
+
+    .maps-search-result:hover,
+    .maps-search-result.is-active {
+        background: rgba(227, 138, 156, 0.14);
+    }
+}
