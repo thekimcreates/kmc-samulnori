@@ -818,3 +818,144 @@ body.performance-detail-open {
     }
 }
 
+
+
+/* ========================================
+   HOME-PAGE PERFORMANCE CARD MATCH
+======================================== */
+
+.performances-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
+}
+
+.performance-public-card.performance-card {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    min-width: 0;
+    min-height: 360px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 0;
+    color: #ffffff;
+    font: inherit;
+    text-align: left;
+    background: linear-gradient(145deg, rgba(104, 0, 20, .96), rgba(61, 0, 12, .94));
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    isolation: isolate;
+    transition: transform .35s ease, box-shadow .35s ease;
+}
+
+.performance-public-card.performance-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image: var(--performance-image);
+    background-position: center;
+    background-size: cover;
+    transform: scale(1.01);
+    transition: transform .55s ease;
+}
+
+.performance-public-card.performance-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+        to top,
+        rgba(8, 0, 2, .9) 0%,
+        rgba(8, 0, 2, .48) 48%,
+        rgba(8, 0, 2, .12) 100%
+    );
+}
+
+.performance-public-card.performance-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow);
+}
+
+.performance-public-card.performance-card.has-highlight-photo:hover::before {
+    transform: scale(1.06);
+}
+
+.performance-public-card.performance-card:focus-visible {
+    outline: 4px solid rgba(127, 0, 32, .28);
+    outline-offset: 4px;
+}
+
+.performance-public-card .performance-card-content {
+    position: relative;
+    inset: auto;
+    z-index: 3;
+    display: block !important;
+    width: 100%;
+    padding: 34px;
+    text-align: left;
+}
+
+.performance-public-card .performance-date-time {
+    display: block;
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 0;
+    color: rgba(255, 255, 255, .74);
+    font-size: clamp(.78rem, 1.2vw, .92rem);
+    font-weight: 650;
+    line-height: 1.35;
+    letter-spacing: .035em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.performance-public-card .performance-location {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    color: #ffffff;
+    font-size: clamp(1.75rem, 3.2vw, 2.65rem);
+    font-weight: 750;
+    line-height: 1.05;
+    letter-spacing: -.035em;
+    text-align: left;
+}
+
+.performance-public-card .performance-meta {
+    display: block;
+    width: 100%;
+    margin: 12px 0 0;
+    padding: 0;
+    color: rgba(255, 255, 255, .68);
+    font-size: clamp(.86rem, 1.25vw, 1rem);
+    font-weight: 600;
+    line-height: 1.55;
+    text-align: left;
+}
+
+/* Remove the older public-page arrow and tall-card presentation. */
+.performance-public-card .performance-card-arrow {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .performances-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .performance-public-card.performance-card {
+        min-height: 360px;
+    }
+}
+
+@media (max-width: 560px) {
+    .performance-public-card .performance-card-content {
+        padding: 28px;
+    }
+}
