@@ -342,3 +342,162 @@ body.performance-modal-open {
         padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
     }
 }
+
+/* ========================================
+   ADMIN NAVIGATION, TOP ALIGNMENT, FOOTER
+======================================== */
+.admin-shell{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:0;
+}
+.admin-site-header{
+    position:sticky;
+    top:18px;
+    z-index:10000;
+    width:min(1150px,calc(100% - 36px));
+    min-height:76px;
+    margin:18px auto 0;
+    padding:0 26px;
+    border:1px solid rgba(255,255,255,.62);
+    border-radius:999px;
+    background:rgba(255,255,255,.72);
+    box-shadow:0 15px 50px rgba(0,0,0,.12);
+    backdrop-filter:blur(30px);
+    -webkit-backdrop-filter:blur(30px);
+}
+.admin-brand{display:inline-flex;align-items:center;flex-shrink:0}
+.admin-brand img{height:42px;width:auto}
+.admin-nav{display:flex;align-items:center;gap:34px}
+.admin-nav a{
+    position:relative;
+    padding:12px 0;
+    color:#171717;
+    font-size:.94rem;
+    font-weight:650;
+    text-decoration:none;
+    opacity:.78;
+}
+.admin-nav a:hover,.admin-nav a.active{opacity:1}
+.admin-nav a.active::after{
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:4px;
+    height:2px;
+    border-radius:999px;
+    background:#7f1d2d;
+}
+body[data-admin-page="dashboard"] .admin-nav [data-admin-page="dashboard"],
+body[data-admin-page="performances"] .admin-nav [data-admin-page="performances"],
+body[data-admin-page="team"] .admin-nav [data-admin-page="team"]{opacity:1}
+body[data-admin-page="dashboard"] .admin-nav [data-admin-page="dashboard"]::after,
+body[data-admin-page="performances"] .admin-nav [data-admin-page="performances"]::after,
+body[data-admin-page="team"] .admin-nav [data-admin-page="team"]::after{
+    content:"";position:absolute;left:0;right:0;bottom:4px;height:2px;border-radius:999px;background:#7f1d2d
+}
+.admin-dashboard-main,
+.admin-login-main{
+    flex:1;
+    width:min(1180px,calc(100% - 40px));
+    margin:0 auto;
+    padding:118px 0 110px;
+}
+.admin-login-main{display:block}
+.admin-login-card{margin:0 auto}
+.dashboard-loading{
+    flex:1;
+    min-height:0;
+    align-items:start;
+    padding-top:150px;
+}
+.admin-dashboard-header{align-items:flex-start}
+
+/* Public-style admin footer */
+.admin-public-footer{
+    width:100%;
+    padding:80px 24px 35px;
+    border-top:1px solid rgba(0,0,0,.08);
+    background:#ece9e5;
+    text-align:center;
+}
+.admin-footer-container{max-width:1180px;margin:0 auto}
+.admin-footer-logo img{width:260px;height:auto;margin:0 auto 35px}
+.admin-footer-contact{margin-bottom:35px;color:#6f6f73}
+.admin-footer-contact a{color:#7f1d2d;text-decoration:none}
+.admin-footer-bottom{padding-top:25px;border-top:1px solid rgba(0,0,0,.08);color:#6f6f73}
+.admin-footer-bottom p,.admin-footer-contact p{margin:0}
+
+/* ========================================
+   THINNER DASHBOARD FEATURE LIST
+======================================== */
+.admin-dashboard-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    width:min(860px,100%);
+    gap:14px;
+}
+.admin-dashboard-card,
+.admin-dashboard-card:first-child{
+    grid-column:auto;
+    min-height:0;
+    padding:22px 24px;
+    border:1px solid rgba(22,22,22,.09);
+    border-radius:18px;
+    color:#171717;
+    background:rgba(255,255,255,.66);
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px 24px;
+}
+.admin-dashboard-card:first-child p{color:#6f6f73}
+.admin-dashboard-card:first-child .admin-card-tag{color:#7f1d2d;background:rgba(127,29,45,.09)}
+.admin-dashboard-card h2{margin:0;font-size:1.12rem;letter-spacing:-.02em}
+.admin-dashboard-card p{grid-column:1;margin:0;font-size:.86rem;line-height:1.45}
+.admin-card-tag{grid-column:2;grid-row:1 / span 2;align-self:center;margin:0;white-space:nowrap}
+.admin-dashboard-card-link:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(41,28,28,.08)}
+
+/* ========================================
+   PERFORMANCE LIST HEADER + MODAL DETAILS
+======================================== */
+.performance-manager-layout{width:min(980px,100%)}
+.performance-list-heading{align-items:center;margin-bottom:22px}
+.performance-list-heading h2{margin:0}
+.performance-list-actions{display:flex;align-items:center;gap:12px}
+.performance-add-trigger{min-width:0;min-height:42px;padding:0 16px;border-radius:13px;box-shadow:none}
+.performance-page-header{margin-bottom:44px}
+.performance-form-panel .admin-subsection{
+    padding:22px 24px 24px;
+}
+.admin-subsection legend{
+    float:left;
+    width:100%;
+    margin:0 0 17px;
+    padding:0;
+    font-size:.9rem;
+    font-weight:800;
+}
+.admin-subsection legend + *{clear:both}
+.performance-modal-backdrop{cursor:default}
+
+.admin-static-page{padding-top:118px}
+.admin-placeholder-panel{width:min(860px,100%)}
+.admin-placeholder-panel h2{margin-top:0}
+
+@media(max-width:760px){
+    .admin-site-header{top:10px;width:calc(100% - 20px);min-height:66px;margin-top:10px;padding:0 14px}
+    .admin-brand img{height:34px}
+    .admin-nav{gap:16px}
+    .admin-nav a{font-size:.8rem}
+    .admin-dashboard-main,.admin-login-main{width:calc(100% - 28px);padding:88px 0 80px}
+    .admin-dashboard-card,.admin-dashboard-card:first-child{grid-template-columns:1fr;padding:20px}
+    .admin-card-tag{grid-column:1;grid-row:auto;margin-top:8px;justify-self:start}
+    .performance-list-heading{align-items:flex-start;gap:18px}
+    .performance-list-actions{width:100%;justify-content:space-between}
+    .admin-public-footer{padding:58px 20px 28px}
+    .admin-footer-logo img{width:210px}
+}
