@@ -106,47 +106,79 @@ document.addEventListener("DOMContentLoaded", () => {
   function beginArrangementDrag(event) {
     if (event.button !== 0 && event.pointerType !== "touch") return;
     event.preventDefault();
+
     const handle = event.currentTarget;
     const card = handle.closest(".sortable-admin-card");
     if (!card) return;
 
-    const rect = card.getBoundingClientRect();
-    const placeholder = document.createElement("div");
-    placeholder.className = "arrangement-sort-placeholder";
-    placeholder.style.height = `${rect.height}px`;
-    card.after(placeholder);
+    const cardRect = card.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    const offsetY = event.clientY - cardRect.top;
 
-    card.classList.add("is-pointer-dragging");
-    card.style.width = `${rect.width}px`;
-    card.style.left = `${rect.left}px`;
-    card.style.top = `${rect.top}px`;
+    // Keep the real card in the list so the layout never collapses or shifts.
+    card.classList.add("is-sort-source");
+
+    const floatingCard = card.cloneNode(true);
+    floatingCard.classList.add("arrangement-drag-preview");
+    floatingCard.removeAttribute("data-admin-reveal");
+    floatingCard.querySelectorAll("button").forEach(button => button.tabIndex = -1);
+    floatingCard.style.width = `${Math.min(cardRect.width, window.innerWidth - 24)}px`;
+    floatingCard.style.left = `${Math.max(12, Math.min(listRect.left, window.innerWidth - cardRect.width - 12))}px`;
+    floatingCard.style.top = `${Math.max(12, Math.min(cardRect.top, window.innerHeight - cardRect.height - 12))}px`;
+    document.body.appendChild(floatingCard);
+
     document.body.classList.add("admin-sorting-active");
     handle.setPointerCapture?.(event.pointerId);
 
-    const offsetY = event.clientY - rect.top;
+    let lastClientY = event.clientY;
+
+    const movePreview = clientY => {
+      const maxTop = Math.max(12, window.innerHeight - floatingCard.offsetHeight - 12);
+      const top = Math.max(12, Math.min(maxTop, clientY - offsetY));
+      floatingCard.style.top = `${top}px`;
+    };
+
+    const reorderSource = clientY => {
+      const candidates = [...list.querySelectorAll(".sortable-admin-card:not(.is-sort-source)")];
+      const nextCard = candidates.find(candidate => {
+        const rect = candidate.getBoundingClientRect();
+        return clientY < rect.top + rect.height / 2;
+      });
+      if (nextCard) list.insertBefore(card, nextCard);
+      else list.appendChild(card);
+    };
+
+    let autoScrollFrame = null;
+    const autoScroll = () => {
+      const edge = 96;
+      let amount = 0;
+      if (lastClientY < edge) amount = -10;
+      else if (lastClientY > window.innerHeight - edge) amount = 10;
+      if (amount) {
+        window.scrollBy(0, amount);
+        reorderSource(lastClientY);
+      }
+      autoScrollFrame = requestAnimationFrame(autoScroll);
+    };
+    autoScrollFrame = requestAnimationFrame(autoScroll);
+
     const move = moveEvent => {
-      const top = Math.max(8, Math.min(window.innerHeight - rect.height - 8, moveEvent.clientY - offsetY));
-      card.style.top = `${top}px`;
-      const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest?.(".sortable-admin-card, .arrangement-sort-placeholder");
-      if (!target || target === card || target === placeholder || target.parentElement !== list) return;
-      const targetRect = target.getBoundingClientRect();
-      if (moveEvent.clientY < targetRect.top + targetRect.height / 2) list.insertBefore(placeholder, target);
-      else target.after(placeholder);
-      const edge = 90;
-      if (moveEvent.clientY < edge) window.scrollBy(0, -12);
-      else if (moveEvent.clientY > window.innerHeight - edge) window.scrollBy(0, 12);
+      lastClientY = moveEvent.clientY;
+      movePreview(lastClientY);
+      reorderSource(lastClientY);
     };
 
     const finish = async () => {
       handle.removeEventListener("pointermove", move);
       handle.removeEventListener("pointerup", finish);
       handle.removeEventListener("pointercancel", finish);
-      placeholder.replaceWith(card);
-      card.classList.remove("is-pointer-dragging");
-      card.removeAttribute("style");
+      if (autoScrollFrame) cancelAnimationFrame(autoScrollFrame);
+      floatingCard.remove();
+      card.classList.remove("is-sort-source");
       document.body.classList.remove("admin-sorting-active");
       syncArrangementStateFromDom();
       await persistArrangementOrder();
+      handle.focus({ preventScroll: true });
     };
 
     handle.addEventListener("pointermove", move);

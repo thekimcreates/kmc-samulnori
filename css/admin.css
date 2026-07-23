@@ -1871,3 +1871,94 @@ html {
     border-radius: 20px;
     background: rgba(127, 29, 45, 0.06);
 }
+
+/* Arrangement list: fixed, predictable alignment */
+.performance-admin-list .sortable-admin-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 20px;
+    width: 100%;
+    min-height: 112px;
+    box-sizing: border-box;
+}
+
+.performance-admin-list .sortable-admin-card .arrangement-admin-card-main {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    min-width: 0;
+}
+
+.performance-admin-list .sortable-admin-card .arrangement-admin-thumb {
+    display: block;
+    width: 112px;
+    height: 76px;
+    margin: 0;
+}
+
+.performance-admin-list .sortable-admin-card .performance-admin-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.performance-admin-list .sortable-admin-card:hover {
+    transform: none;
+}
+
+.sortable-admin-card.is-sort-source {
+    opacity: 0.26;
+    border-style: dashed;
+}
+
+.arrangement-drag-preview {
+    position: fixed !important;
+    z-index: 20000;
+    margin: 0 !important;
+    pointer-events: none;
+    opacity: 0.98;
+    transform: none !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+    box-sizing: border-box;
+}
+
+/* Disable the former fixed-position source-card drag styling. */
+.sortable-admin-card.is-pointer-dragging {
+    position: static;
+    width: auto;
+    box-shadow: none;
+    transform: none;
+}
+
+@media (max-width: 760px) {
+    .performance-admin-list .sortable-admin-card {
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 14px;
+        min-height: 0;
+    }
+
+    .performance-admin-list .sortable-admin-card .arrangement-admin-card-main {
+        grid-template-columns: 86px minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .performance-admin-list .sortable-admin-card .arrangement-admin-thumb {
+        width: 86px;
+        height: 70px;
+    }
+
+    .performance-admin-list .sortable-admin-card .performance-admin-actions {
+        grid-column: 1 / -1;
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .performance-admin-list .sortable-admin-card .performance-admin-actions button {
+        flex: 1;
+    }
+}
