@@ -230,3 +230,8 @@
         transition: none;
     }
 }
+
+.team-loading-message {
+    grid-column: 1 / -1;
+    color: var(--secondary-text);
+}
