@@ -31,3 +31,314 @@
 .performance-admin-photo{width:92px;height:64px;flex:0 0 auto;object-fit:cover;border-radius:12px}
 .performance-admin-card-main{display:flex;align-items:center;gap:14px;min-width:0}
 @media(max-width:700px){.admin-split-fields,.member-options{grid-template-columns:1fr}.external-link-row{grid-template-columns:1fr}.performance-admin-card-main{align-items:flex-start}.performance-admin-photo{width:72px;height:54px}}
+
+/* ========================================
+   EDITORIAL ADMIN DASHBOARD + MODAL EDITOR
+======================================== */
+
+body {
+    background:
+        radial-gradient(circle at 12% 4%, rgba(127,29,45,.12), transparent 34rem),
+        radial-gradient(circle at 88% 88%, rgba(201,162,39,.10), transparent 30rem),
+        #f7f5f2;
+}
+
+.admin-shell {
+    padding: 24px clamp(18px, 4vw, 48px);
+}
+
+.admin-topbar {
+    min-height: 76px;
+    padding: 0 8px;
+}
+
+.admin-dashboard-main {
+    width: min(1240px, 100%);
+    padding: clamp(88px, 12vw, 150px) 0 100px;
+}
+
+.admin-dashboard-header {
+    align-items: flex-end;
+    margin-bottom: clamp(48px, 8vw, 86px);
+}
+
+.admin-dashboard-header h1 {
+    max-width: 850px;
+    font-size: clamp(4rem, 10vw, 8.5rem);
+    font-weight: 800;
+    line-height: .9;
+    letter-spacing: -.075em;
+}
+
+.admin-page-copy {
+    max-width: 690px;
+    margin-top: 24px;
+    font-size: clamp(1rem, 1.6vw, 1.18rem);
+}
+
+.admin-user-meta {
+    align-items: end;
+}
+
+.admin-dashboard-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.admin-dashboard-card {
+    grid-column: span 4;
+    min-height: 300px;
+    padding: clamp(30px, 4vw, 46px);
+    border-radius: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: rgba(255,255,255,.72);
+    box-shadow: 0 24px 70px rgba(41,28,28,.09);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+.admin-dashboard-card:first-child {
+    grid-column: span 8;
+    min-height: 420px;
+    color: #fff;
+    border-color: rgba(255,255,255,.16);
+    background:
+        linear-gradient(145deg, rgba(127,29,45,.96), rgba(69,5,20,.96));
+    box-shadow: 0 32px 90px rgba(91,11,29,.24);
+}
+
+.admin-dashboard-card:first-child p {
+    color: rgba(255,255,255,.74);
+}
+
+.admin-dashboard-card:first-child .admin-card-tag {
+    color: #fff;
+    background: rgba(255,255,255,.15);
+}
+
+.admin-dashboard-card h2 {
+    font-size: clamp(1.65rem, 3vw, 2.65rem);
+    letter-spacing: -.045em;
+}
+
+.admin-card-tag {
+    align-self: flex-start;
+    margin-top: 30px;
+}
+
+/* Published records are centered and use the full manager width. */
+.performance-manager-layout {
+    display: block;
+    width: min(940px, 100%);
+    margin: 0 auto;
+}
+
+.performance-list-panel {
+    width: 100%;
+}
+
+.performance-page-header .admin-user-meta {
+    gap: 14px;
+}
+
+.performance-add-trigger {
+    min-width: 176px;
+    box-shadow: 0 14px 34px rgba(127,29,45,.22);
+}
+
+/* Modal editor */
+body.performance-modal-open {
+    overflow: hidden;
+}
+
+.performance-modal[hidden] {
+    display: none !important;
+}
+
+.performance-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: grid;
+    place-items: center;
+    padding: clamp(14px, 3vw, 34px);
+}
+
+.performance-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgba(22,12,14,.58);
+    opacity: 0;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: opacity .24s ease;
+}
+
+.performance-modal-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(980px, 100%);
+    max-height: min(92vh, 980px);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 34px;
+    background: rgba(248,246,243,.97);
+    box-shadow: 0 42px 130px rgba(25,8,13,.34);
+    opacity: 0;
+    transform: translateY(28px) scale(.975);
+    transition: opacity .24s ease, transform .28s cubic-bezier(.22,1,.36,1);
+}
+
+.performance-modal.is-open .performance-modal-backdrop,
+.performance-modal.is-open .performance-modal-dialog {
+    opacity: 1;
+}
+
+.performance-modal.is-open .performance-modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.performance-modal-body {
+    max-height: min(92vh, 980px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: clamp(24px, 4vw, 48px);
+}
+
+.performance-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 5;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(22,22,22,.1);
+    border-radius: 50%;
+    background: rgba(255,255,255,.86);
+    color: #171717;
+    font-size: 1.75rem;
+    line-height: 1;
+    box-shadow: 0 8px 24px rgba(0,0,0,.09);
+}
+
+.performance-form-panel {
+    position: static;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.performance-form-panel .admin-panel-heading {
+    padding-right: 58px;
+}
+
+.performance-form-panel .admin-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 20px;
+}
+
+.performance-form-panel .admin-form > .admin-field,
+.performance-form-panel .admin-form > .admin-subsection,
+.performance-form-panel .admin-form > .login-status,
+.performance-form-panel .admin-form > .performance-form-actions,
+.performance-form-panel .admin-form > input[type="hidden"] {
+    grid-column: 1 / -1;
+}
+
+.performance-form-panel .admin-subsection {
+    padding: 24px;
+    background: rgba(255,255,255,.72);
+}
+
+.performance-form-actions {
+    position: sticky;
+    bottom: -48px;
+    z-index: 4;
+    margin: 8px -48px -48px;
+    padding: 20px 48px;
+    border-top: 1px solid rgba(22,22,22,.08);
+    background: rgba(248,246,243,.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+@media (max-width: 900px) {
+    .admin-dashboard-card,
+    .admin-dashboard-card:first-child {
+        grid-column: 1 / -1;
+        min-height: 260px;
+    }
+
+    .admin-dashboard-card:first-child {
+        min-height: 340px;
+    }
+
+    .performance-form-panel .admin-form {
+        grid-template-columns: 1fr;
+    }
+
+    .performance-form-actions {
+        bottom: -28px;
+        margin: 8px -28px -28px;
+        padding: 18px 28px;
+    }
+}
+
+@media (max-width: 760px) {
+    .admin-dashboard-main {
+        padding-top: 92px;
+    }
+
+    .admin-dashboard-header h1 {
+        font-size: clamp(3.7rem, 18vw, 6rem);
+    }
+
+    .performance-page-header .admin-user-meta {
+        width: 100%;
+    }
+
+    .performance-add-trigger,
+    .admin-logout {
+        width: 100%;
+    }
+
+    .performance-modal {
+        padding: 0;
+        align-items: end;
+    }
+
+    .performance-modal-dialog {
+        width: 100%;
+        max-height: 96vh;
+        border-radius: 28px 28px 0 0;
+    }
+
+    .performance-modal-body {
+        max-height: 96vh;
+        padding: 28px 20px;
+    }
+
+    .performance-modal-close {
+        top: 14px;
+        right: 14px;
+    }
+
+    .performance-form-actions {
+        bottom: -28px;
+        margin: 8px -20px -28px;
+        padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+    }
+}
