@@ -94,15 +94,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const list = get("performance-list");
     const empty = get("performance-empty");
     const count = get("performance-count");
-    const addSlot = get("performance-add-slot");
-    const formPanel = form?.closest(".performance-form-panel");
-
-    let performanceModal = null;
-    let modalDialog = null;
-    let modalCloseButton = null;
-    let addPerformanceButton = null;
-    let lastModalTrigger = null;
+    const modal = get("performance-modal");
+    const modalDialog = modal?.querySelector(".performance-modal-dialog");
+    const modalClose = get("performance-modal-close");
+    const addPerformanceButton = get("performance-add-button");
     let modalCloseTimer = null;
+    let lastModalTrigger = null;
 
     let unsubscribePerformances = null;
     let performanceRecords = [];
@@ -226,73 +223,18 @@ document.addEventListener("DOMContentLoaded", () => {
         highlightPreviewWrap.hidden = false;
     }
 
-    function ensurePerformanceModal() {
-        if (performanceModal || !formPanel || !addSlot) return;
-
-        addPerformanceButton = document.createElement("button");
-        addPerformanceButton.id = "performance-add-button";
-        addPerformanceButton.className = "admin-submit admin-small-button";
-        addPerformanceButton.type = "button";
-        addPerformanceButton.textContent = "+ Add Performance";
-        addSlot.replaceChildren(addPerformanceButton);
-
-        performanceModal = document.createElement("div");
-        performanceModal.className = "performance-modal";
-        performanceModal.hidden = true;
-        performanceModal.setAttribute("aria-hidden", "true");
-
-        const backdrop = document.createElement("div");
-        backdrop.className = "performance-modal-backdrop";
-        backdrop.setAttribute("aria-hidden", "true");
-
-        modalDialog = document.createElement("section");
-        modalDialog.className = "performance-modal-dialog";
-        modalDialog.setAttribute("role", "dialog");
-        modalDialog.setAttribute("aria-modal", "true");
-        modalDialog.setAttribute("aria-labelledby", "performance-form-title");
-
-        modalCloseButton = document.createElement("button");
-        modalCloseButton.className = "performance-modal-close";
-        modalCloseButton.type = "button";
-        modalCloseButton.setAttribute("aria-label", "Close performance editor");
-        modalCloseButton.innerHTML = "&times;";
-
-        const body = document.createElement("div");
-        body.className = "performance-modal-body";
-
-        formPanel.parentNode.insertBefore(performanceModal, formPanel);
-        body.appendChild(formPanel);
-        modalDialog.append(modalCloseButton, body);
-        performanceModal.append(backdrop, modalDialog);
-
-        addPerformanceButton.addEventListener("click", () => {
-            resetForm();
-            openPerformanceModal(addPerformanceButton);
-        });
-
-        modalCloseButton.addEventListener("click", closePerformanceModal);
-
-        // Intentionally do not close when clicking the backdrop.
-        backdrop.addEventListener("click", (event) => {
-            event.preventDefault();
-        });
-
-        performanceModal.addEventListener("keydown", trapModalFocus);
-    }
-
     function openPerformanceModal(trigger = null) {
-        ensurePerformanceModal();
-        if (!performanceModal) return;
+        if (!modal) return;
 
         window.clearTimeout(modalCloseTimer);
         lastModalTrigger = trigger || document.activeElement;
-        performanceModal.hidden = false;
-        performanceModal.setAttribute("aria-hidden", "false");
+        modal.hidden = false;
+        modal.setAttribute("aria-hidden", "false");
         document.body.classList.add("performance-modal-open");
 
         requestAnimationFrame(() => {
-            performanceModal.classList.remove("is-closing");
-            performanceModal.classList.add("is-open");
+            modal.classList.remove("is-closing");
+            modal.classList.add("is-open");
 
             window.setTimeout(() => {
                 if (window.google?.maps && kmcPerformanceMap) {
@@ -307,21 +249,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 dateInput.focus({ preventScroll: true });
-            }, 120);
+            }, 140);
         });
     }
 
     function closePerformanceModal() {
-        if (!performanceModal || performanceModal.hidden) return;
+        if (!modal || modal.hidden) return;
 
-        performanceModal.classList.remove("is-open");
-        performanceModal.classList.add("is-closing");
+        modal.classList.remove("is-open");
+        modal.classList.add("is-closing");
         document.body.classList.remove("performance-modal-open");
 
         modalCloseTimer = window.setTimeout(() => {
-            performanceModal.hidden = true;
-            performanceModal.classList.remove("is-closing");
-            performanceModal.setAttribute("aria-hidden", "true");
+            modal.hidden = true;
+            modal.classList.remove("is-closing");
+            modal.setAttribute("aria-hidden", "true");
 
             if (lastModalTrigger && typeof lastModalTrigger.focus === "function") {
                 lastModalTrigger.focus({ preventScroll: true });
@@ -330,17 +272,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function trapModalFocus(event) {
+        if (!modalDialog || modal.hidden) return;
+
         if (event.key === "Escape") {
             event.preventDefault();
             closePerformanceModal();
             return;
         }
 
-        if (event.key !== "Tab" || !modalDialog) return;
+        if (event.key !== "Tab") return;
 
         const focusable = [...modalDialog.querySelectorAll(
             'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
-        )].filter((element) => !element.hidden && element.offsetParent !== null);
+        )].filter((element) => element.offsetParent !== null);
 
         if (!focusable.length) return;
 
@@ -541,15 +485,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             email.textContent = user.email || "Administrator";
             await loadMembers();
-            ensurePerformanceModal();
             loading.hidden = true;
             page.hidden = false;
             subscribeToPerformances();
             resetForm();
         } catch (error) {
             console.error("Unable to verify administrator:", error);
-            loading.hidden = false;
-            loading.textContent = "Unable to verify administrator access. Refresh the page to try again.";
+            await auth.signOut();
+            returnToLogin();
         }
     });
 
@@ -664,6 +607,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     addLinkButton.addEventListener("click", () => addExternalLink());
+
+    addPerformanceButton?.addEventListener("click", () => {
+        resetForm();
+        openPerformanceModal(addPerformanceButton);
+    });
+
+    modalClose?.addEventListener("click", closePerformanceModal);
+    modal?.addEventListener("keydown", trapModalFocus);
+
+    // Keep backdrop clicks from closing the editor.
+    modal?.querySelector(".performance-modal-backdrop")?.addEventListener("click", (event) => {
+        event.preventDefault();
+    });
+
     cancelButton.addEventListener("click", () => {
         resetForm();
         closePerformanceModal();
