@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("article");
       card.className = "performance-admin-card sortable-admin-card";
       card.dataset.arrangementId = item.id;
-      card.innerHTML = `<button class="admin-drag-handle" draggable="true" type="button" aria-label="Drag ${item.name || "arrangement"} to reorder" title="Drag to reorder">⋮⋮</button><div class="arrangement-admin-card-main"><img class="arrangement-admin-thumb" alt=""><div><h3></h3><p></p></div></div><div class="performance-admin-actions"><button class="admin-secondary-button admin-small-button" data-edit type="button">Edit</button><button class="admin-danger-button admin-small-button" data-delete type="button">Delete</button></div>`;
+      card.innerHTML = `<button class="admin-drag-handle" type="button" aria-label="Drag ${item.name || "arrangement"} to reorder" title="Drag to reorder">⋮⋮</button><div class="arrangement-admin-card-main"><img class="arrangement-admin-thumb" alt=""><div><h3></h3><p></p></div></div><div class="performance-admin-actions"><button class="admin-secondary-button admin-small-button" data-edit type="button">Edit</button><button class="admin-danger-button admin-small-button" data-delete type="button">Delete</button></div>`;
       card.querySelector("img").src = displayUrl(item.photoUrl);
       card.querySelector("img").alt = item.name || "Arrangement";
       card.querySelector("h3").textContent = `${item.name || "Arrangement"} ${item.koreanName || ""}`.trim();
@@ -71,30 +71,87 @@ document.addEventListener("DOMContentLoaded", () => {
         renderList();
         status(pageStatus, "Arrangement deleted.", "success");
       };
-      card.addEventListener("dragstart", event => {
-        draggedArrangementId = item.id;
-        card.classList.add("is-dragging");
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData("text/plain", item.id);
-      });
-      card.addEventListener("dragend", () => { draggedArrangementId = null; card.classList.remove("is-dragging"); document.querySelectorAll(".is-drag-over").forEach(el => el.classList.remove("is-drag-over")); });
-      card.addEventListener("dragover", event => { event.preventDefault(); if (draggedArrangementId && draggedArrangementId !== item.id) card.classList.add("is-drag-over"); });
-      card.addEventListener("dragleave", () => card.classList.remove("is-drag-over"));
-      card.addEventListener("drop", async event => {
-        event.preventDefault();
-        card.classList.remove("is-drag-over");
-        const fromId = draggedArrangementId || event.dataTransfer.getData("text/plain");
-        if (!fromId || fromId === item.id) return;
-        const fromIndex = state.arrangements.findIndex(entry => entry.id === fromId);
-        const toIndex = state.arrangements.findIndex(entry => entry.id === item.id);
-        if (fromIndex < 0 || toIndex < 0) return;
-        const [moved] = state.arrangements.splice(fromIndex, 1);
-        state.arrangements.splice(toIndex, 0, moved);
-        renderList();
-        await persistArrangementOrder();
-      });
       list.appendChild(card);
     });
+    enableArrangementSorting();
+  }
+
+  function enableArrangementSorting() {
+    const handles = [...list.querySelectorAll(".admin-drag-handle")];
+    handles.forEach(handle => {
+      handle.addEventListener("pointerdown", beginArrangementDrag);
+      handle.addEventListener("keydown", event => {
+        if (!event.altKey || !["ArrowUp", "ArrowDown"].includes(event.key)) return;
+        event.preventDefault();
+        const card = handle.closest(".sortable-admin-card");
+        const sibling = event.key === "ArrowUp" ? card.previousElementSibling : card.nextElementSibling;
+        if (!sibling) return;
+        if (event.key === "ArrowUp") list.insertBefore(card, sibling);
+        else list.insertBefore(sibling, card);
+        syncArrangementStateFromDom();
+        persistArrangementOrder();
+        handle.focus();
+      });
+    });
+  }
+
+  function syncArrangementStateFromDom() {
+    const byId = new Map(state.arrangements.map(item => [item.id, item]));
+    state.arrangements = [...list.querySelectorAll(".sortable-admin-card")]
+      .map(card => byId.get(card.dataset.arrangementId))
+      .filter(Boolean);
+    normalizeArrangementOrder();
+  }
+
+  function beginArrangementDrag(event) {
+    if (event.button !== 0 && event.pointerType !== "touch") return;
+    event.preventDefault();
+    const handle = event.currentTarget;
+    const card = handle.closest(".sortable-admin-card");
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const placeholder = document.createElement("div");
+    placeholder.className = "arrangement-sort-placeholder";
+    placeholder.style.height = `${rect.height}px`;
+    card.after(placeholder);
+
+    card.classList.add("is-pointer-dragging");
+    card.style.width = `${rect.width}px`;
+    card.style.left = `${rect.left}px`;
+    card.style.top = `${rect.top}px`;
+    document.body.classList.add("admin-sorting-active");
+    handle.setPointerCapture?.(event.pointerId);
+
+    const offsetY = event.clientY - rect.top;
+    const move = moveEvent => {
+      const top = Math.max(8, Math.min(window.innerHeight - rect.height - 8, moveEvent.clientY - offsetY));
+      card.style.top = `${top}px`;
+      const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest?.(".sortable-admin-card, .arrangement-sort-placeholder");
+      if (!target || target === card || target === placeholder || target.parentElement !== list) return;
+      const targetRect = target.getBoundingClientRect();
+      if (moveEvent.clientY < targetRect.top + targetRect.height / 2) list.insertBefore(placeholder, target);
+      else target.after(placeholder);
+      const edge = 90;
+      if (moveEvent.clientY < edge) window.scrollBy(0, -12);
+      else if (moveEvent.clientY > window.innerHeight - edge) window.scrollBy(0, 12);
+    };
+
+    const finish = async () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", finish);
+      handle.removeEventListener("pointercancel", finish);
+      placeholder.replaceWith(card);
+      card.classList.remove("is-pointer-dragging");
+      card.removeAttribute("style");
+      document.body.classList.remove("admin-sorting-active");
+      syncArrangementStateFromDom();
+      await persistArrangementOrder();
+    };
+
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", finish, { once: true });
+    handle.addEventListener("pointercancel", finish, { once: true });
   }
 
   function renderInstrumentChecklist(selected = []) {

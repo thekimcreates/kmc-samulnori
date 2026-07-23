@@ -1844,3 +1844,30 @@ html {
 }
 
 .instrument-add-form[hidden], .instrument-inline-editor[hidden] { display: none !important; }
+
+/* Reliable handle-only arrangement sorting (mouse, touch, and pen) */
+.admin-drag-handle {
+    touch-action: none;
+}
+
+.admin-sorting-active {
+    user-select: none;
+    cursor: grabbing;
+}
+
+.sortable-admin-card.is-pointer-dragging {
+    position: fixed;
+    z-index: 20000;
+    margin: 0;
+    pointer-events: none;
+    opacity: 0.96;
+    transform: scale(1.012);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+}
+
+.arrangement-sort-placeholder {
+    width: 100%;
+    border: 2px dashed rgba(127, 29, 45, 0.42);
+    border-radius: 20px;
+    background: rgba(127, 29, 45, 0.06);
+}

@@ -1,6 +1,7 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     const { auth, db } = window.kmcFirebase || {};
     const loading = document.getElementById("team-loading");
     const main = document.getElementById("team-admin");
@@ -128,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
             populateForm(snapshot.exists ? { ...defaults, ...snapshot.data() } : defaults);
             loading.hidden = true;
             main.hidden = false;
+            requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
         } catch (error) {
             console.error("Unable to load team editor:", error);
             loading.textContent = "Unable to load the team editor. Check Firestore rules and try again.";
