@@ -1593,3 +1593,32 @@ html {
         transform: none;
     }
 }
+
+
+/* ========================================
+   GOOGLE PLACES AUTOCOMPLETE IN MODAL
+======================================== */
+
+/*
+ * Google appends the autocomplete suggestion list directly to <body>.
+ * The performance editor uses z-index: 20000, so Google's default
+ * .pac-container layer otherwise appears behind the modal.
+ */
+.pac-container {
+    z-index: 30000 !important;
+    pointer-events: auto !important;
+    border-radius: 14px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+
+.pac-item {
+    cursor: pointer;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.pac-item:hover,
+.pac-item-selected {
+    background: rgba(127, 0, 32, 0.08);
+}
