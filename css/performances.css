@@ -1145,3 +1145,86 @@ body.performance-detail-open {
         background: #1b1b1b;
     }
 }
+
+
+/* ========================================
+   PERFORMANCE DETAIL HEADER CLEARANCE FIX
+======================================== */
+
+/*
+ * Keep the expanded performance beneath the fixed public header instead of
+ * allowing the panel to extend behind it. The higher layer also prevents
+ * header controls from appearing over the expanded card.
+ */
+.performance-detail {
+    top: 88px;
+    bottom: 0;
+    inset-inline: 0;
+    height: auto;
+    padding: 20px 24px 24px;
+    z-index: 12000;
+}
+
+.performance-detail-backdrop {
+    position: fixed;
+    top: 88px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.performance-detail-shell {
+    width: min(980px, 100%);
+    max-height: calc(100dvh - 132px);
+}
+
+.performance-detail-scroll {
+    max-height: calc(100dvh - 132px);
+}
+
+.performance-detail-hero {
+    min-height: clamp(310px, 38vw, 430px);
+}
+
+@media (max-width: 780px) {
+    .performance-detail {
+        top: 72px;
+        padding: 10px;
+    }
+
+    .performance-detail-backdrop {
+        top: 72px;
+    }
+
+    .performance-detail-shell,
+    .performance-detail-scroll {
+        max-height: calc(100dvh - 92px);
+    }
+
+    .performance-detail-hero {
+        min-height: 300px;
+    }
+}
+
+@media (max-width: 520px) {
+    .performance-detail {
+        top: 68px;
+    }
+
+    .performance-detail-backdrop {
+        top: 68px;
+    }
+
+    .performance-detail-shell,
+    .performance-detail-scroll {
+        max-height: calc(100dvh - 82px);
+    }
+
+    .performance-detail-hero {
+        min-height: 260px;
+    }
+
+    .performance-detail-heading h2 {
+        font-size: clamp(2rem, 10vw, 3rem);
+    }
+}
