@@ -15,11 +15,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const detailClose = document.getElementById("performance-detail-close");
     const detailHero = document.getElementById("performance-detail-hero");
     const detailTitle = document.getElementById("performance-detail-title");
+    const detailDateTime = document.getElementById("performance-detail-date-time");
     const detailLocation = document.getElementById("performance-detail-location");
+    const detailAddress = document.getElementById("performance-detail-address");
+    const detailAddressUnavailable = document.getElementById("performance-detail-address-unavailable");
     const detailArrangements = document.getElementById("performance-detail-arrangements");
-    const detailFacts = document.getElementById("performance-detail-facts");
+    const detailMembers = document.getElementById("performance-detail-members");
     const linksSection = document.getElementById("performance-links-section");
     const detailLinks = document.getElementById("performance-detail-links");
+    const linksEmpty = document.getElementById("performance-links-empty");
 
     let records = [];
     let activeRecord = null;
@@ -125,20 +129,69 @@ document.addEventListener("DOMContentLoaded", () => {
         return button;
     }
 
-    function createFact(label, value) {
-        const article = document.createElement("article");
-        article.className = "performance-fact";
+    function buildGoogleMapsUrl(record) {
+        const address = String(record.locationAddress || "").trim();
+        const name = getLocation(record);
+        const query = address || name;
 
-        const labelElement = document.createElement("p");
-        labelElement.className = "performance-fact-label";
-        labelElement.textContent = label;
+        if (!query || record.locationTbd) return "";
 
-        const valueElement = document.createElement("p");
-        valueElement.className = "performance-fact-value";
-        valueElement.textContent = value;
+        const parameters = new URLSearchParams({
+            api: "1",
+            query
+        });
 
-        article.append(labelElement, valueElement);
-        return article;
+        if (record.locationPlaceId) {
+            parameters.set("query_place_id", record.locationPlaceId);
+        }
+
+        return `https://www.google.com/maps/search/?${parameters.toString()}`;
+    }
+
+    function renderLocation(record) {
+        const locationName = getLocation(record);
+        const address = String(record.locationAddress || "").trim();
+        const mapsUrl = buildGoogleMapsUrl(record);
+
+        detailLocation.textContent = locationName;
+
+        if (address && mapsUrl) {
+            detailAddress.textContent = address;
+            detailAddress.href = mapsUrl;
+            detailAddress.hidden = false;
+            detailAddressUnavailable.hidden = true;
+        } else {
+            detailAddress.textContent = "";
+            detailAddress.removeAttribute("href");
+            detailAddress.hidden = true;
+            detailAddressUnavailable.hidden = false;
+        }
+    }
+
+    function renderMembers(record) {
+        const members = Array.isArray(record.members)
+            ? record.members.map((member) => String(member || "").trim()).filter(Boolean)
+            : [];
+
+        detailMembers.replaceChildren();
+
+        if (record.membersTbd || members.length === 0) {
+            const message = document.createElement("p");
+            message.className = "performance-members-placeholder";
+            message.textContent = record.membersTbd
+                ? "Member list coming soon."
+                : "No member list has been added yet.";
+            detailMembers.appendChild(message);
+            return;
+        }
+
+        const list = document.createElement("ul");
+        members.forEach((member) => {
+            const item = document.createElement("li");
+            item.textContent = member;
+            list.appendChild(item);
+        });
+        detailMembers.appendChild(list);
     }
 
     function createExternalLink(link) {
@@ -172,31 +225,30 @@ document.addEventListener("DOMContentLoaded", () => {
         activeRecord = record;
         lastFocusedElement = trigger || document.activeElement;
 
-        detailTitle.textContent = formatDate(record.date);
-        detailLocation.textContent = getLocation(record);
-        detailArrangements.textContent = getArrangements(record);
+        detailTitle.textContent = getLocation(record);
+        detailDateTime.textContent = `${formatDate(record.date)} • ${formatTime(record)}`;
+        detailArrangements.textContent = getArrangements(record).replaceAll(" · ", " • ");
 
-        detailFacts.replaceChildren(
-            createFact("Date", formatDate(record.date)),
-            createFact("Time", formatTime(record)),
-            createFact("Location", getLocation(record)),
-            createFact("Arrangements", getArrangements(record))
-        );
+        renderLocation(record);
+        renderMembers(record);
 
         const links = Array.isArray(record.externalLinks)
             ? record.externalLinks.filter((link) => link?.url)
             : [];
 
         detailLinks.replaceChildren(...links.map(createExternalLink));
-        linksSection.hidden = links.length === 0;
+        linksEmpty.hidden = links.length !== 0;
+        linksSection.hidden = false;
 
         if (record.highlightPhotoUrl) {
             detailHero.style.setProperty(
                 "--detail-image",
                 `url("${safeImageUrl(record.highlightPhotoUrl)}")`
             );
+            detailHero.classList.add("has-highlight-photo");
         } else {
             detailHero.style.removeProperty("--detail-image");
+            detailHero.classList.remove("has-highlight-photo");
         }
 
         detail.hidden = false;

@@ -71,7 +71,7 @@
                 <p class="performances-eyebrow">KMC Samulnori</p>
                 <h1 id="performances-page-title">Performances</h1>
                 <p class="performances-intro">
-                    Explore our latest performance and community events. Upcoming ones will appear here, too.
+                    Explore our latest appearances, arrangements, and event galleries.
                 </p>
             </header>
         </div>
@@ -148,21 +148,48 @@
             <header class="performance-detail-hero" id="performance-detail-hero">
                 <div class="performance-detail-hero-overlay"></div>
                 <div class="performance-detail-heading">
-                    <p id="performance-detail-arrangements">Performance</p>
+                    <p class="performance-detail-date-time" id="performance-detail-date-time">Performance date</p>
                     <h2 id="performance-detail-title">Performance Details</h2>
-                    <p id="performance-detail-location"></p>
+                    <p class="performance-detail-arrangements" id="performance-detail-arrangements">Performance</p>
                 </div>
             </header>
 
             <div class="performance-detail-content">
-                <div class="performance-facts" id="performance-detail-facts"></div>
-
-                <section class="performance-links-section" id="performance-links-section" hidden>
+                <section class="performance-detail-section" id="performance-location-section">
                     <div class="performance-detail-section-heading">
-                        <p>Gallery & Media</p>
-                        <h3>External Links</h3>
+                        <h3>Location</h3>
+                    </div>
+                    <div class="performance-location-details">
+                        <p class="performance-location-name" id="performance-detail-location"></p>
+                        <a
+                            class="performance-location-address"
+                            id="performance-detail-address"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            hidden
+                        ></a>
+                        <p class="performance-location-address-unavailable" id="performance-detail-address-unavailable" hidden>
+                            Full address unavailable
+                        </p>
+                    </div>
+                </section>
+
+                <section class="performance-detail-section" id="performance-members-section">
+                    <div class="performance-detail-section-heading">
+                        <h3>Members List</h3>
+                    </div>
+                    <div class="performance-members-list" id="performance-detail-members"></div>
+                </section>
+
+                <section class="performance-detail-section performance-links-section" id="performance-links-section">
+                    <div class="performance-detail-section-heading">
+                        <h3>Links</h3>
                     </div>
                     <div class="performance-links" id="performance-detail-links"></div>
+                    <p class="performance-links-empty" id="performance-links-empty" hidden>
+                        No external links have been added yet.
+                    </p>
                 </section>
             </div>
         </div>

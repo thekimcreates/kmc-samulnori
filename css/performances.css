@@ -959,3 +959,189 @@ body.performance-detail-open {
         padding: 28px;
     }
 }
+
+
+/* ========================================
+   PERFORMANCE DETAIL CONTENT LAYOUT
+======================================== */
+
+/*
+ * The old hero used an opaque gradient as the first background layer,
+ * which covered the highlight photo. The image is now the actual hero
+ * background, with a separate translucent overlay above it.
+ */
+.performance-detail-hero {
+    min-height: clamp(390px, 50vw, 560px);
+    background-color: #7f0020;
+    background-image: var(--detail-image, none);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.performance-detail-hero:not(.has-highlight-photo) {
+    background-image:
+        radial-gradient(circle at 76% 18%, rgba(255, 255, 255, 0.15), transparent 34%),
+        linear-gradient(135deg, #7f0020, #270009);
+}
+
+.performance-detail-hero-overlay {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.08) 0%,
+            rgba(0, 0, 0, 0.16) 40%,
+            rgba(0, 0, 0, 0.86) 100%
+        );
+}
+
+.performance-detail-heading {
+    width: 100%;
+    max-width: none;
+}
+
+.performance-detail-date-time {
+    margin: 0 0 11px !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.4 !important;
+    text-transform: none !important;
+    opacity: 0.86 !important;
+}
+
+.performance-detail-heading h2 {
+    max-width: 850px;
+    font-size: clamp(2.25rem, 5.4vw, 4.4rem);
+    font-weight: 750;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+}
+
+.performance-detail-arrangements {
+    margin: 16px 0 0 !important;
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem) !important;
+    font-weight: 550 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.5 !important;
+    text-transform: none !important;
+    opacity: 0.82 !important;
+}
+
+.performance-detail-content {
+    gap: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.performance-detail-section {
+    padding: clamp(38px, 5vw, 58px) 0;
+    border-bottom: 1px solid rgba(20, 20, 20, 0.1);
+}
+
+.performance-detail-section:last-child {
+    border-bottom: 0;
+}
+
+.performance-detail-section-heading h3 {
+    font-size: clamp(1.75rem, 3vw, 2.35rem);
+}
+
+.performance-location-details {
+    margin-top: 22px;
+}
+
+.performance-location-name {
+    margin: 0;
+    font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.performance-location-address {
+    display: inline-flex;
+    margin-top: 11px;
+    color: #7f0020;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    transition: opacity 0.22s ease;
+}
+
+.performance-location-address:hover {
+    opacity: 0.68;
+}
+
+.performance-location-address-unavailable,
+.performance-members-placeholder,
+.performance-links-empty {
+    margin: 16px 0 0;
+    color: rgba(20, 20, 20, 0.55);
+    line-height: 1.65;
+}
+
+.performance-members-list {
+    margin-top: 22px;
+}
+
+.performance-members-list ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.performance-members-list li {
+    border: 1px solid rgba(20, 20, 20, 0.11);
+    border-radius: 999px;
+    background: #fafafa;
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.performance-links {
+    margin-top: 22px;
+}
+
+@media (max-width: 780px) {
+    .performance-detail-hero {
+        min-height: 390px;
+    }
+
+    .performance-detail-heading {
+        padding-bottom: 38px;
+    }
+
+    .performance-detail-content {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .performance-detail-section {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .performance-location-address {
+        color: #e194a8;
+    }
+
+    .performance-location-address-unavailable,
+    .performance-members-placeholder,
+    .performance-links-empty {
+        color: rgba(255, 255, 255, 0.53);
+    }
+
+    .performance-members-list li {
+        border-color: rgba(255, 255, 255, 0.11);
+        background: #1b1b1b;
+    }
+}
