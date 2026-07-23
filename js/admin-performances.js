@@ -7,9 +7,7 @@ let kmcPerformanceAutocomplete = null;
 window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
     const mapElement = document.getElementById("performance-location-map");
     const locationInput = document.getElementById("performance-location");
-    const locationNameInput = document.getElementById("performance-location-name");
-    const locationAddressInput = document.getElementById("performance-location-address");
-    if (!mapElement || !locationInput || !locationNameInput || !locationAddressInput || !window.google?.maps?.places) return;
+    if (!mapElement || !locationInput || !window.google?.maps?.places) return;
 
     kmcPerformanceMap = new google.maps.Map(mapElement, {
         center: { lat: 34.0522, lng: -118.2437 },
@@ -30,13 +28,11 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
 
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        const locationName = place.name || place.formatted_address || locationInput.value.trim();
-        const locationAddress = place.formatted_address || "";
+        const displayName = place.name && place.formatted_address
+            ? `${place.name}, ${place.formatted_address}`
+            : place.formatted_address || place.name || locationInput.value;
 
-        // Show only the venue/place name in the form and across the website.
-        locationInput.value = locationName;
-        locationNameInput.value = locationName;
-        locationAddressInput.value = locationAddress;
+        locationInput.value = displayName;
         document.getElementById("performance-location-place-id").value = place.place_id || "";
         document.getElementById("performance-location-lat").value = String(lat);
         document.getElementById("performance-location-lng").value = String(lng);
@@ -44,17 +40,6 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
         kmcPerformanceMap.setCenter({ lat, lng });
         kmcPerformanceMap.setZoom(16);
         kmcPerformanceMarker.setPosition({ lat, lng });
-    });
-
-    // If the administrator edits the text after choosing a suggestion,
-    // clear the saved Google place details so an outdated address is not stored.
-    locationInput.addEventListener("input", () => {
-        if (locationInput.value === locationNameInput.value) return;
-        locationNameInput.value = "";
-        locationAddressInput.value = "";
-        document.getElementById("performance-location-place-id").value = "";
-        document.getElementById("performance-location-lat").value = "";
-        document.getElementById("performance-location-lng").value = "";
     });
 };
 
@@ -94,7 +79,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const list = get("performance-list");
     const empty = get("performance-empty");
     const count = get("performance-count");
+    const formPanel = document.querySelector(".performance-form-panel");
+    const listPanel = document.querySelector(".performance-list-panel");
+    const pageHeader = document.querySelector(".performance-page-header");
 
+    let performanceModal = null;
+    let modalCloseButton = null;
+    let addPerformanceButton = null;
     let unsubscribePerformances = null;
     let performanceRecords = [];
     let memberRecords = [];
@@ -105,6 +96,69 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!auth || !db || !storage) {
         returnToLogin();
         return;
+    }
+
+    function buildPerformanceModal() {
+        if (!formPanel || !listPanel || !pageHeader) return;
+
+        addPerformanceButton = document.createElement("button");
+        addPerformanceButton.type = "button";
+        addPerformanceButton.className = "admin-submit performance-add-trigger";
+        addPerformanceButton.textContent = "+ Add Performance";
+
+        const headerActions = document.createElement("div");
+        headerActions.className = "performance-header-actions";
+        headerActions.appendChild(addPerformanceButton);
+        pageHeader.querySelector(".admin-user-meta")?.prepend(addPerformanceButton);
+
+        performanceModal = document.createElement("div");
+        performanceModal.className = "performance-modal";
+        performanceModal.hidden = true;
+        performanceModal.innerHTML = `
+            <button class="performance-modal-backdrop" type="button" aria-label="Close performance editor"></button>
+            <div class="performance-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="performance-form-title">
+                <button class="performance-modal-close" type="button" aria-label="Close performance editor">×</button>
+                <div class="performance-modal-body"></div>
+            </div>
+        `;
+
+        performanceModal.querySelector(".performance-modal-body").appendChild(formPanel);
+        document.body.appendChild(performanceModal);
+        modalCloseButton = performanceModal.querySelector(".performance-modal-close");
+
+        addPerformanceButton.addEventListener("click", () => {
+            resetForm();
+            openPerformanceModal();
+        });
+        modalCloseButton.addEventListener("click", closePerformanceModal);
+        performanceModal.querySelector(".performance-modal-backdrop").addEventListener("click", closePerformanceModal);
+    }
+
+    function openPerformanceModal() {
+        if (!performanceModal) return;
+        performanceModal.hidden = false;
+        document.body.classList.add("performance-modal-open");
+        requestAnimationFrame(() => performanceModal.classList.add("is-open"));
+
+        if (kmcPerformanceMap && window.google?.maps) {
+            window.setTimeout(() => {
+                google.maps.event.trigger(kmcPerformanceMap, "resize");
+                const lat = Number(get("performance-location-lat").value);
+                const lng = Number(get("performance-location-lng").value);
+                if (lat && lng) kmcPerformanceMap.setCenter({ lat, lng });
+            }, 220);
+        }
+        window.setTimeout(() => dateInput.focus(), 260);
+    }
+
+    function closePerformanceModal() {
+        if (!performanceModal || performanceModal.hidden) return;
+        performanceModal.classList.remove("is-open");
+        document.body.classList.remove("performance-modal-open");
+        window.setTimeout(() => {
+            performanceModal.hidden = true;
+            addPerformanceButton?.focus();
+        }, 240);
     }
 
     function setStatus(message = "", type = "") {
@@ -221,8 +275,6 @@ document.addEventListener("DOMContentLoaded", () => {
         form.reset();
         idInput.value = "";
         highlightExisting.value = "";
-        get("performance-location-name").value = "";
-        get("performance-location-address").value = "";
         get("performance-location-place-id").value = "";
         get("performance-location-lat").value = "";
         get("performance-location-lng").value = "";
@@ -274,9 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
         date.className = "performance-admin-date";
         date.textContent = `${formatDate(record.date)} · ${formatTime(record)}`;
         const location = document.createElement("h3");
-        location.textContent = record.locationTbd
-            ? "Location TBD"
-            : record.locationName || record.location || "Location unavailable";
+        location.textContent = record.locationTbd ? "Location TBD" : record.location;
         const arrangements = document.createElement("p");
         arrangements.className = "performance-admin-arrangements";
         arrangements.textContent = record.arrangementsTbd ? "Arrangements TBD" : record.arrangements.join(" · ");
@@ -315,10 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
         timezoneInput.value = record.timezone || "America/Los_Angeles";
         timeTbd.checked = Boolean(record.timeTbd);
         locationTbd.checked = Boolean(record.locationTbd);
-        const savedLocationName = record.locationName || record.location || "";
-        locationInput.value = savedLocationName;
-        get("performance-location-name").value = savedLocationName;
-        get("performance-location-address").value = record.locationAddress || "";
+        locationInput.value = record.location || "";
         get("performance-location-place-id").value = record.locationPlaceId || "";
         get("performance-location-lat").value = record.locationLat ?? "";
         get("performance-location-lng").value = record.locationLng ?? "";
@@ -351,8 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
         submitButton.textContent = "Save Changes";
         cancelButton.hidden = false;
         setStatus();
-        dateInput.focus();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        openPerformanceModal();
     }
 
     async function deletePerformance(record) {
@@ -393,6 +439,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return { url: await snapshot.ref.getDownloadURL(), path };
     }
 
+    buildPerformanceModal();
+
     auth.onAuthStateChanged(async (user) => {
         if (!user) return returnToLogin();
         try {
@@ -426,9 +474,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!dateInput.value) return setStatus("Enter a date.", "error");
         if (!timeTbd.checked && !timeInput.value) return setStatus("Enter a time or select Time is TBD.", "error");
         if (!locationTbd.checked && !locationInput.value.trim()) return setStatus("Choose a location or select Location is TBD.", "error");
-        if (!locationTbd.checked && !get("performance-location-name").value.trim()) {
-            return setStatus("Choose a location from the Google Maps suggestions.", "error");
-        }
         if (!arrangementsTbd.checked && arrangements.length === 0) return setStatus("Select or enter an arrangement, or choose TBD.", "error");
         if (!membersTbd.checked && members.length === 0) return setStatus("Select attending members or choose TBD.", "error");
         if (!highlightTbd.checked && !highlightInput.files[0] && !highlightExisting.value) return setStatus("Upload a highlight photo or choose TBD.", "error");
@@ -464,11 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 time: timeTbd.checked ? "" : timeInput.value,
                 timeTbd: timeTbd.checked,
                 timezone: timeTbd.checked ? "" : timezoneInput.value,
-                // Keep the legacy location field for older pages, but store the
-                // place name and full address separately from now on.
-                location: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
-                locationName: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
-                locationAddress: locationTbd.checked ? "" : get("performance-location-address").value.trim(),
+                location: locationTbd.checked ? "" : locationInput.value.trim(),
                 locationTbd: locationTbd.checked,
                 locationPlaceId: locationTbd.checked ? "" : get("performance-location-place-id").value,
                 locationLat: locationTbd.checked ? null : Number(get("performance-location-lat").value) || null,
@@ -494,6 +535,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             resetForm();
+            closePerformanceModal();
             setStatus(documentId ? "Performance updated successfully." : "Performance added successfully.", "success");
         } catch (error) {
             console.error("Unable to save performance:", error);
@@ -524,7 +566,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     addLinkButton.addEventListener("click", () => addExternalLink());
-    cancelButton.addEventListener("click", resetForm);
+    cancelButton.addEventListener("click", () => {
+        resetForm();
+        closePerformanceModal();
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && performanceModal && !performanceModal.hidden) {
+            closePerformanceModal();
+        }
+    });
     logout.addEventListener("click", async () => {
         logout.disabled = true;
         if (unsubscribePerformances) unsubscribePerformances();
