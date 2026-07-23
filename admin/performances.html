@@ -15,7 +15,6 @@
             <nav class="admin-nav" aria-label="Admin navigation">
                 <a href="dashboard.html" data-admin-page="dashboard">Dashboard</a>
                 <a href="performances.html" data-admin-page="performances">Performances</a>
-                <a href="arrangements.html" data-admin-page="arrangements">Arrangements</a>
                 <a href="team.html" data-admin-page="team">Team</a>
             </nav>
         </header>
@@ -115,17 +114,10 @@
                                 <span>Arrangements are TBD</span>
                             </label>
                             <div id="performance-arrangement-fields">
-                                <div class="arrangement-options">
-                                    <label><input type="checkbox" name="arrangements" value="Samulnori 사물놀이"> <span>Samulnori 사물놀이</span></label>
-                                    <label><input type="checkbox" name="arrangements" value="Nongak 농악"> <span>Nongak 농악</span></label>
-                                    <label><input type="checkbox" name="arrangements" value="Ogomu 오고무"> <span>Ogomu 오고무</span></label>
-                                    <label><input type="checkbox" name="arrangements" value="Nanta 난타"> <span>Nanta 난타</span></label>
-                                    <label><input type="checkbox" name="arrangements" value="Sogo 소고춤"> <span>Sogo 소고춤</span></label>
+                                <div id="performance-arrangements-list" class="arrangement-options">
+                                    <p class="admin-help-text">Loading arrangements…</p>
                                 </div>
-                                <div class="admin-field admin-custom-field">
-                                    <label for="performance-custom-arrangements">Other arrangements</label>
-                                    <input id="performance-custom-arrangements" type="text" maxlength="300" placeholder="Separate multiple arrangements with commas">
-                                </div>
+                                <p class="admin-help-text">To add custom arrangements, go to the <a href="arrangements.html">Admin Arrangements page</a> and make them there.</p>
                             </div>
                         </fieldset>
 

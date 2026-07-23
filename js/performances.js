@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const linksEmpty = document.getElementById("performance-links-empty");
 
     let records = [];
+    let arrangementRecords = [];
     let activeRecord = null;
     let lastFocusedElement = null;
     let closeTimer = null;
@@ -70,9 +71,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return record.locationName || record.location || "Location unavailable";
     }
 
+    function arrangementLabel(arrangement) {
+        return `${arrangement.name || "Arrangement"} ${arrangement.koreanName || ""}`.trim();
+    }
+
+    function getArrangementLabels(record) {
+        if (record.arrangementsTbd) return [];
+        const ids = Array.isArray(record.arrangementIds) ? record.arrangementIds : [];
+        const resolved = ids.map((id) => arrangementRecords.find((item) => item.id === id))
+            .filter(Boolean)
+            .map(arrangementLabel);
+        if (resolved.length) return resolved;
+        return Array.isArray(record.arrangements) ? record.arrangements : [];
+    }
+
     function getArrangements(record) {
         if (record.arrangementsTbd) return "Arrangements TBD";
-        const items = Array.isArray(record.arrangements) ? record.arrangements : [];
+        const items = getArrangementLabels(record);
         return items.length ? items.join(" · ") : "Arrangement details coming soon";
     }
 
@@ -322,14 +337,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getRecordArrangements(record) {
-        return Array.isArray(record.arrangements)
-            ? record.arrangements.map((item) => String(item || "").trim()).filter(Boolean)
-            : [];
+        return getArrangementLabels(record).map((item) => String(item || "").trim()).filter(Boolean);
+    }
+
+    function getRecordArrangementKeys(record) {
+        const ids = Array.isArray(record.arrangementIds) ? record.arrangementIds.map(normalizeArrangement) : [];
+        return [...ids, ...getRecordArrangements(record).map(normalizeArrangement)];
     }
 
     function updateArrangementSummary() {
         const selectedInputs = [...arrangementOptions.querySelectorAll('input[type="checkbox"]:checked')];
-        const selectedLabels = selectedInputs.map((input) => input.value);
+        const selectedLabels = selectedInputs.map((input) => input.dataset.label || input.value);
 
         if (selectedLabels.length === 0) {
             arrangementSummary.textContent = "All";
@@ -360,13 +378,15 @@ document.addEventListener("DOMContentLoaded", () => {
         render();
     }
 
-    function createArrangementFilterOption(arrangement) {
+    function createArrangementFilterOption(option) {
+        const arrangement = option.label;
         const label = document.createElement("label");
         label.className = "performance-check-option";
 
         const input = document.createElement("input");
         input.type = "checkbox";
-        input.value = arrangement;
+        input.value = option.key;
+        input.dataset.label = arrangement;
 
         const checkmark = document.createElement("span");
         checkmark.className = "performance-checkmark";
@@ -376,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
         text.textContent = arrangement;
 
         input.addEventListener("change", () => {
-            const key = normalizeArrangement(arrangement);
+            const key = normalizeArrangement(option.key);
 
             if (input.checked) {
                 selectedArrangements.add(key);
@@ -399,9 +419,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function populateArrangementFilter() {
-        const arrangements = [...new Set(
-            records.flatMap(getRecordArrangements)
-        )].sort((a, b) => a.localeCompare(b));
+        const usedIds = new Set(records.flatMap((record) => Array.isArray(record.arrangementIds) ? record.arrangementIds : []));
+        const catalogOptions = arrangementRecords
+            .filter((item) => usedIds.has(item.id))
+            .map((item) => ({ key: item.id, label: arrangementLabel(item) }));
+        const legacyLabels = [...new Set(records
+            .filter((record) => !Array.isArray(record.arrangementIds) || record.arrangementIds.length === 0)
+            .flatMap(getRecordArrangements))]
+            .filter((label) => !catalogOptions.some((option) => option.label === label))
+            .map((label) => ({ key: label, label }));
+        const arrangements = [...catalogOptions, ...legacyLabels]
+            .sort((a, b) => a.label.localeCompare(b.label));
 
         arrangementOptions.replaceChildren(
             ...arrangements.map(createArrangementFilterOption)
@@ -436,8 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function recordMatchesArrangementFilter(record) {
         if (selectedArrangements.size === 0) return true;
 
-        const recordArrangements = getRecordArrangements(record)
-            .map(normalizeArrangement);
+        const recordArrangements = getRecordArrangementKeys(record);
 
         return recordArrangements.some((arrangement) =>
             selectedArrangements.has(arrangement)
@@ -570,10 +597,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    db.collection("performances")
-        .orderBy("date", "desc")
-        .get()
-        .then((snapshot) => {
+    Promise.all([
+        db.collection("performances").orderBy("date", "desc").get(),
+        db.collection("siteContent").doc("arrangements").get()
+    ])
+        .then(([snapshot, arrangementSnapshot]) => {
+            const arrangementData = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
+            arrangementRecords = Array.isArray(arrangementData.arrangements)
+                ? [...arrangementData.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                : [];
             records = snapshot.docs.map((documentSnapshot) => ({
                 id: documentSnapshot.id,
                 ...documentSnapshot.data()

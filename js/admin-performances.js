@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const locationInput = get("performance-location");
     const locationTbd = get("performance-location-tbd");
     const arrangementsTbd = get("performance-arrangements-tbd");
-    const customArrangementsInput = get("performance-custom-arrangements");
+    const arrangementsList = get("performance-arrangements-list");
     const membersTbd = get("performance-members-tbd");
     const membersList = get("performance-members-list");
     const highlightInput = get("performance-highlight");
@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let unsubscribePerformances = null;
     let performanceRecords = [];
     let memberRecords = [];
+    let arrangementRecords = [];
     let previewObjectUrl = "";
     let removeExistingHighlight = false;
 
@@ -142,11 +143,63 @@ document.addEventListener("DOMContentLoaded", () => {
         return [...form.querySelectorAll(`input[name="${name}"]:checked`)].map((input) => input.value);
     }
 
-    function customArrangements() {
-        return customArrangementsInput.value
-            .split(",")
-            .map((value) => value.trim())
-            .filter(Boolean);
+    function arrangementLabel(arrangement) {
+        return `${arrangement.name || "Arrangement"} ${arrangement.koreanName || ""}`.trim();
+    }
+
+    function getRecordArrangementIds(record) {
+        if (Array.isArray(record.arrangementIds)) return record.arrangementIds;
+        const legacyNames = Array.isArray(record.arrangements) ? record.arrangements : [];
+        return arrangementRecords
+            .filter((arrangement) => legacyNames.includes(arrangementLabel(arrangement)))
+            .map((arrangement) => arrangement.id);
+    }
+
+    function getRecordArrangementLabels(record) {
+        if (record.arrangementsTbd) return [];
+        const ids = getRecordArrangementIds(record);
+        const resolved = ids.map((id) => arrangementRecords.find((item) => item.id === id))
+            .filter(Boolean)
+            .map(arrangementLabel);
+        if (resolved.length) return resolved;
+        return Array.isArray(record.arrangements) ? record.arrangements : [];
+    }
+
+    function renderArrangementOptions(selectedIds = []) {
+        arrangementsList.replaceChildren();
+        if (!arrangementRecords.length) {
+            const message = document.createElement("p");
+            message.className = "admin-help-text";
+            message.textContent = "No arrangements were found. Add one on the Admin Arrangements page.";
+            arrangementsList.appendChild(message);
+            return;
+        }
+        arrangementRecords.forEach((arrangement) => {
+            const label = document.createElement("label");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.name = "arrangements";
+            checkbox.value = arrangement.id;
+            checkbox.checked = selectedIds.includes(arrangement.id);
+            const span = document.createElement("span");
+            span.textContent = arrangementLabel(arrangement);
+            label.append(checkbox, span);
+            arrangementsList.appendChild(label);
+        });
+    }
+
+    async function loadArrangements() {
+        try {
+            const snapshot = await db.collection("siteContent").doc("arrangements").get();
+            const data = snapshot.exists ? snapshot.data() : {};
+            arrangementRecords = Array.isArray(data.arrangements)
+                ? [...data.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                : [];
+        } catch (error) {
+            console.error("Unable to load arrangements:", error);
+            arrangementRecords = [];
+        }
+        renderArrangementOptions();
     }
 
     function externalLinks() {
@@ -314,6 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
         linksList.replaceChildren();
         addExternalLink();
         renderMembers();
+        renderArrangementOptions();
         formTitle.textContent = "Add Performance";
         submitButton.textContent = "Add Performance";
         cancelButton.hidden = true;
@@ -362,7 +416,8 @@ document.addEventListener("DOMContentLoaded", () => {
             : record.locationName || record.location || "Location unavailable";
         const arrangements = document.createElement("p");
         arrangements.className = "performance-admin-arrangements";
-        arrangements.textContent = record.arrangementsTbd ? "Arrangements TBD" : record.arrangements.join(" · ");
+        const arrangementLabels = getRecordArrangementLabels(record);
+        arrangements.textContent = record.arrangementsTbd ? "Arrangements TBD" : (arrangementLabels.join(" · ") || "No arrangements selected");
         content.append(date, location, arrangements);
         main.appendChild(content);
 
@@ -410,10 +465,7 @@ document.addEventListener("DOMContentLoaded", () => {
         highlightTbd.checked = Boolean(record.highlightTbd);
         linksTbd.checked = Boolean(record.linksTbd);
 
-        form.querySelectorAll('input[name="arrangements"]').forEach((input) => {
-            input.checked = record.arrangements.includes(input.value);
-        });
-        customArrangementsInput.value = (record.customArrangements || []).join(", ");
+        renderArrangementOptions(getRecordArrangementIds(record));
         renderMembers(record.members || []);
 
         highlightExisting.value = record.highlightPhotoUrl || "";
@@ -484,7 +536,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return returnToLogin();
             }
             email.textContent = user.email || "Administrator";
-            await loadMembers();
+            await Promise.all([loadMembers(), loadArrangements()]);
             loading.hidden = true;
             page.hidden = false;
             subscribeToPerformances();
@@ -499,9 +551,11 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const documentId = idInput.value;
-        const fixedArrangements = selectedValues("arrangements");
-        const custom = customArrangements();
-        const arrangements = [...new Set([...fixedArrangements, ...custom])];
+        const arrangementIds = selectedValues("arrangements");
+        const arrangementNames = arrangementIds
+            .map((id) => arrangementRecords.find((item) => item.id === id))
+            .filter(Boolean)
+            .map(arrangementLabel);
         const members = selectedValues("members");
         const links = externalLinks();
 
@@ -511,7 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!locationTbd.checked && !get("performance-location-name").value.trim()) {
             return setStatus("Choose a location from the Google Maps suggestions.", "error");
         }
-        if (!arrangementsTbd.checked && arrangements.length === 0) return setStatus("Select or enter an arrangement, or choose TBD.", "error");
+        if (!arrangementsTbd.checked && arrangementIds.length === 0) return setStatus("Select an arrangement or choose TBD.", "error");
         if (!membersTbd.checked && members.length === 0) return setStatus("Select attending members or choose TBD.", "error");
         if (!highlightTbd.checked && !highlightInput.files[0] && !highlightExisting.value) return setStatus("Upload a highlight photo or choose TBD.", "error");
         if (!linksTbd.checked && links.some((link) => !link.label || !link.url)) return setStatus("Each external link needs both a name and URL.", "error");
@@ -555,8 +609,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 locationPlaceId: locationTbd.checked ? "" : get("performance-location-place-id").value,
                 locationLat: locationTbd.checked ? null : Number(get("performance-location-lat").value) || null,
                 locationLng: locationTbd.checked ? null : Number(get("performance-location-lng").value) || null,
-                arrangements: arrangementsTbd.checked ? [] : arrangements,
-                customArrangements: arrangementsTbd.checked ? [] : custom,
+                arrangementIds: arrangementsTbd.checked ? [] : arrangementIds,
+                // Keep a readable snapshot for backwards compatibility; public pages resolve IDs first.
+                arrangements: arrangementsTbd.checked ? [] : arrangementNames,
                 arrangementsTbd: arrangementsTbd.checked,
                 members: membersTbd.checked ? [] : members,
                 membersTbd: membersTbd.checked,

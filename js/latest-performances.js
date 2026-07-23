@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("latest-performances");
     const db = window.kmcFirebase?.db;
     if (!container) return;
+    let arrangementRecords = [];
 
     function showMessage(message) {
         const paragraph = document.createElement("p");
@@ -27,9 +28,22 @@ document.addEventListener("DOMContentLoaded", () => {
         return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(date);
     }
 
+    function arrangementLabel(arrangement) {
+        return `${arrangement.name || "Arrangement"} ${arrangement.koreanName || ""}`.trim();
+    }
+
+    function getArrangementLabels(performance) {
+        const ids = Array.isArray(performance.arrangementIds) ? performance.arrangementIds : [];
+        const resolved = ids.map((id) => arrangementRecords.find((item) => item.id === id))
+            .filter(Boolean)
+            .map(arrangementLabel);
+        if (resolved.length) return resolved;
+        return Array.isArray(performance.arrangements) ? performance.arrangements : [];
+    }
+
     function createPerformanceCard(documentSnapshot) {
         const performance = documentSnapshot.data();
-        const arrangements = Array.isArray(performance.arrangements) ? performance.arrangements : [];
+        const arrangements = getArrangementLabels(performance);
         const article = document.createElement("article");
         article.className = "performance-card reveal visible";
 
@@ -71,8 +85,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!db) return showMessage("Latest performances are temporarily unavailable.");
 
-    db.collection("performances").orderBy("date", "desc").limit(2).get()
-        .then((snapshot) => {
+    Promise.all([
+        db.collection("performances").orderBy("date", "desc").limit(2).get(),
+        db.collection("siteContent").doc("arrangements").get()
+    ])
+        .then(([snapshot, arrangementSnapshot]) => {
+            const data = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
+            arrangementRecords = Array.isArray(data.arrangements) ? data.arrangements : [];
             if (snapshot.empty) return showMessage("No performances have been published yet.");
             container.replaceChildren(...snapshot.docs.map(createPerformanceCard));
         })
