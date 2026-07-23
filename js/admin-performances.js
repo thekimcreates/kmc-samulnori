@@ -4,274 +4,58 @@ let kmcPerformanceMap = null;
 let kmcPerformanceMarker = null;
 let kmcPerformanceAutocomplete = null;
 
-window.initializeKmcPerformanceMap = async function initializeKmcPerformanceMap() {
+window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
     const mapElement = document.getElementById("performance-location-map");
     const locationInput = document.getElementById("performance-location");
+    const locationNameInput = document.getElementById("performance-location-name");
+    const locationAddressInput = document.getElementById("performance-location-address");
+    if (!mapElement || !locationInput || !locationNameInput || !locationAddressInput || !window.google?.maps?.places) return;
 
-    if (!mapElement || !locationInput) {
-        window.setTimeout(window.initializeKmcPerformanceMap, 100);
-        return;
-    }
+    kmcPerformanceMap = new google.maps.Map(mapElement, {
+        center: { lat: 34.0522, lng: -118.2437 },
+        zoom: 10,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false
+    });
 
-    if (!window.google?.maps?.importLibrary) {
-        console.error("Google Maps JavaScript API did not load correctly.");
-        return;
-    }
+    kmcPerformanceMarker = new google.maps.Marker({ map: kmcPerformanceMap });
+    kmcPerformanceAutocomplete = new google.maps.places.Autocomplete(locationInput, {
+        fields: ["formatted_address", "geometry", "name", "place_id"]
+    });
 
-    if (kmcPerformanceAutocomplete) return;
+    kmcPerformanceAutocomplete.addListener("place_changed", () => {
+        const place = kmcPerformanceAutocomplete.getPlace();
+        if (!place.geometry?.location) return;
 
-    try {
-        const [{ Map }, { Marker }, placesLibrary] = await Promise.all([
-            google.maps.importLibrary("maps"),
-            google.maps.importLibrary("marker"),
-            google.maps.importLibrary("places")
-        ]);
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const locationName = place.name || place.formatted_address || locationInput.value.trim();
+        const locationAddress = place.formatted_address || "";
 
-        const {
-            AutocompleteSuggestion,
-            AutocompleteSessionToken
-        } = placesLibrary;
+        // Show only the venue/place name in the form and across the website.
+        locationInput.value = locationName;
+        locationNameInput.value = locationName;
+        locationAddressInput.value = locationAddress;
+        document.getElementById("performance-location-place-id").value = place.place_id || "";
+        document.getElementById("performance-location-lat").value = String(lat);
+        document.getElementById("performance-location-lng").value = String(lng);
 
-        kmcPerformanceMap = new Map(mapElement, {
-            center: { lat: 34.0522, lng: -118.2437 },
-            zoom: 10,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false
-        });
+        kmcPerformanceMap.setCenter({ lat, lng });
+        kmcPerformanceMap.setZoom(16);
+        kmcPerformanceMarker.setPosition({ lat, lng });
+    });
 
-        kmcPerformanceMarker = new Marker({
-            map: kmcPerformanceMap
-        });
-
-        const wrapper = locationInput.closest(".admin-field") || locationInput.parentElement;
-        wrapper.classList.add("maps-search-field");
-
-        const results = document.createElement("div");
-        results.className = "maps-search-results";
-        results.hidden = true;
-        results.setAttribute("role", "listbox");
-        results.setAttribute("aria-label", "Google Maps search results");
-        wrapper.appendChild(results);
-
-        let sessionToken = new AutocompleteSessionToken();
-        let debounceTimer = null;
-        let requestNumber = 0;
-        let activeIndex = -1;
-        let currentSuggestions = [];
-
-        function closeResults() {
-            results.hidden = true;
-            results.replaceChildren();
-            activeIndex = -1;
-            currentSuggestions = [];
-            locationInput.setAttribute("aria-expanded", "false");
-        }
-
-        function updateActiveResult() {
-            [...results.querySelectorAll(".maps-search-result")].forEach(
-                (button, index) => {
-                    const active = index === activeIndex;
-                    button.classList.toggle("is-active", active);
-                    button.setAttribute("aria-selected", String(active));
-                }
-            );
-        }
-
-        async function selectSuggestion(suggestion) {
-            closeResults();
-
-            const place = suggestion.placePrediction.toPlace();
-
-            await place.fetchFields({
-                fields: [
-                    "id",
-                    "displayName",
-                    "formattedAddress",
-                    "location",
-                    "viewport"
-                ]
-            });
-
-            if (!place.location) {
-                throw new Error("Google Maps did not return a location.");
-            }
-
-            const lat = place.location.lat();
-            const lng = place.location.lng();
-            const displayName =
-                place.displayName ||
-                place.formattedAddress ||
-                locationInput.value;
-
-            locationInput.value = displayName;
-            document.getElementById("performance-location-name").value =
-                displayName;
-            document.getElementById("performance-location-address").value =
-                place.formattedAddress || "";
-            document.getElementById("performance-location-place-id").value =
-                place.id || "";
-            document.getElementById("performance-location-lat").value =
-                String(lat);
-            document.getElementById("performance-location-lng").value =
-                String(lng);
-
-            if (place.viewport) {
-                kmcPerformanceMap.fitBounds(place.viewport);
-            } else {
-                kmcPerformanceMap.setCenter({ lat, lng });
-                kmcPerformanceMap.setZoom(16);
-            }
-
-            kmcPerformanceMarker.setPosition({ lat, lng });
-            sessionToken = new AutocompleteSessionToken();
-
-            locationInput.dispatchEvent(new Event("change", {
-                bubbles: true
-            }));
-        }
-
-        async function searchPlaces() {
-            const query = locationInput.value.trim();
-            const thisRequest = ++requestNumber;
-
-            if (query.length < 2 || locationInput.disabled) {
-                closeResults();
-                return;
-            }
-
-            try {
-                const response =
-                    await AutocompleteSuggestion.fetchAutocompleteSuggestions({
-                        input: query,
-                        sessionToken,
-                        locationBias: kmcPerformanceMap.getBounds() || {
-                            center: kmcPerformanceMap.getCenter(),
-                            radius: 50000
-                        }
-                    });
-
-                if (thisRequest !== requestNumber) return;
-
-                currentSuggestions = response.suggestions || [];
-                results.replaceChildren();
-                activeIndex = -1;
-
-                if (!currentSuggestions.length) {
-                    closeResults();
-                    return;
-                }
-
-                currentSuggestions.forEach((suggestion, index) => {
-                    const prediction = suggestion.placePrediction;
-                    const button = document.createElement("button");
-                    button.type = "button";
-                    button.className = "maps-search-result";
-                    button.setAttribute("role", "option");
-                    button.setAttribute("aria-selected", "false");
-
-                    const primary = document.createElement("span");
-                    primary.className = "maps-search-result-primary";
-                    primary.textContent =
-                        prediction.mainText?.text ||
-                        prediction.text?.text ||
-                        "Unnamed place";
-
-                    const secondaryText =
-                        prediction.secondaryText?.text || "";
-
-                    button.appendChild(primary);
-
-                    if (secondaryText) {
-                        const secondary = document.createElement("span");
-                        secondary.className = "maps-search-result-secondary";
-                        secondary.textContent = secondaryText;
-                        button.appendChild(secondary);
-                    }
-
-                    button.addEventListener("pointerdown", (event) => {
-                        event.preventDefault();
-                    });
-
-                    button.addEventListener("click", async () => {
-                        try {
-                            await selectSuggestion(suggestion);
-                        } catch (error) {
-                            console.error("Unable to select this place:", error);
-                        }
-                    });
-
-                    results.appendChild(button);
-                });
-
-                results.hidden = false;
-                locationInput.setAttribute("aria-expanded", "true");
-            } catch (error) {
-                if (thisRequest !== requestNumber) return;
-                closeResults();
-                console.error("Google Maps place search failed:", error);
-            }
-        }
-
-        locationInput.setAttribute("role", "combobox");
-        locationInput.setAttribute("aria-autocomplete", "list");
-        locationInput.setAttribute("aria-expanded", "false");
-
-        locationInput.addEventListener("input", () => {
-            window.clearTimeout(debounceTimer);
-            debounceTimer = window.setTimeout(searchPlaces, 220);
-        });
-
-        locationInput.addEventListener("keydown", async (event) => {
-            if (results.hidden || !currentSuggestions.length) return;
-
-            if (event.key === "ArrowDown") {
-                event.preventDefault();
-                activeIndex =
-                    (activeIndex + 1) % currentSuggestions.length;
-                updateActiveResult();
-            } else if (event.key === "ArrowUp") {
-                event.preventDefault();
-                activeIndex =
-                    (activeIndex - 1 + currentSuggestions.length) %
-                    currentSuggestions.length;
-                updateActiveResult();
-            } else if (event.key === "Enter" && activeIndex >= 0) {
-                event.preventDefault();
-                try {
-                    await selectSuggestion(
-                        currentSuggestions[activeIndex]
-                    );
-                } catch (error) {
-                    console.error("Unable to select this place:", error);
-                }
-            } else if (event.key === "Escape") {
-                closeResults();
-            }
-        });
-
-        locationInput.addEventListener("focus", () => {
-            if (locationInput.value.trim().length >= 2) {
-                searchPlaces();
-            }
-        });
-
-        document.addEventListener("pointerdown", (event) => {
-            if (!wrapper.contains(event.target)) {
-                closeResults();
-            }
-        });
-
-        kmcPerformanceAutocomplete = {
-            close: closeResults,
-            refresh: searchPlaces
-        };
-    } catch (error) {
-        console.error(
-            "Google Maps place search could not be initialized:",
-            error
-        );
-    }
+    // If the administrator edits the text after choosing a suggestion,
+    // clear the saved Google place details so an outdated address is not stored.
+    locationInput.addEventListener("input", () => {
+        if (locationInput.value === locationNameInput.value) return;
+        locationNameInput.value = "";
+        locationAddressInput.value = "";
+        document.getElementById("performance-location-place-id").value = "";
+        document.getElementById("performance-location-lat").value = "";
+        document.getElementById("performance-location-lng").value = "";
+    });
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -310,13 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const list = get("performance-list");
     const empty = get("performance-empty");
     const count = get("performance-count");
-    const formPanel = document.querySelector(".performance-form-panel");
-    const listPanel = document.querySelector(".performance-list-panel");
-    const pageHeader = document.querySelector(".performance-page-header");
 
-    let performanceModal = null;
-    let modalCloseButton = null;
-    let addPerformanceButton = null;
     let unsubscribePerformances = null;
     let performanceRecords = [];
     let memberRecords = [];
@@ -327,72 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!auth || !db || !storage) {
         returnToLogin();
         return;
-    }
-
-    function buildPerformanceModal() {
-        if (!formPanel || !listPanel || !pageHeader) return;
-
-        addPerformanceButton = document.createElement("button");
-        addPerformanceButton.type = "button";
-        addPerformanceButton.className = "admin-submit performance-add-trigger";
-        addPerformanceButton.textContent = "+ Add Performance";
-
-        const addSlot = document.getElementById("performance-add-slot");
-        if (addSlot) {
-            addSlot.appendChild(addPerformanceButton);
-        } else {
-            listPanel.querySelector(".performance-list-heading")?.appendChild(addPerformanceButton);
-        }
-
-        performanceModal = document.createElement("div");
-        performanceModal.className = "performance-modal";
-        performanceModal.hidden = true;
-        performanceModal.innerHTML = `
-            <button class="performance-modal-backdrop" type="button" aria-label="Close performance editor"></button>
-            <div class="performance-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="performance-form-title">
-                <button class="performance-modal-close" type="button" aria-label="Close performance editor">×</button>
-                <div class="performance-modal-body"></div>
-            </div>
-        `;
-
-        performanceModal.querySelector(".performance-modal-body").appendChild(formPanel);
-        document.body.appendChild(performanceModal);
-        modalCloseButton = performanceModal.querySelector(".performance-modal-close");
-
-        addPerformanceButton.addEventListener("click", () => {
-            resetForm();
-            openPerformanceModal();
-        });
-        modalCloseButton.addEventListener("click", closePerformanceModal);
-        // The backdrop is intentionally non-dismissible. Use the close button,
-        // Cancel Edit, or Escape to close the editor.
-    }
-
-    function openPerformanceModal() {
-        if (!performanceModal) return;
-        performanceModal.hidden = false;
-        document.body.classList.add("performance-modal-open");
-        requestAnimationFrame(() => performanceModal.classList.add("is-open"));
-
-        if (kmcPerformanceMap && window.google?.maps) {
-            window.setTimeout(() => {
-                google.maps.event.trigger(kmcPerformanceMap, "resize");
-                const lat = Number(get("performance-location-lat").value);
-                const lng = Number(get("performance-location-lng").value);
-                if (lat && lng) kmcPerformanceMap.setCenter({ lat, lng });
-            }, 220);
-        }
-        window.setTimeout(() => dateInput.focus(), 260);
-    }
-
-    function closePerformanceModal() {
-        if (!performanceModal || performanceModal.hidden) return;
-        performanceModal.classList.remove("is-open");
-        document.body.classList.remove("performance-modal-open");
-        window.setTimeout(() => {
-            performanceModal.hidden = true;
-            addPerformanceButton?.focus();
-        }, 240);
     }
 
     function setStatus(message = "", type = "") {
@@ -562,7 +274,9 @@ document.addEventListener("DOMContentLoaded", () => {
         date.className = "performance-admin-date";
         date.textContent = `${formatDate(record.date)} · ${formatTime(record)}`;
         const location = document.createElement("h3");
-        location.textContent = record.locationTbd ? "Location TBD" : (record.locationName || record.location || "Location unavailable");
+        location.textContent = record.locationTbd
+            ? "Location TBD"
+            : record.locationName || record.location || "Location unavailable";
         const arrangements = document.createElement("p");
         arrangements.className = "performance-admin-arrangements";
         arrangements.textContent = record.arrangementsTbd ? "Arrangements TBD" : record.arrangements.join(" · ");
@@ -637,7 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
         submitButton.textContent = "Save Changes";
         cancelButton.hidden = false;
         setStatus();
-        openPerformanceModal();
+        dateInput.focus();
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     async function deletePerformance(record) {
@@ -678,8 +393,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return { url: await snapshot.ref.getDownloadURL(), path };
     }
 
-    buildPerformanceModal();
-
     auth.onAuthStateChanged(async (user) => {
         if (!user) return returnToLogin();
         try {
@@ -712,7 +425,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!dateInput.value) return setStatus("Enter a date.", "error");
         if (!timeTbd.checked && !timeInput.value) return setStatus("Enter a time or select Time is TBD.", "error");
-        if (!locationTbd.checked && !get("performance-location-name").value.trim()) return setStatus("Choose a Google Maps location or select Location is TBD.", "error");
+        if (!locationTbd.checked && !locationInput.value.trim()) return setStatus("Choose a location or select Location is TBD.", "error");
+        if (!locationTbd.checked && !get("performance-location-name").value.trim()) {
+            return setStatus("Choose a location from the Google Maps suggestions.", "error");
+        }
         if (!arrangementsTbd.checked && arrangements.length === 0) return setStatus("Select or enter an arrangement, or choose TBD.", "error");
         if (!membersTbd.checked && members.length === 0) return setStatus("Select attending members or choose TBD.", "error");
         if (!highlightTbd.checked && !highlightInput.files[0] && !highlightExisting.value) return setStatus("Upload a highlight photo or choose TBD.", "error");
@@ -748,6 +464,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 time: timeTbd.checked ? "" : timeInput.value,
                 timeTbd: timeTbd.checked,
                 timezone: timeTbd.checked ? "" : timezoneInput.value,
+                // Keep the legacy location field for older pages, but store the
+                // place name and full address separately from now on.
                 location: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
                 locationName: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
                 locationAddress: locationTbd.checked ? "" : get("performance-location-address").value.trim(),
@@ -776,7 +494,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             resetForm();
-            closePerformanceModal();
             setStatus(documentId ? "Performance updated successfully." : "Performance added successfully.", "success");
         } catch (error) {
             console.error("Unable to save performance:", error);
@@ -789,17 +506,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     [timeTbd, locationTbd, arrangementsTbd, membersTbd, highlightTbd, linksTbd]
         .forEach((checkbox) => checkbox.addEventListener("change", syncTbdStates));
-
-    locationInput.addEventListener("input", () => {
-        const selectedName = get("performance-location-name").value;
-        if (locationInput.value !== selectedName) {
-            get("performance-location-name").value = "";
-            get("performance-location-address").value = "";
-            get("performance-location-place-id").value = "";
-            get("performance-location-lat").value = "";
-            get("performance-location-lng").value = "";
-        }
-    });
 
     highlightInput.addEventListener("change", () => {
         const file = highlightInput.files[0];
@@ -818,15 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     addLinkButton.addEventListener("click", () => addExternalLink());
-    cancelButton.addEventListener("click", () => {
-        resetForm();
-        closePerformanceModal();
-    });
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && performanceModal && !performanceModal.hidden) {
-            closePerformanceModal();
-        }
-    });
+    cancelButton.addEventListener("click", resetForm);
     logout.addEventListener("click", async () => {
         logout.disabled = true;
         if (unsubscribePerformances) unsubscribePerformances();
