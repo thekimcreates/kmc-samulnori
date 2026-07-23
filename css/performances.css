@@ -1228,3 +1228,34 @@ body.performance-detail-open {
         font-size: clamp(2rem, 10vw, 3rem);
     }
 }
+
+
+/* ========================================
+   FULL-SCREEN PERFORMANCE BACKDROP FIX
+======================================== */
+
+/*
+ * The expanded card remains positioned below the public header, while its
+ * dimmed blur layer covers the entire viewport, including the header area.
+ */
+.performance-detail-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+}
+
+.performance-detail-shell {
+    z-index: 1;
+}
+
+@media (max-width: 780px) {
+    .performance-detail-backdrop {
+        inset: 0;
+    }
+}
+
+@media (max-width: 520px) {
+    .performance-detail-backdrop {
+        inset: 0;
+    }
+}
