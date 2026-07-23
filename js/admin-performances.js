@@ -28,11 +28,13 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
 
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        const displayName = place.name && place.formatted_address
-            ? `${place.name}, ${place.formatted_address}`
-            : place.formatted_address || place.name || locationInput.value;
+        const locationNameInput = document.getElementById("performance-location-name");
+        const locationAddressInput = document.getElementById("performance-location-address");
+        const displayName = place.name || place.formatted_address || locationInput.value;
 
         locationInput.value = displayName;
+        if (locationNameInput) locationNameInput.value = displayName;
+        if (locationAddressInput) locationAddressInput.value = place.formatted_address || "";
         document.getElementById("performance-location-place-id").value = place.place_id || "";
         document.getElementById("performance-location-lat").value = String(lat);
         document.getElementById("performance-location-lng").value = String(lng);
@@ -106,10 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
         addPerformanceButton.className = "admin-submit performance-add-trigger";
         addPerformanceButton.textContent = "+ Add Performance";
 
-        const headerActions = document.createElement("div");
-        headerActions.className = "performance-header-actions";
-        headerActions.appendChild(addPerformanceButton);
-        pageHeader.querySelector(".admin-user-meta")?.prepend(addPerformanceButton);
+        const addSlot = document.getElementById("performance-add-slot");
+        if (addSlot) {
+            addSlot.appendChild(addPerformanceButton);
+        } else {
+            listPanel.querySelector(".performance-list-heading")?.appendChild(addPerformanceButton);
+        }
 
         performanceModal = document.createElement("div");
         performanceModal.className = "performance-modal";
@@ -131,7 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
             openPerformanceModal();
         });
         modalCloseButton.addEventListener("click", closePerformanceModal);
-        performanceModal.querySelector(".performance-modal-backdrop").addEventListener("click", closePerformanceModal);
+        // The backdrop is intentionally non-dismissible. Use the close button,
+        // Cancel Edit, or Escape to close the editor.
     }
 
     function openPerformanceModal() {
@@ -275,6 +280,8 @@ document.addEventListener("DOMContentLoaded", () => {
         form.reset();
         idInput.value = "";
         highlightExisting.value = "";
+        get("performance-location-name").value = "";
+        get("performance-location-address").value = "";
         get("performance-location-place-id").value = "";
         get("performance-location-lat").value = "";
         get("performance-location-lng").value = "";
@@ -326,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
         date.className = "performance-admin-date";
         date.textContent = `${formatDate(record.date)} · ${formatTime(record)}`;
         const location = document.createElement("h3");
-        location.textContent = record.locationTbd ? "Location TBD" : record.location;
+        location.textContent = record.locationTbd ? "Location TBD" : (record.locationName || record.location || "Location unavailable");
         const arrangements = document.createElement("p");
         arrangements.className = "performance-admin-arrangements";
         arrangements.textContent = record.arrangementsTbd ? "Arrangements TBD" : record.arrangements.join(" · ");
@@ -365,7 +372,10 @@ document.addEventListener("DOMContentLoaded", () => {
         timezoneInput.value = record.timezone || "America/Los_Angeles";
         timeTbd.checked = Boolean(record.timeTbd);
         locationTbd.checked = Boolean(record.locationTbd);
-        locationInput.value = record.location || "";
+        const savedLocationName = record.locationName || record.location || "";
+        locationInput.value = savedLocationName;
+        get("performance-location-name").value = savedLocationName;
+        get("performance-location-address").value = record.locationAddress || "";
         get("performance-location-place-id").value = record.locationPlaceId || "";
         get("performance-location-lat").value = record.locationLat ?? "";
         get("performance-location-lng").value = record.locationLng ?? "";
@@ -473,7 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!dateInput.value) return setStatus("Enter a date.", "error");
         if (!timeTbd.checked && !timeInput.value) return setStatus("Enter a time or select Time is TBD.", "error");
-        if (!locationTbd.checked && !locationInput.value.trim()) return setStatus("Choose a location or select Location is TBD.", "error");
+        if (!locationTbd.checked && !get("performance-location-name").value.trim()) return setStatus("Choose a Google Maps location or select Location is TBD.", "error");
         if (!arrangementsTbd.checked && arrangements.length === 0) return setStatus("Select or enter an arrangement, or choose TBD.", "error");
         if (!membersTbd.checked && members.length === 0) return setStatus("Select attending members or choose TBD.", "error");
         if (!highlightTbd.checked && !highlightInput.files[0] && !highlightExisting.value) return setStatus("Upload a highlight photo or choose TBD.", "error");
@@ -509,7 +519,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 time: timeTbd.checked ? "" : timeInput.value,
                 timeTbd: timeTbd.checked,
                 timezone: timeTbd.checked ? "" : timezoneInput.value,
-                location: locationTbd.checked ? "" : locationInput.value.trim(),
+                location: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
+                locationName: locationTbd.checked ? "" : get("performance-location-name").value.trim(),
+                locationAddress: locationTbd.checked ? "" : get("performance-location-address").value.trim(),
                 locationTbd: locationTbd.checked,
                 locationPlaceId: locationTbd.checked ? "" : get("performance-location-place-id").value,
                 locationLat: locationTbd.checked ? null : Number(get("performance-location-lat").value) || null,
@@ -548,6 +560,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     [timeTbd, locationTbd, arrangementsTbd, membersTbd, highlightTbd, linksTbd]
         .forEach((checkbox) => checkbox.addEventListener("change", syncTbdStates));
+
+    locationInput.addEventListener("input", () => {
+        const selectedName = get("performance-location-name").value;
+        if (locationInput.value !== selectedName) {
+            get("performance-location-name").value = "";
+            get("performance-location-address").value = "";
+            get("performance-location-place-id").value = "";
+            get("performance-location-lat").value = "";
+            get("performance-location-lng").value = "";
+        }
+    });
 
     highlightInput.addEventListener("change", () => {
         const file = highlightInput.files[0];
