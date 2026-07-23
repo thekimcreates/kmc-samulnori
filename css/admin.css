@@ -501,3 +501,27 @@ body[data-admin-page="team"] .admin-nav [data-admin-page="team"]::after{
     .admin-public-footer{padding:58px 20px 28px}
     .admin-footer-logo img{width:210px}
 }
+
+
+/* ========================================
+   LOGIN PUBLIC HEADER + PUBLIC FOOTER LINK
+======================================== */
+.admin-footer-contact a {
+    color: #0071e3;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.admin-footer-contact a:hover {
+    opacity: .85;
+}
+body[data-admin-page="login"] .admin-login-main {
+    padding-top: 150px;
+}
+body[data-admin-page="login"] .admin-security-note {
+    text-align: center;
+}
+@media (max-width: 900px) {
+    body[data-admin-page="login"] .admin-login-main {
+        padding-top: 112px;
+    }
+}
