@@ -35,7 +35,12 @@
             </div>
 
             <div class="performance-manager-layout">
-                <section class="admin-panel performance-form-panel">
+                <div id="performance-modal" class="performance-modal" hidden aria-hidden="true">
+                    <div class="performance-modal-backdrop" aria-hidden="true"></div>
+                    <section class="performance-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="performance-form-title">
+                        <button id="performance-modal-close" class="performance-modal-close" type="button" aria-label="Close performance editor">&times;</button>
+                        <div class="performance-modal-body">
+                            <section class="admin-panel performance-form-panel">
                     <div class="admin-panel-heading">
                         <div>
                             <p class="admin-eyebrow">Performance details</p>
@@ -176,12 +181,15 @@
                         </div>
                     </form>
                 </section>
+                        </div>
+                    </section>
+                </div>
 
                 <section class="admin-panel performance-list-panel">
                     <div class="admin-panel-heading performance-list-heading">
                         <h2>All Performances</h2>
                         <div class="performance-list-actions">
-                            <span id="performance-add-slot"></span>
+                            <button id="performance-add-button" class="admin-submit admin-small-button" type="button">+ Add Performance</button>
                             <span id="performance-count" class="admin-count-badge" aria-label="Total performances">0</span>
                         </div>
                     </div>
