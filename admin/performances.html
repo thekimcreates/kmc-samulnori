@@ -6,13 +6,17 @@
     <title>Manage Performances | KMC Samulnori</title>
     <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body>
+<body data-admin-page="performances">
     <div class="admin-shell">
-        <header class="admin-topbar">
-            <a class="admin-brand" href="../index.html">
+        <header class="admin-topbar admin-site-header">
+            <a class="admin-brand" href="../index.html" aria-label="KMC Samulnori home">
                 <img src="../assets/logo/full.png" alt="KMC Samulnori">
             </a>
-            <a class="admin-back-link" href="dashboard.html">← Dashboard</a>
+            <nav class="admin-nav" aria-label="Admin navigation">
+                <a href="dashboard.html" data-admin-page="dashboard">Dashboard</a>
+                <a href="performances.html" data-admin-page="performances">Performances</a>
+                <a href="team.html" data-admin-page="team">Team</a>
+            </nav>
         </header>
 
         <div id="performances-loading" class="dashboard-loading">Verifying administrator access…</div>
@@ -20,7 +24,7 @@
         <main id="performances-admin" class="admin-dashboard-main" hidden>
             <div class="admin-dashboard-header performance-page-header">
                 <div>
-                    <p class="admin-eyebrow">Content manager</p>
+                    
                     <h1>Performances</h1>
                     <p class="admin-page-copy">Add and manage performance details shown across the KMC Samulnori website.</p>
                 </div>
@@ -175,11 +179,11 @@
 
                 <section class="admin-panel performance-list-panel">
                     <div class="admin-panel-heading performance-list-heading">
-                        <div>
-                            <p class="admin-eyebrow">Published records</p>
-                            <h2>All Performances</h2>
+                        <h2>All Performances</h2>
+                        <div class="performance-list-actions">
+                            <span id="performance-add-slot"></span>
+                            <span id="performance-count" class="admin-count-badge" aria-label="Total performances">0</span>
                         </div>
-                        <span id="performance-count" class="admin-count-badge">0</span>
                     </div>
 
                     <div id="performance-list" class="performance-admin-list"></div>
@@ -188,7 +192,19 @@
             </div>
         </main>
 
-        <footer class="admin-footer">© 2026 KMC Samulnori</footer>
+        <footer class="admin-public-footer">
+            <div class="admin-footer-container">
+                <div class="admin-footer-logo">
+                    <img src="../assets/logo/full.png" alt="KMC Samulnori Logo">
+                </div>
+                <div class="admin-footer-contact">
+                    <p>Contact: <a href="mailto:kmc-samulnori@gmail.com">kmc-samulnori@gmail.com</a></p>
+                </div>
+                <div class="admin-footer-bottom">
+                    <p>© 2026 KMC Samulnori. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
@@ -197,6 +213,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
     <script src="../js/firebase.js"></script>
     <script src="../js/admin-performances.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-MVpD9Qvsag1sJKHblNsBdQXZDXPTbMI&libraries=places&callback=initializeKmcPerformanceMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=REPLACE_WITH_GOOGLE_MAPS_API_KEY&libraries=places&callback=initializeKmcPerformanceMap"></script>
 </body>
 </html>
