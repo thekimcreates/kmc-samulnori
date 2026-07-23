@@ -49,7 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    const addMemberEditor = (member = { name: "", age: "", service: "" }) => {
+    let draggedMemberCard = null;
+
+    const addMemberEditor = (member = { name: "", age: "", service: "" }, shouldFocus = false) => {
         const card = memberTemplate.content.firstElementChild.cloneNode(true);
         card.querySelector(".member-name").value = member.name || "";
         card.querySelector(".member-age").value = member.age ?? "";
@@ -58,8 +60,41 @@ document.addEventListener("DOMContentLoaded", () => {
             card.remove();
             renumberMembers();
         });
+        card.addEventListener("dragstart", event => {
+            draggedMemberCard = card;
+            card.classList.add("is-dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", "member");
+        });
+        card.addEventListener("dragend", () => {
+            draggedMemberCard = null;
+            card.classList.remove("is-dragging");
+            memberList.querySelectorAll(".is-drag-over").forEach(item => item.classList.remove("is-drag-over"));
+        });
+        card.addEventListener("dragover", event => {
+            event.preventDefault();
+            if (draggedMemberCard && draggedMemberCard !== card) card.classList.add("is-drag-over");
+        });
+        card.addEventListener("dragleave", () => card.classList.remove("is-drag-over"));
+        card.addEventListener("drop", event => {
+            event.preventDefault();
+            card.classList.remove("is-drag-over");
+            if (!draggedMemberCard || draggedMemberCard === card) return;
+            const cards = [...memberList.children];
+            const fromIndex = cards.indexOf(draggedMemberCard);
+            const toIndex = cards.indexOf(card);
+            if (fromIndex < toIndex) card.after(draggedMemberCard);
+            else card.before(draggedMemberCard);
+            renumberMembers();
+        });
         memberList.appendChild(card);
         renumberMembers();
+        if (shouldFocus) {
+            requestAnimationFrame(() => {
+                card.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => card.querySelector(".member-name").focus(), 350);
+            });
+        }
     };
 
     const populateForm = data => {
@@ -99,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    addMemberButton.addEventListener("click", () => addMemberEditor());
+    addMemberButton.addEventListener("click", () => addMemberEditor(undefined, true));
 
     form.addEventListener("submit", async event => {
         event.preventDefault();

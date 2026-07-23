@@ -109,12 +109,14 @@ a {
 
 body[data-admin-page="dashboard"] .admin-nav [data-admin-page="dashboard"],
 body[data-admin-page="performances"] .admin-nav [data-admin-page="performances"],
+body[data-admin-page="arrangements"] .admin-nav [data-admin-page="arrangements"],
 body[data-admin-page="team"] .admin-nav [data-admin-page="team"] {
     opacity: 1;
 }
 
 body[data-admin-page="dashboard"] .admin-nav [data-admin-page="dashboard"]::after,
 body[data-admin-page="performances"] .admin-nav [data-admin-page="performances"]::after,
+body[data-admin-page="arrangements"] .admin-nav [data-admin-page="arrangements"]::after,
 body[data-admin-page="team"] .admin-nav [data-admin-page="team"]::after,
 .admin-nav a.active::after {
     content: "";
@@ -1739,3 +1741,106 @@ html {
 ======================================== */
 .arrangement-manager-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.arrangement-admin-card-main{display:flex;align-items:center;gap:18px;min-width:0}.arrangement-admin-thumb{width:112px;height:76px;border-radius:14px;object-fit:cover;background:#eee}.arrangement-admin-card-main h3{margin:0 0 6px}.arrangement-admin-card-main p{margin:0;color:var(--admin-muted)}.instrument-picker{border:1px solid rgba(22,22,22,.1);border-radius:16px;background:rgba(255,255,255,.62);overflow:hidden}.instrument-picker summary{cursor:pointer;padding:15px 17px;font-weight:700}.instrument-checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 16px 16px}.instrument-checklist label{display:flex;align-items:center;gap:10px;padding:11px;border-radius:12px;background:rgba(127,29,45,.05);cursor:pointer}.selected-instrument-list{display:grid;gap:14px;margin-top:18px}.selected-instrument-card{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;padding:16px;border:1px solid rgba(22,22,22,.09);border-radius:18px;background:rgba(255,255,255,.58)}.selected-instrument-card>img{width:100%;height:130px;object-fit:cover;border-radius:14px}.selected-instrument-copy h3{margin:0 0 10px}.selected-instrument-copy label{font-weight:700}.selected-instrument-copy textarea{display:block;width:100%;margin-top:8px;padding:12px;border:1px solid rgba(22,22,22,.12);border-radius:12px;font:inherit;resize:vertical}.instrument-library-list{display:grid;gap:12px;margin-top:28px}.instrument-library-card{display:grid;grid-template-columns:84px minmax(0,1fr) auto;align-items:center;gap:16px;padding:14px;border:1px solid rgba(22,22,22,.09);border-radius:16px}.instrument-library-card img{width:84px;height:68px;object-fit:cover;border-radius:12px}.instrument-library-card h3,.instrument-library-card p{margin:0}.instrument-library-card p{margin-top:4px;color:var(--admin-muted)}
 @media(max-width:760px){.arrangement-manager-actions{width:100%}.arrangement-manager-actions>*{flex:1}.arrangement-admin-card-main{align-items:flex-start}.arrangement-admin-thumb{width:86px;height:70px}.instrument-checklist{grid-template-columns:1fr}.selected-instrument-card{grid-template-columns:1fr}.selected-instrument-card>img{height:190px}.instrument-library-card{grid-template-columns:70px 1fr}.instrument-library-card .performance-admin-actions{grid-column:1/-1}.instrument-library-card img{width:70px;height:60px}}
+
+/* Sortable admin lists */
+.sortable-admin-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.admin-drag-handle,
+.member-drag-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-width: 36px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(127, 29, 45, 0.07);
+    color: var(--admin-maroon);
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.25em;
+    cursor: grab;
+    user-select: none;
+}
+
+.admin-drag-handle:active,
+.member-drag-handle:active {
+    cursor: grabbing;
+}
+
+.sortable-admin-card.is-dragging,
+.member-editor-card.is-dragging {
+    opacity: 0.45;
+}
+
+.sortable-admin-card.is-drag-over,
+.member-editor-card.is-drag-over {
+    border-color: var(--admin-maroon);
+    box-shadow: 0 0 0 3px rgba(127, 29, 45, 0.12);
+    transform: translateY(2px);
+}
+
+.member-editor-card {
+    position: relative;
+    padding-left: 68px;
+}
+
+.member-drag-handle {
+    position: absolute;
+    left: 18px;
+    top: 18px;
+}
+
+.instrument-add-form {
+    margin: 8px 0 24px;
+    padding: 20px;
+    border: 1px solid rgba(127, 29, 45, 0.14);
+    border-radius: 18px;
+    background: rgba(127, 29, 45, 0.035);
+}
+
+.instrument-library-card {
+    display: block;
+}
+
+.instrument-library-summary {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+}
+
+.instrument-inline-editor {
+    margin-top: 16px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(22, 22, 22, 0.09);
+}
+
+.instrument-library-card.is-expanded {
+    border-color: rgba(127, 29, 45, 0.32);
+    background: rgba(127, 29, 45, 0.035);
+}
+
+@media (max-width: 760px) {
+    .sortable-admin-card {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .sortable-admin-card .performance-admin-actions {
+        grid-column: 1 / -1;
+    }
+
+    .instrument-library-summary {
+        grid-template-columns: 70px 1fr;
+    }
+
+    .instrument-library-summary .performance-admin-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+.instrument-add-form[hidden], .instrument-inline-editor[hidden] { display: none !important; }
