@@ -1359,94 +1359,237 @@ body.performance-modal-open {
 
 
 /* ========================================
-   GOOGLE MAPS PLACE SEARCH — PLACES API NEW
+   APPLE-STYLE ADMIN MOTION
 ======================================== */
 
-.maps-search-field {
-    position: relative;
-    z-index: 20;
+:root {
+    --admin-motion-spring: cubic-bezier(0.22, 1, 0.36, 1);
+    --admin-motion-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.maps-search-results {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    left: 0;
-    z-index: 30000;
-    max-height: 310px;
-    padding: 7px;
-    overflow-y: auto;
-    border: 1px solid var(--admin-border);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.97);
-    box-shadow: 0 18px 48px rgba(24, 18, 19, 0.20);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+html {
+    scroll-behavior: smooth;
 }
 
-.maps-search-result {
-    width: 100%;
-    min-height: 56px;
-    padding: 11px 13px;
-    display: grid;
-    gap: 3px;
-    border: 0;
-    border-radius: 11px;
-    background: transparent;
-    color: var(--admin-text);
-    text-align: left;
-    cursor: pointer;
+.admin-site-header,
+.admin-dashboard-header,
+.admin-login-card,
+.admin-panel,
+.dashboard-card,
+.performance-admin-card,
+.team-admin-card,
+.admin-public-footer {
+    will-change: transform, opacity;
 }
 
-.maps-search-result:hover,
-.maps-search-result.is-active {
-    background: rgba(127, 29, 45, 0.10);
+.admin-motion-ready [data-admin-reveal] {
+    opacity: 0;
+    transform: translateY(22px) scale(0.992);
 }
 
-.maps-search-result-primary {
-    font-size: 0.88rem;
-    font-weight: 750;
-    line-height: 1.35;
+.admin-motion-ready [data-admin-reveal].admin-reveal-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+        opacity 0.72s var(--admin-motion-spring),
+        transform 0.78s var(--admin-motion-spring);
+    transition-delay: var(--admin-reveal-delay, 0ms);
 }
 
-.maps-search-result-secondary {
-    color: var(--admin-muted);
-    font-size: 0.76rem;
-    line-height: 1.35;
+.admin-site-header {
+    transition:
+        transform 0.55s var(--admin-motion-spring),
+        opacity 0.45s ease,
+        background-color 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.35s ease;
 }
 
-@media (max-width: 600px) {
-    .maps-search-results {
-        position: fixed;
-        top: auto;
-        right: 16px;
-        bottom: calc(16px + env(safe-area-inset-bottom));
-        left: 16px;
-        max-height: min(52vh, 420px);
-        padding: 9px;
-        border-radius: 20px;
+.admin-motion-ready .admin-site-header {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.99);
+}
+
+.admin-motion-ready .admin-site-header.admin-header-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.admin-nav a,
+.admin-brand,
+.admin-submit,
+.admin-secondary-button,
+.admin-danger-button,
+.admin-logout,
+.performance-modal-close,
+.dashboard-card,
+.performance-admin-card {
+    transition:
+        transform 0.34s var(--admin-motion-spring),
+        box-shadow 0.34s var(--admin-motion-smooth),
+        background-color 0.28s ease,
+        border-color 0.28s ease,
+        opacity 0.28s ease;
+}
+
+.admin-nav a:hover,
+.admin-brand:hover {
+    transform: translateY(-1px);
+}
+
+.admin-submit:hover,
+.admin-secondary-button:hover,
+.admin-danger-button:hover,
+.admin-logout:hover {
+    transform: translateY(-2px) scale(1.012);
+}
+
+.admin-submit:active,
+.admin-secondary-button:active,
+.admin-danger-button:active,
+.admin-logout:active,
+.performance-modal-close:active {
+    transform: translateY(0) scale(0.97);
+    transition-duration: 0.12s;
+}
+
+.dashboard-card:hover,
+.performance-admin-card:hover {
+    transform: translateY(-5px) scale(1.006);
+}
+
+.admin-field input,
+.admin-field select,
+.external-link-row input {
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.32s var(--admin-motion-smooth),
+        background-color 0.25s ease,
+        transform 0.32s var(--admin-motion-spring);
+}
+
+.admin-field input:focus,
+.admin-field select:focus,
+.external-link-row input:focus {
+    transform: translateY(-1px);
+}
+
+/* Performance editor popup */
+.performance-modal-backdrop {
+    transition:
+        opacity 0.38s ease,
+        backdrop-filter 0.45s ease,
+        -webkit-backdrop-filter 0.45s ease;
+}
+
+.performance-modal-dialog {
+    transform: translateY(34px) scale(0.955);
+    transform-origin: 50% 44%;
+    transition:
+        opacity 0.34s ease,
+        transform 0.62s var(--admin-motion-spring);
+}
+
+.performance-modal.is-open .performance-modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.performance-modal.is-closing .performance-modal-backdrop {
+    opacity: 0;
+}
+
+.performance-modal.is-closing .performance-modal-dialog {
+    opacity: 0;
+    transform: translateY(20px) scale(0.975);
+    transition:
+        opacity 0.22s ease,
+        transform 0.30s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.performance-modal-body {
+    scroll-behavior: smooth;
+}
+
+.performance-modal.is-open .performance-form-panel > * {
+    animation: admin-modal-content-in 0.64s var(--admin-motion-spring) both;
+}
+
+.performance-modal.is-open .performance-form-panel > *:nth-child(2) {
+    animation-delay: 55ms;
+}
+
+@keyframes admin-modal-content-in {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Newly loaded Firestore cards */
+.admin-new-record {
+    animation: admin-record-in 0.72s var(--admin-motion-spring) both;
+}
+
+@keyframes admin-record-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Loading-to-page transition */
+.dashboard-loading {
+    transition:
+        opacity 0.32s ease,
+        transform 0.42s var(--admin-motion-spring);
+}
+
+.dashboard-loading[hidden] {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    .performance-modal-dialog {
+        transform-origin: 50% 100%;
+        transform: translateY(44px) scale(0.985);
     }
 
-    .maps-search-result {
-        min-height: 62px;
-        padding: 13px 14px;
-        border-radius: 14px;
+    .performance-modal.is-open .performance-modal-dialog {
+        transform: translateY(0) scale(1);
+    }
+
+    .dashboard-card:hover,
+    .performance-admin-card:hover {
+        transform: none;
     }
 }
 
-@media (prefers-color-scheme: dark) {
-    .maps-search-results {
-        border-color: rgba(255, 255, 255, 0.13);
-        background: rgba(30, 30, 33, 0.98);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.48);
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
     }
 
-    .maps-search-result {
-        color: var(--admin-text);
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
     }
 
-    .maps-search-result:hover,
-    .maps-search-result.is-active {
-        background: rgba(227, 138, 156, 0.14);
+    .admin-motion-ready [data-admin-reveal],
+    .admin-motion-ready .admin-site-header {
+        opacity: 1;
+        transform: none;
     }
 }
