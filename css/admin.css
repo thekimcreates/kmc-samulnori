@@ -1962,3 +1962,29 @@ html {
         flex: 1;
     }
 }
+
+/* Final arrangement drag behavior: the source leaves layout control to a placeholder. */
+.sortable-admin-card.is-sort-source {
+    display: none !important;
+}
+
+.arrangement-sort-placeholder {
+    display: block;
+    flex: 0 0 auto;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.arrangement-drag-preview {
+    right: auto !important;
+    bottom: auto !important;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    overflow: hidden;
+    contain: layout paint;
+}
+
+.admin-sorting-active,
+.admin-sorting-active * {
+    cursor: grabbing !important;
+}

@@ -104,86 +104,115 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function beginArrangementDrag(event) {
-    if (event.button !== 0 && event.pointerType !== "touch") return;
+    if (event.button !== 0 && event.pointerType !== "touch" && event.pointerType !== "pen") return;
     event.preventDefault();
 
     const handle = event.currentTarget;
     const card = handle.closest(".sortable-admin-card");
     if (!card) return;
 
-    const cardRect = card.getBoundingClientRect();
-    const listRect = list.getBoundingClientRect();
-    const offsetY = event.clientY - cardRect.top;
+    const pointerId = event.pointerId;
+    const originalRect = card.getBoundingClientRect();
+    const pointerOffsetY = event.clientY - originalRect.top;
 
-    // Keep the real card in the list so the layout never collapses or shifts.
+    const placeholder = document.createElement("div");
+    placeholder.className = "arrangement-sort-placeholder";
+    placeholder.style.height = `${originalRect.height}px`;
+    card.before(placeholder);
+
+    const previewCard = card.cloneNode(true);
+    previewCard.classList.add("arrangement-drag-preview");
+    previewCard.querySelectorAll("button").forEach(button => { button.tabIndex = -1; });
+    previewCard.style.width = `${Math.min(originalRect.width, window.innerWidth - 24)}px`;
+    previewCard.style.left = `${Math.max(12, Math.min(originalRect.left, window.innerWidth - originalRect.width - 12))}px`;
+    document.body.appendChild(previewCard);
+
     card.classList.add("is-sort-source");
-
-    const floatingCard = card.cloneNode(true);
-    floatingCard.classList.add("arrangement-drag-preview");
-    floatingCard.removeAttribute("data-admin-reveal");
-    floatingCard.querySelectorAll("button").forEach(button => button.tabIndex = -1);
-    floatingCard.style.width = `${Math.min(cardRect.width, window.innerWidth - 24)}px`;
-    floatingCard.style.left = `${Math.max(12, Math.min(listRect.left, window.innerWidth - cardRect.width - 12))}px`;
-    floatingCard.style.top = `${Math.max(12, Math.min(cardRect.top, window.innerHeight - cardRect.height - 12))}px`;
-    document.body.appendChild(floatingCard);
-
     document.body.classList.add("admin-sorting-active");
-    handle.setPointerCapture?.(event.pointerId);
 
     let lastClientY = event.clientY;
+    let finished = false;
+    let autoScrollFrame = 0;
 
-    const movePreview = clientY => {
-      const maxTop = Math.max(12, window.innerHeight - floatingCard.offsetHeight - 12);
-      const top = Math.max(12, Math.min(maxTop, clientY - offsetY));
-      floatingCard.style.top = `${top}px`;
+    const positionPreview = clientY => {
+      const previewHeight = previewCard.offsetHeight || originalRect.height;
+      const maxTop = Math.max(12, window.innerHeight - previewHeight - 12);
+      previewCard.style.top = `${Math.max(12, Math.min(maxTop, clientY - pointerOffsetY))}px`;
     };
 
-    const reorderSource = clientY => {
-      const candidates = [...list.querySelectorAll(".sortable-admin-card:not(.is-sort-source)")];
-      const nextCard = candidates.find(candidate => {
+    const positionPlaceholder = clientY => {
+      const cards = [...list.querySelectorAll(".sortable-admin-card:not(.is-sort-source)")];
+      let inserted = false;
+
+      for (const candidate of cards) {
         const rect = candidate.getBoundingClientRect();
-        return clientY < rect.top + rect.height / 2;
-      });
-      if (nextCard) list.insertBefore(card, nextCard);
-      else list.appendChild(card);
-    };
-
-    let autoScrollFrame = null;
-    const autoScroll = () => {
-      const edge = 96;
-      let amount = 0;
-      if (lastClientY < edge) amount = -10;
-      else if (lastClientY > window.innerHeight - edge) amount = 10;
-      if (amount) {
-        window.scrollBy(0, amount);
-        reorderSource(lastClientY);
+        if (clientY < rect.top + rect.height / 2) {
+          list.insertBefore(placeholder, candidate);
+          inserted = true;
+          break;
+        }
       }
-      autoScrollFrame = requestAnimationFrame(autoScroll);
-    };
-    autoScrollFrame = requestAnimationFrame(autoScroll);
 
-    const move = moveEvent => {
+      if (!inserted) list.appendChild(placeholder);
+    };
+
+    const onPointerMove = moveEvent => {
+      if (moveEvent.pointerId !== pointerId) return;
+      moveEvent.preventDefault();
       lastClientY = moveEvent.clientY;
-      movePreview(lastClientY);
-      reorderSource(lastClientY);
+      positionPreview(lastClientY);
+      positionPlaceholder(lastClientY);
     };
 
-    const finish = async () => {
-      handle.removeEventListener("pointermove", move);
-      handle.removeEventListener("pointerup", finish);
-      handle.removeEventListener("pointercancel", finish);
+    const stopDrag = async releaseEvent => {
+      if (finished || (releaseEvent?.pointerId != null && releaseEvent.pointerId !== pointerId)) return;
+      finished = true;
+
+      document.removeEventListener("pointermove", onPointerMove, true);
+      document.removeEventListener("pointerup", stopDrag, true);
+      document.removeEventListener("pointercancel", stopDrag, true);
+      window.removeEventListener("blur", stopDrag);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       if (autoScrollFrame) cancelAnimationFrame(autoScrollFrame);
-      floatingCard.remove();
+
+      placeholder.replaceWith(card);
+      previewCard.remove();
       card.classList.remove("is-sort-source");
       document.body.classList.remove("admin-sorting-active");
+
       syncArrangementStateFromDom();
       await persistArrangementOrder();
       handle.focus({ preventScroll: true });
     };
 
-    handle.addEventListener("pointermove", move);
-    handle.addEventListener("pointerup", finish, { once: true });
-    handle.addEventListener("pointercancel", finish, { once: true });
+    const onVisibilityChange = () => {
+      if (document.hidden) stopDrag();
+    };
+
+    const autoScroll = () => {
+      const edgeSize = Math.min(120, window.innerHeight * 0.2);
+      let delta = 0;
+      if (lastClientY < edgeSize) {
+        delta = -Math.max(4, Math.round((edgeSize - lastClientY) / 8));
+      } else if (lastClientY > window.innerHeight - edgeSize) {
+        delta = Math.max(4, Math.round((lastClientY - (window.innerHeight - edgeSize)) / 8));
+      }
+
+      if (delta !== 0) {
+        window.scrollBy(0, delta);
+        positionPlaceholder(lastClientY);
+      }
+      autoScrollFrame = requestAnimationFrame(autoScroll);
+    };
+
+    positionPreview(lastClientY);
+    positionPlaceholder(lastClientY);
+    document.addEventListener("pointermove", onPointerMove, { capture: true, passive: false });
+    document.addEventListener("pointerup", stopDrag, true);
+    document.addEventListener("pointercancel", stopDrag, true);
+    window.addEventListener("blur", stopDrag);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    autoScrollFrame = requestAnimationFrame(autoScroll);
   }
 
   function renderInstrumentChecklist(selected = []) {

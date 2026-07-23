@@ -1,26 +1,6 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-
-    let allowMemberAutoScroll = false;
-    const keepTeamEditorAtTop = () => {
-        if (allowMemberAutoScroll) return;
-        const active = document.activeElement;
-        if (active && active !== document.body && typeof active.blur === "function") active.blur();
-        window.scrollTo(0, 0);
-    };
-
-    // Safari can restore a form field and its scroll position after rendering.
-    // Reassert the intended initial position for a few frames only during page load.
-    const resetInitialScroll = () => {
-        keepTeamEditorAtTop();
-        requestAnimationFrame(keepTeamEditorAtTop);
-        setTimeout(keepTeamEditorAtTop, 80);
-        setTimeout(keepTeamEditorAtTop, 250);
-    };
-
-    window.addEventListener("pageshow", resetInitialScroll, { once: true });
     const { auth, db } = window.kmcFirebase || {};
     const loading = document.getElementById("team-loading");
     const main = document.getElementById("team-admin");
@@ -110,12 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
         memberList.appendChild(card);
         renumberMembers();
         if (shouldFocus) {
-            allowMemberAutoScroll = true;
             requestAnimationFrame(() => {
                 card.scrollIntoView({ behavior: "smooth", block: "center" });
-                setTimeout(() => {
+                window.setTimeout(() => {
                     card.querySelector(".member-name").focus({ preventScroll: true });
-                    allowMemberAutoScroll = false;
                 }, 350);
             });
         }
@@ -152,7 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
             populateForm(snapshot.exists ? { ...defaults, ...snapshot.data() } : defaults);
             loading.hidden = true;
             main.hidden = false;
-            resetInitialScroll();
         } catch (error) {
             console.error("Unable to load team editor:", error);
             loading.textContent = "Unable to load the team editor. Check Firestore rules and try again.";
