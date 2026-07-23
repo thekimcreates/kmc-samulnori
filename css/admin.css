@@ -525,3 +525,64 @@ body[data-admin-page="login"] .admin-security-note {
         padding-top: 112px;
     }
 }
+
+/* ========================================
+   ADMIN PAGE HERO ALIGNMENT
+======================================== */
+body[data-admin-page="dashboard"] .admin-dashboard-main,
+body[data-admin-page="performances"] .admin-dashboard-main,
+body[data-admin-page="team"] .admin-dashboard-main {
+    padding-top: 72px;
+}
+
+body[data-admin-page="team"] .admin-static-page {
+    padding-top: 72px;
+}
+
+.admin-dashboard-header {
+    align-items: flex-start;
+}
+
+.admin-dashboard-header > div:first-child {
+    align-self: flex-start;
+}
+
+.admin-user-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.admin-user-meta #admin-user-email {
+    line-height: 1.25;
+}
+
+.admin-user-meta .admin-logout {
+    min-height: 44px;
+}
+
+@media (max-width: 760px) {
+    body[data-admin-page="dashboard"] .admin-dashboard-main,
+    body[data-admin-page="performances"] .admin-dashboard-main,
+    body[data-admin-page="team"] .admin-dashboard-main,
+    body[data-admin-page="team"] .admin-static-page {
+        padding-top: 64px;
+    }
+
+    .admin-dashboard-header {
+        align-items: flex-start;
+    }
+
+    .admin-user-meta {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-top: 0;
+    }
+
+    .admin-user-meta .admin-logout {
+        width: auto;
+    }
+}
