@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function createCard(record, index) {
         const button = document.createElement("button");
-        button.className = "performance-public-card reveal";
+        button.className = "performance-card performance-public-card reveal visible";
         button.type = "button";
         button.dataset.performanceId = record.id;
         button.style.transitionDelay = `${Math.min(index * 55, 275)}ms`;
@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "--performance-image",
                 `url("${safeImageUrl(record.highlightPhotoUrl)}")`
             );
+            button.classList.add("has-highlight-photo");
         }
 
         const location = getLocation(record);
@@ -105,20 +106,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const content = document.createElement("span");
         content.className = "performance-card-content";
 
-        const arrangements = document.createElement("span");
-        arrangements.className = "performance-card-arrangements";
-        arrangements.textContent = getArrangements(record);
+        const dateTime = document.createElement("span");
+        dateTime.className = "performance-date-time";
+        dateTime.textContent = `${formatDate(record.date)} • ${formatTime(record)}`;
 
         const locationHeading = document.createElement("span");
-        locationHeading.className = "performance-card-location";
+        locationHeading.className = "performance-location";
         locationHeading.textContent = location;
 
-        const date = document.createElement("span");
-        date.className = "performance-card-date";
-        date.textContent = `${formatDate(record.date)} · ${formatTime(record)}`;
+        const arrangements = document.createElement("span");
+        arrangements.className = "performance-meta";
+        arrangements.textContent = getArrangements(record).replaceAll(" · ", " • ");
 
-        content.append(arrangements, locationHeading, date);
-        button.append(createArrowIcon(), content);
+        content.append(dateTime, locationHeading, arrangements);
+        button.append(content);
         button.addEventListener("click", () => openDetail(record, button));
 
         return button;
