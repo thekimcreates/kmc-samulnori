@@ -2434,3 +2434,17 @@ footer img {
     margin: 12px 0 0;
     color: rgba(255, 255, 255, .68);
 }
+
+
+/* ========================================
+   HOMEPAGE PERFORMANCE CARD CLICK FIX
+======================================== */
+
+/* Keep the full-card link clickable even when clicking the visible text. */
+.performance-card-content {
+    pointer-events: none;
+}
+
+.performance-card-link {
+    cursor: pointer;
+}
