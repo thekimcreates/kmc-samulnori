@@ -7,8 +7,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const count = document.getElementById("performance-count");
     const yearFilter = document.getElementById("performance-year");
     const arrangementFilter = document.getElementById("performance-arrangement-filter");
+    const arrangementTrigger = document.getElementById("performance-arrangement-trigger");
+    const arrangementPopover = document.getElementById("performance-arrangement-popover");
+    const arrangementSummary = document.getElementById("performance-arrangement-summary");
     const arrangementOptions = document.getElementById("performance-filter-options");
-    const clearFiltersButton = document.getElementById("performance-filter-clear");
+    const allArrangementsInput = document.getElementById("performance-filter-all");
 
     const detail = document.getElementById("performance-detail");
     const detailShell = detail?.querySelector(".performance-detail-shell");
@@ -324,13 +327,50 @@ document.addEventListener("DOMContentLoaded", () => {
             : [];
     }
 
+    function updateArrangementSummary() {
+        const selectedInputs = [...arrangementOptions.querySelectorAll('input[type="checkbox"]:checked')];
+        const selectedLabels = selectedInputs.map((input) => input.value);
+
+        if (selectedLabels.length === 0) {
+            arrangementSummary.textContent = "All";
+            allArrangementsInput.checked = true;
+            return;
+        }
+
+        allArrangementsInput.checked = false;
+
+        if (selectedLabels.length === 1) {
+            arrangementSummary.textContent = selectedLabels[0];
+        } else if (selectedLabels.length === 2) {
+            arrangementSummary.textContent = `${selectedLabels[0]} + ${selectedLabels[1]}`;
+        } else {
+            arrangementSummary.textContent = `${selectedLabels.length} selected`;
+        }
+    }
+
+    function setAllArrangements() {
+        selectedArrangements.clear();
+
+        arrangementOptions.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+            input.checked = false;
+        });
+
+        allArrangementsInput.checked = true;
+        updateArrangementSummary();
+        render();
+    }
+
     function createArrangementFilterOption(arrangement) {
         const label = document.createElement("label");
-        label.className = "performance-filter-option";
+        label.className = "performance-check-option";
 
         const input = document.createElement("input");
         input.type = "checkbox";
         input.value = arrangement;
+
+        const checkmark = document.createElement("span");
+        checkmark.className = "performance-checkmark";
+        checkmark.setAttribute("aria-hidden", "true");
 
         const text = document.createElement("span");
         text.textContent = arrangement;
@@ -344,12 +384,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectedArrangements.delete(key);
             }
 
-            label.classList.toggle("is-selected", input.checked);
-            clearFiltersButton.hidden = selectedArrangements.size === 0;
+            if (selectedArrangements.size === 0) {
+                setAllArrangements();
+                return;
+            }
+
+            allArrangementsInput.checked = false;
+            updateArrangementSummary();
             render();
         });
 
-        label.append(input, text);
+        label.append(input, checkmark, text);
         return label;
     }
 
@@ -362,7 +407,30 @@ document.addEventListener("DOMContentLoaded", () => {
             ...arrangements.map(createArrangementFilterOption)
         );
 
-        arrangementFilter.disabled = arrangements.length === 0;
+        arrangementTrigger.disabled = arrangements.length === 0;
+        allArrangementsInput.checked = true;
+        updateArrangementSummary();
+    }
+
+    function openArrangementPopover() {
+        if (arrangementTrigger.disabled) return;
+        arrangementPopover.hidden = false;
+        arrangementTrigger.setAttribute("aria-expanded", "true");
+        arrangementFilter.classList.add("is-open");
+    }
+
+    function closeArrangementPopover() {
+        arrangementPopover.hidden = true;
+        arrangementTrigger.setAttribute("aria-expanded", "false");
+        arrangementFilter.classList.remove("is-open");
+    }
+
+    function toggleArrangementPopover() {
+        if (arrangementPopover.hidden) {
+            openArrangementPopover();
+        } else {
+            closeArrangementPopover();
+        }
     }
 
     function recordMatchesArrangementFilter(record) {
@@ -418,7 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .filter((year) => /^\d{4}$/.test(year))
         )].sort((a, b) => Number(b) - Number(a));
 
-        yearFilter.replaceChildren(new Option("All years", "all"));
+        yearFilter.replaceChildren(new Option("All", "all"));
         years.forEach((year) => yearFilter.add(new Option(year, year)));
         yearFilter.disabled = years.length === 0;
     }
@@ -451,14 +519,28 @@ document.addEventListener("DOMContentLoaded", () => {
     detail?.querySelector(".performance-detail-backdrop")?.addEventListener("click", () => closeDetail());
     detail?.addEventListener("keydown", trapDetailFocus);
     yearFilter.addEventListener("change", render);
-    clearFiltersButton?.addEventListener("click", () => {
-        selectedArrangements.clear();
-        arrangementOptions.querySelectorAll('input[type="checkbox"]').forEach((input) => {
-            input.checked = false;
-            input.closest(".performance-filter-option")?.classList.remove("is-selected");
-        });
-        clearFiltersButton.hidden = true;
-        render();
+
+    arrangementTrigger?.addEventListener("click", toggleArrangementPopover);
+
+    allArrangementsInput?.addEventListener("change", () => {
+        if (allArrangementsInput.checked) {
+            setAllArrangements();
+        } else if (selectedArrangements.size === 0) {
+            allArrangementsInput.checked = true;
+        }
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!arrangementFilter?.contains(event.target)) {
+            closeArrangementPopover();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !arrangementPopover.hidden) {
+            closeArrangementPopover();
+            arrangementTrigger.focus();
+        }
     });
 
     if (!db) {

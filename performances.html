@@ -84,24 +84,50 @@
                     <h2 id="performance-list-title">All Performances</h2>
                     <p id="performance-count" aria-live="polite">Loading performances…</p>
                 </div>
+            </div>
+
+            <div class="performance-filter-row reveal">
+                <div class="performance-arrangement-filter" id="performance-arrangement-filter">
+                    <span class="performance-filter-label">Filter by Arrangements</span>
+
+                    <button
+                        class="performance-arrangement-trigger"
+                        id="performance-arrangement-trigger"
+                        type="button"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-controls="performance-arrangement-popover"
+                        disabled
+                    >
+                        <span id="performance-arrangement-summary">All</span>
+                        <span class="performance-filter-chevron" aria-hidden="true"></span>
+                    </button>
+
+                    <div
+                        class="performance-arrangement-popover"
+                        id="performance-arrangement-popover"
+                        role="group"
+                        aria-label="Filter performances by arrangement"
+                        hidden
+                    >
+                        <label class="performance-check-option performance-check-all">
+                            <input id="performance-filter-all" type="checkbox" checked>
+                            <span class="performance-checkmark" aria-hidden="true"></span>
+                            <span>All</span>
+                        </label>
+
+                        <div class="performance-check-divider" aria-hidden="true"></div>
+                        <div class="performance-filter-options" id="performance-filter-options"></div>
+                    </div>
+                </div>
 
                 <label class="performance-year-filter" for="performance-year">
-                    <span>Year</span>
+                    <span>Filter by Year</span>
                     <select id="performance-year" disabled>
-                        <option value="all">All years</option>
+                        <option value="all">All</option>
                     </select>
                 </label>
             </div>
-
-            <fieldset class="performance-arrangement-filter reveal" id="performance-arrangement-filter" disabled>
-                <legend>Filter by arrangement</legend>
-                <div class="performance-filter-heading">
-                    <p>Select one or more arrangements</p>
-                    <button id="performance-filter-clear" type="button" hidden>Clear filters</button>
-                </div>
-                <div class="performance-filter-options" id="performance-filter-options"></div>
-                <p class="performance-filter-help">Multiple selections use OR filtering.</p>
-            </fieldset>
 
             <div
                 class="performances-grid"
