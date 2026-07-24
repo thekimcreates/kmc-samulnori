@@ -27,15 +27,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const openModal = modal => { modal.hidden = false; modal.setAttribute("aria-hidden", "false"); requestAnimationFrame(() => modal.classList.add("is-open")); document.body.style.overflow = "hidden"; };
   const closeModal = modal => { modal.classList.remove("is-open"); modal.setAttribute("aria-hidden", "true"); setTimeout(() => { modal.hidden = true; }, 250); document.body.style.overflow = ""; };
   const preview = (img, wrap, url) => { if (url) { img.src = displayUrl(url); wrap.hidden = false; } else { img.removeAttribute("src"); wrap.hidden = true; } };
-  const upload = async (file, folder, id) => {
+  const upload = async (file, folder, id, statusElement = pageStatus) => {
     if (!file) return null;
     if (!imageOptimizer) throw new Error("The image optimizer could not be loaded. Refresh the page and try again.");
     const isInstrument = folder === "instrument-photos";
+    status(statusElement, "Optimizing image…");
     const optimized = await imageOptimizer.optimize(file, {
       maxWidth: isInstrument ? 900 : 1600,
       maxHeight: isInstrument ? 900 : 1200,
       quality: isInstrument ? 0.80 : 0.82
     });
+    status(statusElement, `Uploading optimized image (${imageOptimizer.formatBytes(optimized.optimizedBytes)})…`);
     const path = `${folder}/${id}/${Date.now()}-${optimized.fileName}`;
     const snapshot = await storage.ref(path).put(optimized.blob, {
       contentType: optimized.contentType,
@@ -76,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("article");
       card.className = "performance-admin-card sortable-admin-card";
       card.dataset.arrangementId = item.id;
-      card.innerHTML = `<button class="admin-drag-handle" type="button" aria-label="Drag ${item.name || "arrangement"} to reorder" title="Drag to reorder">⋮⋮</button><div class="arrangement-admin-card-main"><img class="arrangement-admin-thumb" alt=""><div><h3></h3><p></p></div></div><div class="performance-admin-actions"><button class="admin-secondary-button admin-small-button" data-edit type="button">Edit</button><button class="admin-danger-button admin-small-button" data-delete type="button">Delete</button></div>`;
+      card.innerHTML = `<button class="admin-drag-handle" type="button" aria-label="Drag ${item.name || "arrangement"} to reorder" title="Drag to reorder">⋮⋮</button><div class="arrangement-admin-card-main"><img class="arrangement-admin-thumb" alt="" loading="lazy" decoding="async"><div><h3></h3><p></p></div></div><div class="performance-admin-actions"><button class="admin-secondary-button admin-small-button" data-edit type="button">Edit</button><button class="admin-danger-button admin-small-button" data-delete type="button">Delete</button></div>`;
       card.querySelector("img").src = displayUrl(item.photoUrl);
       card.querySelector("img").alt = item.name || "Arrangement";
       card.querySelector("h3").textContent = `${item.name || "Arrangement"} ${item.koreanName || ""}`.trim();
@@ -264,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const row = document.createElement("article");
       row.className = "selected-instrument-card";
       row.dataset.instrumentId = inst.id;
-      row.innerHTML = `<img alt=""><div class="selected-instrument-copy"><h3></h3><label>Description for this arrangement</label><div data-editor-host></div></div>`;
+      row.innerHTML = `<img alt="" loading="lazy" decoding="async"><div class="selected-instrument-copy"><h3></h3><label>Description for this arrangement</label><div data-editor-host></div></div>`;
       row.querySelector("img").src = displayUrl(inst.photoUrl);
       row.querySelector("img").alt = inst.name || "Instrument";
       row.querySelector("h3").textContent = `${inst.name} ${inst.koreanName || ""}`.trim();
@@ -305,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let photoUrl = removeArrangementPhoto ? "" : q("arrangement-photo-existing").value;
     let photoPath = removeArrangementPhoto ? "" : q("arrangement-photo-path").value;
     try {
-      const uploaded = await upload(q("arrangement-photo").files[0], "arrangement-photos", id, photoPath);
+      const uploaded = await upload(q("arrangement-photo").files[0], "arrangement-photos", id, q("arrangement-form-status"));
       if (uploaded) ({ photoUrl, photoPath } = uploaded);
       if (!photoUrl) throw new Error("Please upload an arrangement photo.");
       const instruments = [...q("selected-instruments").children].map((row, order) => ({ instrumentId: row.dataset.instrumentId, descriptionHtml: row._richEditor?.getHtml() || "", description: row._richEditor?.getText() || "", order }));
@@ -340,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!oldId && state.instruments.some(item => item.id === id)) id += `-${Date.now()}`;
     let photoUrl = existingUrl;
     let photoPath = existingPath;
-    const uploaded = await upload(file, "instrument-photos", id, photoPath);
+    const uploaded = await upload(file, "instrument-photos", id, q("instrument-status"));
     if (uploaded) ({ photoUrl, photoPath } = uploaded);
     if (!photoUrl) throw new Error("Please upload an instrument photo.");
     const record = { id, name: name.trim(), koreanName: koreanName.trim(), photoUrl, photoPath };
@@ -357,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.instruments.forEach(inst => {
       const row = document.createElement("article");
       row.className = `instrument-library-card${expandedId === inst.id ? " is-expanded" : ""}`;
-      row.innerHTML = `<div class="instrument-library-summary"><img alt=""><div><h3></h3><p>Used by <span></span> arrangement(s)</p></div><div class="performance-admin-actions"><button data-edit class="admin-secondary-button admin-small-button" type="button">Edit</button><button data-delete class="admin-danger-button admin-small-button" type="button">Delete</button></div></div><form class="instrument-inline-editor" ${expandedId === inst.id ? "" : "hidden"}><div class="team-editor-grid"><div class="admin-field"><label>English name</label><input data-name required></div><div class="admin-field"><label>Korean name</label><input data-korean></div></div><div class="admin-field"><label>Instrument photo</label><input data-photo type="file" accept="image/jpeg,image/png,image/webp"></div><div class="performance-form-actions"><button class="admin-submit" type="submit">Save Changes</button><button data-cancel class="admin-secondary-button" type="button">Cancel</button></div></form>`;
+      row.innerHTML = `<div class="instrument-library-summary"><img alt="" loading="lazy" decoding="async"><div><h3></h3><p>Used by <span></span> arrangement(s)</p></div><div class="performance-admin-actions"><button data-edit class="admin-secondary-button admin-small-button" type="button">Edit</button><button data-delete class="admin-danger-button admin-small-button" type="button">Delete</button></div></div><form class="instrument-inline-editor" ${expandedId === inst.id ? "" : "hidden"}><div class="team-editor-grid"><div class="admin-field"><label>English name</label><input data-name required></div><div class="admin-field"><label>Korean name</label><input data-korean></div></div><div class="admin-field"><label>Instrument photo</label><input data-photo type="file" accept="image/jpeg,image/png,image/webp"></div><div class="performance-form-actions"><button class="admin-submit" type="submit">Save Changes</button><button data-cancel class="admin-secondary-button" type="button">Cancel</button></div></form>`;
       row.querySelector("img").src = displayUrl(inst.photoUrl);
       row.querySelector("img").alt = inst.name;
       row.querySelector("h3").textContent = `${inst.name} ${inst.koreanName || ""}`.trim();

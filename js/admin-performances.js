@@ -408,6 +408,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (record.highlightPhotoUrl) {
             const image = document.createElement("img");
+            image.loading = "lazy";
+            image.decoding = "async";
             image.className = "performance-admin-photo";
             image.src = record.highlightPhotoUrl;
             image.alt = "";
@@ -531,11 +533,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = highlightInput.files[0];
         if (!file) return null;
         if (!imageOptimizer) throw new Error("The image optimizer could not be loaded. Refresh the page and try again.");
+        setStatus("Optimizing highlight image…");
         const optimized = await imageOptimizer.optimize(file, {
             maxWidth: 1800,
             maxHeight: 1350,
             quality: 0.82
         });
+        setStatus(`Uploading optimized image (${imageOptimizer.formatBytes(optimized.optimizedBytes)})…`);
         const path = `performance-highlights/${documentId}/${Date.now()}-${optimized.fileName}`;
         const snapshot = await storage.ref(path).put(optimized.blob, {
             contentType: optimized.contentType,

@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!instrument) return "";
             const article = document.createElement("article");
             article.className = "instrument-row";
-            article.innerHTML = `<div class="instrument-image"><img loading="lazy"></div><div class="instrument-copy"><h4></h4><p></p></div>`;
+            article.innerHTML = `<div class="instrument-image"><img loading="lazy" decoding="async"></div><div class="instrument-copy"><h4></h4><p></p></div>`;
             const image = article.querySelector("img"); image.src = instrument.photoUrl || ""; image.alt = `${instrument.name || 'Instrument'} ${instrument.koreanName || ''}`.trim();
             const h4 = article.querySelector("h4"); h4.append(document.createTextNode(instrument.name || "Instrument"));
             if (instrument.koreanName) { const span=document.createElement("span"); span.textContent=instrument.koreanName; h4.append(" ",span); }
