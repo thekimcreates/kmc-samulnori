@@ -23,8 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const mobileMenu = document.getElementById("mobile-menu");
 
-    const heroSlides = document.querySelectorAll(".hero-slide");
-
     const revealElements = document.querySelectorAll(".reveal");
 
     const images = document.querySelectorAll("img");
@@ -338,56 +336,6 @@ if (menuButton && mobileMenu) {
         }
     );
 }
-
-    /* ======================================
-       HERO SLIDESHOW
-    ====================================== */
-
-    let currentSlide = 0;
-
-    function showSlide(index) {
-
-        heroSlides.forEach(slide => {
-
-            slide.classList.remove("active");
-
-        });
-
-        if (heroSlides[index]) {
-
-            heroSlides[index].classList.add("active");
-
-        }
-
-    }
-    function nextSlide() {
-
-        if (heroSlides.length <= 1) return;
-
-        currentSlide =
-            (currentSlide + 1) %
-            heroSlides.length;
-
-        showSlide(currentSlide);
-
-    }
-
-
-
-    if (heroSlides.length > 0) {
-
-        showSlide(0);
-
-        setInterval(
-            nextSlide,
-            5000
-        );
-
-    }
-
-
-
-
 
     /* ======================================
        SCROLL REVEAL

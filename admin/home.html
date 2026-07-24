@@ -35,6 +35,23 @@
             </div>
         </div>
 
+
+        <section class="admin-panel home-hero-admin-panel">
+            <div class="admin-panel-heading">
+                <div>
+                    <h2>Hero Images</h2>
+                    <p class="admin-help-text">Upload as many images as needed. Drag them to choose the carousel order.</p>
+                </div>
+                <label class="admin-submit home-hero-upload-label" for="home-hero-upload">Add Hero Images</label>
+                <input id="home-hero-upload" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+            </div>
+            <div id="home-hero-upload-progress" class="home-hero-upload-progress" hidden>
+                <span id="home-hero-upload-progress-text">Preparing images…</span>
+            </div>
+            <div id="home-hero-admin-list" class="home-hero-admin-list" aria-live="polite"></div>
+            <p id="home-hero-status" class="login-status" role="status" aria-live="polite"></p>
+        </section>
+
         <section class="admin-panel">
             <div class="admin-panel-heading">
                 <div>
@@ -91,10 +108,13 @@
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
 <script src="../js/config.js"></script>
 <script src="../js/firebase.js"></script>
 <script src="../js/admin-tools.js"></script>
+<script src="../js/image-optimizer.js"></script>
 <script src="../js/admin-home.js"></script>
+<script src="../js/admin-home-hero.js"></script>
 <script src="../js/admin-motion.js"></script>
 </body>
 </html>

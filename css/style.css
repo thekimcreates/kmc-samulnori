@@ -2489,3 +2489,54 @@ footer img {
     text-decoration: underline;
     text-underline-offset: 0.2em;
 }
+
+
+/* ======================================
+   HERO CAROUSEL CONTROLS
+====================================== */
+.hero-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 4;
+    width: 52px;
+    height: 96px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,.88);
+    transform: translateY(-50%);
+    cursor: pointer;
+    text-shadow: 0 2px 18px rgba(0,0,0,.45);
+    transition: color .2s ease, transform .2s ease;
+}
+.hero-carousel-arrow:hover,
+.hero-carousel-arrow:focus-visible { color: #fff; transform: translateY(-50%) scale(1.08); outline: none; }
+.hero-carousel-arrow span { font-size: 4.3rem; font-weight: 200; line-height: 1; }
+.hero-carousel-arrow-previous { left: clamp(10px, 2.5vw, 38px); }
+.hero-carousel-arrow-next { right: clamp(10px, 2.5vw, 38px); }
+.hero-carousel-dots {
+    position: absolute;
+    top: clamp(118px, 14vh, 150px);
+    left: 50%;
+    z-index: 4;
+    display: flex;
+    gap: 8px;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+.hero-carousel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.4);
+    box-shadow: 0 1px 8px rgba(0,0,0,.22);
+    transition: width .3s ease, background .3s ease;
+}
+.hero-carousel-dot.active { width: 22px; background: rgba(255,255,255,.95); }
+@media (max-width: 720px) {
+    .hero-carousel-arrow { width: 38px; height: 72px; }
+    .hero-carousel-arrow span { font-size: 3.2rem; }
+    .hero-carousel-dots { top: 108px; }
+}

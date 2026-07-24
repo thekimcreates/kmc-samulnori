@@ -2128,3 +2128,19 @@ body.home-section-sorting * {
         flex-wrap: wrap;
     }
 }
+
+
+/* ========================================
+   ADMIN HOME HERO IMAGES
+======================================== */
+.visually-hidden { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+.home-hero-admin-panel { margin-bottom: 28px; }
+.home-hero-upload-label { cursor: pointer; }
+.home-hero-upload-progress { margin: 0 0 18px; padding: 12px 16px; border-radius: 12px; background: rgba(127,23,33,.08); color: #7f1721; font-weight: 600; }
+.home-hero-admin-list { display: grid; gap: 12px; }
+.home-hero-admin-card { display:grid; grid-template-columns:42px 138px minmax(0,1fr) auto; gap:16px; align-items:center; min-height:106px; padding:12px 16px 12px 10px; border:1px solid rgba(127,23,33,.14); border-radius:18px; background:var(--admin-card,#fff); box-shadow:0 8px 28px rgba(24,19,20,.05); }
+.home-hero-admin-card > img { width:138px; height:82px; object-fit:cover; border-radius:13px; background:#eee; }
+.home-hero-admin-copy h3 { margin:0; font-size:1rem; }
+.home-hero-admin-copy p { margin:5px 0 0; color:var(--admin-muted,#6f6769); font-size:.88rem; }
+.home-hero-admin-card.is-home-hero-sort-source { opacity:.24; }
+@media (max-width:720px) { .home-hero-admin-card { grid-template-columns:36px 86px minmax(0,1fr); } .home-hero-admin-card > img { width:86px; height:64px; } .home-hero-admin-card > .admin-danger-button { grid-column:2 / -1; justify-self:start; } }
