@@ -37,6 +37,61 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     };
 
+    const sanitizeRichText = html => {
+        const template = document.createElement("template");
+        template.innerHTML = String(html || "");
+        const allowedTags = new Set([
+            "P", "BR", "STRONG", "B", "EM", "I", "U",
+            "UL", "OL", "LI", "A"
+        ]);
+
+        const clean = parent => {
+            [...parent.childNodes].forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) return;
+                if (node.nodeType !== Node.ELEMENT_NODE) {
+                    node.remove();
+                    return;
+                }
+
+                if (!allowedTags.has(node.tagName)) {
+                    node.replaceWith(...node.childNodes);
+                    return;
+                }
+
+                const href = node.tagName === "A"
+                    ? String(node.getAttribute("href") || "").trim()
+                    : "";
+
+                [...node.attributes].forEach(attribute => {
+                    node.removeAttribute(attribute.name);
+                });
+
+                if (node.tagName === "A" && /^(https?:\/\/|mailto:)/i.test(href)) {
+                    node.setAttribute("href", href);
+                    node.setAttribute("target", "_blank");
+                    node.setAttribute("rel", "noopener noreferrer");
+                }
+
+                clean(node);
+            });
+        };
+
+        clean(template.content);
+        return template.innerHTML;
+    };
+
+    const renderMessage = (container, html, plainText) => {
+        if (!container) return;
+
+        const safeHtml = sanitizeRichText(html);
+        if (safeHtml.trim()) {
+            container.innerHTML = safeHtml;
+            return;
+        }
+
+        renderParagraphs(container, plainText);
+    };
+
     const renderTeam = data => {
         instructorName.textContent = data.instructorName || fallback.instructorName;
         instructorKoreanName.textContent = data.instructorKoreanName || "";
