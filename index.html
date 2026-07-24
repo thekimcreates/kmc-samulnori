@@ -250,8 +250,11 @@
 
 
 <!-- ======================================
-     ARRANGEMENTS SECTION
+     FIREBASE-BACKED HOME SECTIONS
 ======================================= -->
+<div id="home-sections-root" class="home-sections-root" aria-live="polite"></div>
+
+<template id="home-section-template-arrangements">
 <section class="arrangements section" id="arrangements">
     <div class="section-container">
         <div class="section-header reveal"><h2>Our Arrangements</h2></div>
@@ -263,11 +266,9 @@
         </div>
     </div>
 </section>
+</template>
 
-<!-- ======================================
-     LATEST PERFORMANCES SECTION
-======================================= -->
-
+<template id="home-section-template-performances">
 <section 
     class="performances-preview section"
     id="performances"
@@ -349,13 +350,9 @@
 
 
 </section>
+</template>
 
-
-
-<!-- ======================================
-     TEAM PREVIEW SECTION
-======================================= -->
-
+<template id="home-section-template-team">
 <section class="team-preview section" id="team">
 
 
@@ -477,8 +474,7 @@
 
 
 </section>
-
-
+</template>
 
 
 
@@ -569,6 +565,7 @@
 <script src="js/arrangements-data.js"></script>
 <script src="js/firebase.js"></script>
 <script src="js/main.js"></script>
+<script src="js/home-sections.js"></script>
 <script src="js/home-arrangements.js"></script>
 <script src="js/latest-performances.js"></script>
 

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manage Home Page | KMC Samulnori</title>
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body data-admin-page="home-sections">
+<div class="admin-shell">
+    <header class="admin-topbar admin-site-header">
+        <a class="admin-brand" href="../index.html" aria-label="KMC Samulnori home">
+            <img src="../assets/logo/full.png" alt="KMC Samulnori">
+        </a>
+        <nav class="admin-nav" aria-label="Admin navigation">
+            <a href="dashboard.html" data-admin-page="dashboard">Dashboard</a>
+            <a href="home.html" data-admin-page="home-sections">Home Page</a>
+            <a href="performances.html" data-admin-page="performances">Performances</a>
+            <a href="arrangements.html" data-admin-page="arrangements">Arrangements</a>
+            <a href="team.html" data-admin-page="team">Team</a>
+        </nav>
+    </header>
+
+    <div id="home-sections-loading" class="dashboard-loading">Verifying administrator access…</div>
+
+    <main id="home-sections-admin" class="admin-dashboard-main" hidden>
+        <div class="admin-dashboard-header performance-page-header">
+            <div>
+                <h1>Home Page</h1>
+                <p class="admin-page-copy">Reorder the homepage sections or add custom headings and text.</p>
+            </div>
+            <div class="admin-user-meta">
+                <span id="admin-user-email"></span>
+                <button id="admin-logout" class="admin-logout" type="button">Sign Out</button>
+            </div>
+        </div>
+
+        <section class="admin-panel">
+            <div class="admin-panel-heading">
+                <div>
+                    <h2>Published Sections</h2>
+                </div>
+                <button id="add-text-section" class="admin-submit" type="button">Add Header and Text</button>
+            </div>
+
+            <p class="admin-help-text home-sections-help">Drag using the handle on the left. The hero remains fixed at the top of the homepage.</p>
+            <div id="home-section-list" class="home-section-admin-list" aria-live="polite"></div>
+            <p id="home-section-status" class="login-status" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <footer class="admin-public-footer">
+        <div class="admin-footer-container">
+            <div class="admin-footer-logo"><img src="../assets/logo/full.png" alt="KMC Samulnori Logo"></div>
+            <div class="admin-footer-contact"><p>Contact: <a href="mailto:kmc-samulnori@gmail.com">kmc-samulnori@gmail.com</a></p></div>
+            <div class="admin-footer-bottom"><p>© 2026 KMC Samulnori. All Rights Reserved.</p></div>
+        </div>
+    </footer>
+</div>
+
+<div id="home-section-editor-modal" class="performance-modal" hidden aria-hidden="true">
+    <div class="performance-modal-backdrop"></div>
+    <section class="performance-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="home-section-editor-title">
+        <button class="performance-modal-close" data-close-home-section-modal type="button" aria-label="Close editor">&times;</button>
+        <div class="performance-modal-body">
+            <section class="admin-panel">
+                <div class="admin-panel-heading">
+                    <div>
+                        <p class="admin-eyebrow">Custom Homepage Content</p>
+                        <h2 id="home-section-editor-title">Add Header and Text</h2>
+                    </div>
+                </div>
+                <form id="home-section-form" class="admin-form">
+                    <input id="home-section-id" type="hidden">
+                    <div class="admin-field">
+                        <label for="home-section-heading">Header</label>
+                        <input id="home-section-heading" maxlength="120" required>
+                    </div>
+                    <div class="admin-field">
+                        <label>Text</label>
+                        <div id="home-section-body-editor"></div>
+                    </div>
+                    <p id="home-section-form-status" class="login-status" role="status" aria-live="polite"></p>
+                    <button class="admin-submit" type="submit">Save Section</button>
+                </form>
+            </section>
+        </div>
+    </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/firebase.js"></script>
+<script src="../js/admin-tools.js"></script>
+<script src="../js/admin-home.js"></script>
+<script src="../js/admin-motion.js"></script>
+</body>
+</html>
