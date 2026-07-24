@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Image Migration | KMC Samulnori</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body data-admin-page="images">
+<div class="admin-shell">
+  <header class="admin-topbar admin-site-header">
+    <a class="admin-brand" href="../index.html" aria-label="KMC Samulnori home"><img src="../assets/logo/full.webp" alt="KMC Samulnori"></a>
+    <nav class="admin-nav" aria-label="Admin navigation">
+      <a href="dashboard.html">Dashboard</a><a href="home.html">Home Page</a><a href="performances.html">Performances</a><a href="arrangements.html">Arrangements</a><a href="team.html">Team</a>
+    </nav>
+  </header>
+  <main class="admin-dashboard-main" id="image-migration-main" hidden>
+    <div class="admin-dashboard-header"><div><h1>Image Migration</h1><p>Convert existing Firebase images to optimized WebP files.</p></div><div class="admin-user-meta"><span id="admin-user-email"></span><button id="admin-logout" class="admin-logout">Sign Out</button></div></div>
+    <section class="admin-panel">
+      <div class="admin-panel-heading"><div><p class="admin-eyebrow">One-time maintenance</p><h2>Convert Firebase Images</h2></div></div>
+      <p>This scans performance highlights, arrangement photos, and instrument photos. Images already stored as WebP are skipped.</p>
+      <p><strong>Keep this page open until it finishes.</strong> Database records are updated only after each replacement uploads successfully.</p>
+      <button id="start-image-migration" class="admin-submit" type="button">Convert Existing Images</button>
+      <div id="image-migration-status" class="admin-status" role="status" aria-live="polite"></div>
+      <div id="image-migration-progress" class="activity-list"></div>
+    </section>
+  </main>
+  <div id="image-migration-loading" class="dashboard-loading">Verifying administrator access…</div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
+<script src="../js/config.js"></script><script src="../js/firebase.js"></script><script src="../js/image-optimizer.js"></script><script src="../js/admin-images.js"></script><script src="../js/admin-motion.js"></script>
+</body>
+</html>
