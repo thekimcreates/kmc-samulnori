@@ -2144,3 +2144,31 @@ body.home-section-sorting * {
 .home-hero-admin-copy p { margin:5px 0 0; color:var(--admin-muted,#6f6769); font-size:.88rem; }
 .home-hero-admin-card.is-home-hero-sort-source { opacity:.24; }
 @media (max-width:720px) { .home-hero-admin-card { grid-template-columns:36px 86px minmax(0,1fr); } .home-hero-admin-card > img { width:86px; height:64px; } .home-hero-admin-card > .admin-danger-button { grid-column:2 / -1; justify-self:start; } }
+
+/* ========================================
+   ADMIN HOME HERO — INTERACTION POLISH
+======================================== */
+.home-hero-upload-button { cursor: pointer; }
+.home-hero-upload-button:disabled { cursor: wait; opacity: .62; }
+.home-hero-admin-card {
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, opacity .18s ease;
+}
+.home-hero-admin-card:hover { border-color: rgba(127,23,33,.24); }
+.home-hero-drag-handle { touch-action: none; cursor: grab; }
+.home-hero-sort-placeholder {
+    min-height: 106px;
+    transition: height .16s ease;
+}
+.home-hero-admin-card.is-home-hero-sort-source { display: none; }
+.home-hero-drag-preview {
+    grid-template-columns: 42px 138px minmax(0,1fr) auto;
+    opacity: .97;
+    transform: translate3d(0,0,0);
+    box-shadow: 0 24px 70px rgba(32,16,19,.24);
+}
+.home-hero-drag-preview .home-section-drag-handle { cursor: grabbing; }
+@media (max-width:720px) {
+    .home-hero-sort-placeholder { min-height: 100px; }
+    .home-hero-drag-preview { grid-template-columns:36px 86px minmax(0,1fr); }
+    .home-hero-drag-preview > .admin-danger-button { grid-column:2 / -1; justify-self:start; }
+}

@@ -84,6 +84,9 @@
         blob = await canvasToBlob(canvas, "image/webp", settings.quality);
         if (blob.type !== "image/webp") throw new Error("WebP unavailable");
       } catch (_) {
+        if (settings.requireWebP) {
+          throw new Error("This browser could not convert the image to WebP. Please use a current version of Safari, Chrome, or Firefox.");
+        }
         blob = await canvasToBlob(canvas, "image/jpeg", settings.quality);
         extension = "jpg";
       }
