@@ -1,63 +1,79 @@
 "use strict";
 
-document.addEventListener("DOMContentLoaded", () => {
-    const container = document.getElementById("latest-performances");
-    const db = window.kmcFirebase?.db;
-    if (!container) return;
-    let arrangementRecords = [];
+(() => {
+    const state = {
+        performances: null,
+        arrangements: [],
+        loadingPromise: null
+    };
 
-    function showMessage(message) {
+    function formatDate(value) {
+        if (!value) return "Date unavailable";
+        const date = new Date(`${value}T12:00:00`);
+        if (Number.isNaN(date.getTime())) return String(value);
+        return new Intl.DateTimeFormat("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        }).format(date);
+    }
+
+    function formatTime(performance) {
+        if (performance.timeTbd) return "Time TBD";
+        if (!performance.time) return "";
+
+        const [hour, minute] = String(performance.time).split(":").map(Number);
+        if (!Number.isFinite(hour) || !Number.isFinite(minute)) return String(performance.time);
+
+        return new Intl.DateTimeFormat("en-US", {
+            hour: "numeric",
+            minute: "2-digit"
+        }).format(new Date(2000, 0, 1, hour, minute));
+    }
+
+    function arrangementLabel(arrangement) {
+        return `${arrangement?.name || "Arrangement"} ${arrangement?.koreanName || ""}`.trim();
+    }
+
+    function getArrangementLabels(performance) {
+        const ids = Array.isArray(performance.arrangementIds) ? performance.arrangementIds : [];
+        const resolved = ids
+            .map(id => state.arrangements.find(item => item.id === id))
+            .filter(Boolean)
+            .map(arrangementLabel);
+
+        if (resolved.length) return resolved;
+        return Array.isArray(performance.arrangements)
+            ? performance.arrangements.filter(Boolean)
+            : [];
+    }
+
+    function showMessage(container, message) {
         const paragraph = document.createElement("p");
         paragraph.className = "performance-message";
         paragraph.textContent = message;
         container.replaceChildren(paragraph);
     }
 
-    function formatDate(value) {
-        if (!value) return "Date unavailable";
-        const date = new Date(`${value}T12:00:00`);
-        if (Number.isNaN(date.getTime())) return value;
-        return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(date);
-    }
-
-    function formatTime(performance) {
-        if (performance.timeTbd) return "Time TBD";
-        if (!performance.time) return "";
-        const [hour, minute] = performance.time.split(":").map(Number);
-        const date = new Date(2000, 0, 1, hour, minute);
-        return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(date);
-    }
-
-    function arrangementLabel(arrangement) {
-        return `${arrangement.name || "Arrangement"} ${arrangement.koreanName || ""}`.trim();
-    }
-
-    function getArrangementLabels(performance) {
-        const ids = Array.isArray(performance.arrangementIds) ? performance.arrangementIds : [];
-        const resolved = ids.map((id) => arrangementRecords.find((item) => item.id === id))
-            .filter(Boolean)
-            .map(arrangementLabel);
-        if (resolved.length) return resolved;
-        return Array.isArray(performance.arrangements) ? performance.arrangements : [];
-    }
-
-    function createPerformanceCard(documentSnapshot) {
-        const performance = documentSnapshot.data();
+    function createPerformanceCard(record) {
+        const performance = record.data;
         const arrangements = getArrangementLabels(performance);
         const article = document.createElement("article");
         article.className = "performance-card reveal visible";
 
         if (performance.highlightPhotoUrl) {
-            article.style.setProperty("--performance-image", `url("${performance.highlightPhotoUrl.replaceAll('"', '%22')}")`);
+            const safeUrl = String(performance.highlightPhotoUrl).replaceAll('"', "%22");
+            article.style.setProperty("--performance-image", `url("${safeUrl}")`);
             article.classList.add("has-highlight-photo");
         }
 
-        const link = document.createElement("a");
-        link.className = "performance-card-link";
-        link.href = `performances.html#${encodeURIComponent(documentSnapshot.id)}`;
         const locationText = performance.locationTbd
             ? "Location TBD"
             : performance.locationName || performance.location || "Location unavailable";
+
+        const link = document.createElement("a");
+        link.className = "performance-card-link";
+        link.href = `performances.html#${encodeURIComponent(record.id)}`;
         link.setAttribute("aria-label", `View the ${formatDate(performance.date)} performance at ${locationText}`);
 
         const content = document.createElement("div");
@@ -65,8 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const dateTime = document.createElement("p");
         dateTime.className = "performance-date-time";
-        const timeText = formatTime(performance);
-        dateTime.textContent = [formatDate(performance.date), timeText].filter(Boolean).join(" • ");
+        dateTime.textContent = [formatDate(performance.date), formatTime(performance)]
+            .filter(Boolean)
+            .join(" • ");
 
         const location = document.createElement("h3");
         location.className = "performance-location";
@@ -76,27 +93,76 @@ document.addEventListener("DOMContentLoaded", () => {
         details.className = "performance-meta";
         details.textContent = performance.arrangementsTbd
             ? "Arrangements TBD"
-            : arrangements.length ? arrangements.join(" • ") : "Arrangement details coming soon";
+            : arrangements.length
+                ? arrangements.join(" • ")
+                : "Arrangement details coming soon";
 
         content.append(dateTime, location, details);
         article.append(link, content);
         return article;
     }
 
-    if (!db) return showMessage("Latest performances are temporarily unavailable.");
+    function render() {
+        const container = document.getElementById("latest-performances");
+        if (!container) return;
 
-    Promise.all([
-        db.collection("performances").orderBy("date", "desc").limit(2).get(),
-        db.collection("siteContent").doc("arrangements").get()
-    ])
-        .then(([snapshot, arrangementSnapshot]) => {
-            const data = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
-            arrangementRecords = Array.isArray(data.arrangements) ? data.arrangements : [];
-            if (snapshot.empty) return showMessage("No performances have been published yet.");
-            container.replaceChildren(...snapshot.docs.map(createPerformanceCard));
-        })
-        .catch((error) => {
-            console.error("Unable to load latest performances:", error);
-            showMessage("Latest performances could not be loaded.");
-        });
-});
+        if (!state.performances) {
+            container.setAttribute("aria-busy", "true");
+            return;
+        }
+
+        container.removeAttribute("aria-busy");
+        if (!state.performances.length) {
+            showMessage(container, "No performances have been published yet.");
+            return;
+        }
+
+        container.replaceChildren(...state.performances.map(createPerformanceCard));
+    }
+
+    function load() {
+        if (state.loadingPromise) return state.loadingPromise;
+
+        const db = window.kmcFirebase?.db;
+        if (!db) {
+            const container = document.getElementById("latest-performances");
+            if (container) showMessage(container, "Latest performances are temporarily unavailable.");
+            return Promise.resolve();
+        }
+
+        state.loadingPromise = Promise.all([
+            db.collection("performances").orderBy("date", "desc").limit(2).get(),
+            db.collection("siteContent").doc("arrangements").get()
+        ])
+            .then(([performanceSnapshot, arrangementSnapshot]) => {
+                const arrangementData = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
+                state.arrangements = Array.isArray(arrangementData.arrangements)
+                    ? arrangementData.arrangements
+                    : [];
+                state.performances = performanceSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data()
+                }));
+                render();
+            })
+            .catch(error => {
+                console.error("Unable to load latest performances:", error);
+                const container = document.getElementById("latest-performances");
+                if (container) showMessage(container, "Latest performances could not be loaded.");
+            });
+
+        return state.loadingPromise;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        render();
+        load();
+    });
+
+    // The homepage section manager can replace the entire Performances section
+    // after Firebase finishes loading. Re-render cached cards into the new node.
+    window.addEventListener("kmc:home-sections-rendered", () => {
+        render();
+        load();
+    });
+})();

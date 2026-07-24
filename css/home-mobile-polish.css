@@ -1,0 +1,105 @@
+/* KMC Samulnori — focused homepage stability and mobile polish */
+
+#latest-performances[aria-busy="true"] {
+    min-height: 360px;
+}
+
+.performance-card-link:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.95);
+    outline-offset: -6px;
+    border-radius: inherit;
+}
+
+@media (max-width: 900px) {
+    .performances-preview .section-container,
+    .arrangements-preview .section-container,
+    .team-preview .section-container {
+        width: min(100% - 32px, 1200px);
+    }
+
+    .performance-grid {
+        gap: 18px;
+    }
+
+    .performance-card {
+        min-height: clamp(300px, 72vw, 410px);
+    }
+
+    .performance-card-content {
+        padding: clamp(24px, 6vw, 34px);
+    }
+
+    .performance-card .performance-location {
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 600px) {
+    .hero {
+        min-height: 620px;
+        height: 100svh;
+    }
+
+    .hero-content {
+        width: min(100%, 640px);
+        padding-inline: 20px;
+    }
+
+    .hero-content h1 {
+        font-size: clamp(3.25rem, 17vw, 5.5rem);
+    }
+
+    .section {
+        overflow-x: clip;
+    }
+
+    .section-header {
+        margin-bottom: 34px;
+    }
+
+    .section-header h2 {
+        overflow-wrap: anywhere;
+    }
+
+    .performance-card {
+        min-height: 330px;
+        border-radius: 26px;
+    }
+
+    .performance-card .performance-date-time {
+        font-size: 0.76rem;
+        line-height: 1.45;
+    }
+
+    .performance-card .performance-location {
+        font-size: clamp(1.7rem, 8.5vw, 2.35rem);
+        line-height: 1.04;
+    }
+
+    .performance-card .performance-meta {
+        font-size: 0.84rem;
+        line-height: 1.5;
+    }
+
+    .performance-message {
+        padding: 32px 20px;
+        border-radius: 24px;
+    }
+}
+
+@media (hover: none) {
+    .performance-card:hover {
+        transform: none;
+    }
+
+    .performance-card.has-highlight-photo:hover::before {
+        transform: scale(1.01);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .performance-card,
+    .performance-card::before {
+        transition: none !important;
+    }
+}
