@@ -600,18 +600,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    Promise.all([
-        db.collection("performances").orderBy("date", "desc").get(),
-        db.collection("siteContent").doc("arrangements").get(),
-        db.collection("siteContent").doc("team").get()
-    ])
-        .then(([snapshot, arrangementSnapshot, teamSnapshot]) => {
-            const arrangementData = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
-            arrangementRecords = Array.isArray(arrangementData.arrangements)
-                ? [...arrangementData.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-                : [];
-            const teamData = teamSnapshot.exists ? teamSnapshot.data() : {};
-            memberRecords = Array.isArray(teamData.members) ? teamData.members.map((member,index)=>({ ...member, id:member.id || `legacy-member-${index}` })) : [];
+    const performancesRequest = db.collection("performances").orderBy("date", "desc").get();
+    const arrangementRequest = db.collection("siteContent").doc("arrangements").get();
+    const teamRequest = db.collection("siteContent").doc("team").get();
+
+    performancesRequest
+        .then((snapshot) => {
             records = snapshot.docs.map((documentSnapshot) => ({
                 id: documentSnapshot.id,
                 ...documentSnapshot.data()
@@ -621,6 +615,36 @@ document.addEventListener("DOMContentLoaded", () => {
             populateArrangementFilter();
             render();
             openHashRecord();
+
+            return Promise.allSettled([arrangementRequest, teamRequest]);
+        })
+        .then((results) => {
+            if (!results) return;
+
+            const [arrangementResult, teamResult] = results;
+
+            if (arrangementResult.status === "fulfilled") {
+                const arrangementSnapshot = arrangementResult.value;
+                const arrangementData = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
+                arrangementRecords = Array.isArray(arrangementData.arrangements)
+                    ? [...arrangementData.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                    : [];
+            }
+
+            if (teamResult.status === "fulfilled") {
+                const teamSnapshot = teamResult.value;
+                const teamData = teamSnapshot.exists ? teamSnapshot.data() : {};
+                memberRecords = Array.isArray(teamData.members)
+                    ? teamData.members.map((member, index) => ({
+                        ...member,
+                        id: member.id || `legacy-member-${index}`
+                    }))
+                    : [];
+            }
+
+            selectedArrangements.clear();
+            populateArrangementFilter();
+            render();
         })
         .catch((error) => {
             console.error("Unable to load performances:", error);
