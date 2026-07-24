@@ -61,6 +61,7 @@ window.initializeKmcPerformanceMap = function initializeKmcPerformanceMap() {
 document.addEventListener("DOMContentLoaded", () => {
     const { auth, db, storage } = window.kmcFirebase || {};
     const tools = window.kmcAdminTools;
+    const imageOptimizer = window.kmcImageOptimizer;
     const get = (id) => document.getElementById(id);
 
     const page = get("performances-admin");
@@ -526,16 +527,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    async function uploadHighlight(documentId, existingPath = "") {
+    async function uploadHighlight(documentId) {
         const file = highlightInput.files[0];
         if (!file) return null;
-        if (!file.type.startsWith("image/")) throw new Error("Select an image file.");
-        if (file.size > 10 * 1024 * 1024) throw new Error("The highlight photo must be 10 MB or smaller.");
-
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-        const path = `performance-highlights/${documentId}/${Date.now()}-${safeName}`;
-        const snapshot = await storage.ref(path).put(file, { contentType: file.type });
-        return { url: await snapshot.ref.getDownloadURL(), path };
+        if (!imageOptimizer) throw new Error("The image optimizer could not be loaded. Refresh the page and try again.");
+        const optimized = await imageOptimizer.optimize(file, {
+            maxWidth: 1800,
+            maxHeight: 1350,
+            quality: 0.82
+        });
+        const path = `performance-highlights/${documentId}/${Date.now()}-${optimized.fileName}`;
+        const snapshot = await storage.ref(path).put(optimized.blob, {
+            contentType: optimized.contentType,
+            customMetadata: {
+                originalBytes: String(optimized.originalBytes),
+                optimizedBytes: String(optimized.optimizedBytes),
+                optimizedWidth: String(optimized.width),
+                optimizedHeight: String(optimized.height)
+            }
+        });
+        return { url: await snapshot.ref.getDownloadURL(), path, optimization: optimized };
     }
 
     auth.onAuthStateChanged(async (user) => {
@@ -594,6 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let highlightPhotoUrl = highlightTbd.checked ? "" : highlightExisting.value;
             let highlightPhotoPath = highlightTbd.checked ? "" : oldRecord.highlightPhotoPath || "";
+            let imageOptimization = null;
 
             const pathToDeleteAfterSave = (highlightTbd.checked || removeExistingHighlight) ? oldRecord.highlightPhotoPath || "" : "";
             if (highlightTbd.checked || removeExistingHighlight) {
@@ -605,6 +617,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const uploaded = await uploadHighlight(reference.id, oldRecord.highlightPhotoPath || "");
                 highlightPhotoUrl = uploaded.url;
                 highlightPhotoPath = uploaded.path;
+                imageOptimization = uploaded.optimization || null;
                 if (oldRecord.highlightPhotoPath && oldRecord.highlightPhotoPath !== uploaded.path) await tools.deleteStoragePath(storage, oldRecord.highlightPhotoPath);
             }
 
@@ -647,7 +660,8 @@ document.addEventListener("DOMContentLoaded", () => {
             await tools.logActivity(db, auth, documentId ? "Updated" : "Created", "performance", reference.id, `${formatDate(data.date)} performance`);
 
             resetForm();
-            setStatus(documentId ? "Performance updated successfully." : "Performance added successfully.", "success");
+            const savedMessage = documentId ? "Performance updated successfully." : "Performance added successfully.";
+            setStatus(imageOptimization ? `${savedMessage} ${imageOptimizer.summary(imageOptimization)}` : savedMessage, "success");
             closePerformanceModal();
         } catch (error) {
             console.error("Unable to save performance:", error);

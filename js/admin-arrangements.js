@@ -3,6 +3,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const { auth, db, storage } = window.kmcFirebase || {};
   const tools = window.kmcAdminTools;
+  const imageOptimizer = window.kmcImageOptimizer;
   const defaults = window.KMC_ARRANGEMENT_DEFAULTS || { arrangements: [], instruments: [] };
   const docRef = db?.collection("siteContent").doc("arrangements");
   const q = id => document.getElementById(id);
@@ -26,12 +27,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const openModal = modal => { modal.hidden = false; modal.setAttribute("aria-hidden", "false"); requestAnimationFrame(() => modal.classList.add("is-open")); document.body.style.overflow = "hidden"; };
   const closeModal = modal => { modal.classList.remove("is-open"); modal.setAttribute("aria-hidden", "true"); setTimeout(() => { modal.hidden = true; }, 250); document.body.style.overflow = ""; };
   const preview = (img, wrap, url) => { if (url) { img.src = displayUrl(url); wrap.hidden = false; } else { img.removeAttribute("src"); wrap.hidden = true; } };
-  const upload = async (file, folder, id, oldPath = "") => {
+  const upload = async (file, folder, id) => {
     if (!file) return null;
-    if (file.size > 10 * 1024 * 1024) throw new Error("Photos must be 10 MB or smaller.");
-    const path = `${folder}/${id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
-    const snapshot = await storage.ref(path).put(file, { contentType: file.type });
-    return { photoUrl: await snapshot.ref.getDownloadURL(), photoPath: path };
+    if (!imageOptimizer) throw new Error("The image optimizer could not be loaded. Refresh the page and try again.");
+    const isInstrument = folder === "instrument-photos";
+    const optimized = await imageOptimizer.optimize(file, {
+      maxWidth: isInstrument ? 900 : 1600,
+      maxHeight: isInstrument ? 900 : 1200,
+      quality: isInstrument ? 0.80 : 0.82
+    });
+    const path = `${folder}/${id}/${Date.now()}-${optimized.fileName}`;
+    const snapshot = await storage.ref(path).put(optimized.blob, {
+      contentType: optimized.contentType,
+      customMetadata: {
+        originalBytes: String(optimized.originalBytes),
+        optimizedBytes: String(optimized.optimizedBytes),
+        optimizedWidth: String(optimized.width),
+        optimizedHeight: String(optimized.height)
+      }
+    });
+    return {
+      photoUrl: await snapshot.ref.getDownloadURL(),
+      photoPath: path,
+      optimization: optimized
+    };
   };
 
   function normalizeArrangementOrder() {
@@ -298,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (removeArrangementPhoto && old?.photoPath) await tools.deleteStoragePath(storage, old.photoPath);
       renderList();
       closeModal(editor);
-      status(pageStatus, "Arrangement saved.", "success");
+      status(pageStatus, uploaded?.optimization ? `Arrangement saved. ${imageOptimizer.summary(uploaded.optimization)}` : "Arrangement saved.", "success");
       await tools.logActivity(db, auth, old ? "Updated" : "Created", "arrangement", id, record.name);
     } catch (error) {
       console.error(error);
@@ -329,6 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
     await saveState();
     if (uploaded && existingPath && existingPath !== uploaded.photoPath) await tools.deleteStoragePath(storage, existingPath);
     await tools.logActivity(db, auth, oldId ? "Updated" : "Created", "instrument", id, record.name);
+    return uploaded;
   }
 
   function renderInstrumentLibrary(expandedId = "") {
@@ -362,9 +382,9 @@ document.addEventListener("DOMContentLoaded", () => {
       form.onsubmit = async event => {
         event.preventDefault();
         try {
-          await saveInstrument({ oldId: inst.id, name: form.querySelector("[data-name]").value, koreanName: form.querySelector("[data-korean]").value, file: form.querySelector("[data-photo]").files[0], existingUrl: inst.photoUrl, existingPath: inst.photoPath });
+          const uploaded = await saveInstrument({ oldId: inst.id, name: form.querySelector("[data-name]").value, koreanName: form.querySelector("[data-korean]").value, file: form.querySelector("[data-photo]").files[0], existingUrl: inst.photoUrl, existingPath: inst.photoPath });
           renderInstrumentLibrary();
-          status(q("instrument-status"), "Instrument saved.", "success");
+          status(q("instrument-status"), uploaded?.optimization ? `Instrument saved. ${imageOptimizer.summary(uploaded.optimization)}` : "Instrument saved.", "success");
         } catch (error) {
           status(q("instrument-status"), error.message || "Unable to save.", "error");
         }
@@ -376,11 +396,11 @@ document.addEventListener("DOMContentLoaded", () => {
   q("instrument-form").onsubmit = async event => {
     event.preventDefault();
     try {
-      await saveInstrument({ name: q("instrument-name").value, koreanName: q("instrument-korean").value, file: q("instrument-photo").files[0] });
+      const uploaded = await saveInstrument({ name: q("instrument-name").value, koreanName: q("instrument-korean").value, file: q("instrument-photo").files[0] });
       q("instrument-form").hidden = true;
       resetAddInstrumentForm();
       renderInstrumentLibrary();
-      status(q("instrument-status"), "Instrument added.", "success");
+      status(q("instrument-status"), uploaded?.optimization ? `Instrument added. ${imageOptimizer.summary(uploaded.optimization)}` : "Instrument added.", "success");
     } catch (error) {
       status(q("instrument-status"), error.message || "Unable to save.", "error");
     }
