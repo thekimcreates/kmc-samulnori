@@ -76,9 +76,31 @@
         return db;
     }
 
+    async function getFreshSnapshot(reference) {
+        try {
+            await Promise.resolve(window.kmcFirebase?.persistenceReady);
+        } catch (_) {
+            // Persistence is optional; a live server read should still continue.
+        }
+
+        try {
+            // Explicit server reads prevent Safari from repeatedly returning an
+            // older IndexedDB snapshot after a performance has been published.
+            return await reference.get({ source: "server" });
+        } catch (serverError) {
+            try {
+                // Preserve offline support when the device genuinely has no network.
+                return await reference.get({ source: "cache" });
+            } catch (_) {
+                throw serverError;
+            }
+        }
+    }
+
     function getDocument(key, collectionName, documentId) {
         return requestOnce(key, async () => {
-            const snapshot = await requireDatabase().collection(collectionName).doc(documentId).get();
+            const reference = requireDatabase().collection(collectionName).doc(documentId);
+            const snapshot = await getFreshSnapshot(reference);
             const value = snapshot.exists ? snapshot.data() : null;
             writeCache(key, value);
             return value;
@@ -91,7 +113,7 @@
             const query = typeof buildQuery.configure === "function"
                 ? buildQuery.configure(collection)
                 : collection;
-            const snapshot = await query.get();
+            const snapshot = await getFreshSnapshot(query);
             const value = snapshot.docs.map(mapDocument);
             writeCache(key, value);
             return value;
