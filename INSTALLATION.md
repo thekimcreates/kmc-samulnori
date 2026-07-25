@@ -1,7 +1,19 @@
-# Phase 3D — Safari Team & Arrangements Refresh
+# Phase 3E — macOS Safari Live Firebase Fix
 
-Upload all included files to their matching project folders and replace the existing versions.
+Upload every included file to the matching location in the project and replace the existing version.
 
-This update invalidates the old Team and Arrangements page caches, starts the Firestore refresh immediately, and refreshes again when Safari restores a page from its back-forward cache or returns to a visible tab.
+## What changed
 
-After deployment, close existing KMC tabs in Safari and reopen the site. If necessary, use Command + Option + R once.
+- Firestore IndexedDB persistence is disabled only for macOS Safari.
+- Chrome, iPhone Safari, and other supported public browsers retain their existing persistence behavior.
+- Public Firestore reads contact the server immediately and no longer wait for persistence initialization.
+- The shared local data-cache version was changed from v1 to v2, so stale saved records are ignored.
+- The public bundle cache version is now `20260725p3e` on all four public pages.
+
+## After deployment
+
+1. Close every open KMC tab in macOS Safari.
+2. Open the public website again.
+3. A normal refresh should now retrieve current Firebase content.
+
+No Firebase rules or collection changes are required.

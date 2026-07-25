@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-    const CACHE_PREFIX = "kmc-shared-data-v1:";
+    const CACHE_PREFIX = "kmc-shared-data-v2:";
     const memory = new Map();
     const pending = new Map();
     const subscribers = new Map();
@@ -78,18 +78,14 @@
 
     async function getFreshSnapshot(reference) {
         try {
-            await Promise.resolve(window.kmcFirebase?.persistenceReady);
-        } catch (_) {
-            // Persistence is optional; a live server read should still continue.
-        }
-
-        try {
-            // Explicit server reads prevent Safari from repeatedly returning an
-            // older IndexedDB snapshot after a performance has been published.
+            // Never wait for IndexedDB initialization before a live read. This is
+            // especially important on macOS Safari, where persistence startup can
+            // stall and keep an old snapshot visible indefinitely.
             return await reference.get({ source: "server" });
         } catch (serverError) {
             try {
-                // Preserve offline support when the device genuinely has no network.
+                // Offline fallback remains available on browsers with a usable
+                // Firestore cache. macOS Safari normally reaches this only offline.
                 return await reference.get({ source: "cache" });
             } catch (_) {
                 throw serverError;

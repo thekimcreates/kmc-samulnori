@@ -15,7 +15,9 @@
         window.kmcFirebase = {
             auth: null,
             db: null,
-            storage: null
+            storage: null,
+            persistenceReady: Promise.resolve(false),
+            persistenceEnabled: false
         };
         return;
     }
@@ -28,12 +30,16 @@
     const db = typeof firebase.firestore === "function" ? firebase.firestore() : null;
     const storage = typeof firebase.storage === "function" ? firebase.storage() : null;
 
-    // Public pages benefit from Firestore's IndexedDB cache. Admin pages must use
-    // a direct network client so security checks and writes never wait for a stale
-    // persistence lease or Safari's delayed offline-network recovery.
+    const ua = navigator.userAgent || "";
+    const isMacOSSafari =
+        /Macintosh|Mac OS X/.test(ua) &&
+        /Safari\//.test(ua) &&
+        !/(Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS)\//.test(ua);
     const isAdminPage = /\/admin(?:\/|$)/.test(window.location.pathname);
-    const persistenceReady = !isAdminPage && db && typeof db.enablePersistence === "function"
-        ? db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
+    const shouldEnablePersistence = !isAdminPage && !isMacOSSafari;
+
+    const persistenceReady = shouldEnablePersistence && db && typeof db.enablePersistence === "function"
+        ? db.enablePersistence({ synchronizeTabs: true }).then(() => true).catch((error) => {
             if (error?.code === "failed-precondition") {
                 console.info("Firestore persistence is already controlled by another open tab.");
             } else if (error?.code === "unimplemented") {
@@ -45,5 +51,16 @@
         })
         : Promise.resolve(false);
 
-    window.kmcFirebase = { auth, db, storage, persistenceReady };
+    if (isMacOSSafari) {
+        console.info("KMC: Firestore IndexedDB persistence is disabled on macOS Safari to guarantee fresh server data.");
+    }
+
+    window.kmcFirebase = {
+        auth,
+        db,
+        storage,
+        persistenceReady,
+        persistenceEnabled: shouldEnablePersistence,
+        isMacOSSafari
+    };
 })();

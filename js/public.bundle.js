@@ -41,7 +41,9 @@ window.KMC_CONFIG = Object.freeze({
         window.kmcFirebase = {
             auth: null,
             db: null,
-            storage: null
+            storage: null,
+            persistenceReady: Promise.resolve(false),
+            persistenceEnabled: false
         };
         return;
     }
@@ -54,8 +56,16 @@ window.KMC_CONFIG = Object.freeze({
     const db = typeof firebase.firestore === "function" ? firebase.firestore() : null;
     const storage = typeof firebase.storage === "function" ? firebase.storage() : null;
 
-    const persistenceReady = db && typeof db.enablePersistence === "function"
-        ? db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
+    const ua = navigator.userAgent || "";
+    const isMacOSSafari =
+        /Macintosh|Mac OS X/.test(ua) &&
+        /Safari\//.test(ua) &&
+        !/(Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS)\//.test(ua);
+    const isAdminPage = /\/admin(?:\/|$)/.test(window.location.pathname);
+    const shouldEnablePersistence = !isAdminPage && !isMacOSSafari;
+
+    const persistenceReady = shouldEnablePersistence && db && typeof db.enablePersistence === "function"
+        ? db.enablePersistence({ synchronizeTabs: true }).then(() => true).catch((error) => {
             if (error?.code === "failed-precondition") {
                 console.info("Firestore persistence is already controlled by another open tab.");
             } else if (error?.code === "unimplemented") {
@@ -67,14 +77,25 @@ window.KMC_CONFIG = Object.freeze({
         })
         : Promise.resolve(false);
 
-    window.kmcFirebase = { auth, db, storage, persistenceReady };
+    if (isMacOSSafari) {
+        console.info("KMC: Firestore IndexedDB persistence is disabled on macOS Safari to guarantee fresh server data.");
+    }
+
+    window.kmcFirebase = {
+        auth,
+        db,
+        storage,
+        persistenceReady,
+        persistenceEnabled: shouldEnablePersistence,
+        isMacOSSafari
+    };
 })();
 
 /* ===== shared-data-store.js ===== */
 "use strict";
 
 (() => {
-    const CACHE_PREFIX = "kmc-shared-data-v1:";
+    const CACHE_PREFIX = "kmc-shared-data-v2:";
     const memory = new Map();
     const pending = new Map();
     const subscribers = new Map();
@@ -151,18 +172,14 @@ window.KMC_CONFIG = Object.freeze({
 
     async function getFreshSnapshot(reference) {
         try {
-            await Promise.resolve(window.kmcFirebase?.persistenceReady);
-        } catch (_) {
-            // Persistence is optional; a live server read should still continue.
-        }
-
-        try {
-            // Explicit server reads prevent Safari from repeatedly returning an
-            // older IndexedDB snapshot after a performance has been published.
+            // Never wait for IndexedDB initialization before a live read. This is
+            // especially important on macOS Safari, where persistence startup can
+            // stall and keep an old snapshot visible indefinitely.
             return await reference.get({ source: "server" });
         } catch (serverError) {
             try {
-                // Preserve offline support when the device genuinely has no network.
+                // Offline fallback remains available on browsers with a usable
+                // Firestore cache. macOS Safari normally reaches this only offline.
                 return await reference.get({ source: "cache" });
             } catch (_) {
                 throw serverError;
