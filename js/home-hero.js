@@ -2,14 +2,14 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     const slider = document.querySelector(".hero-slider");
-    const controls = document.getElementById("hero-carousel-controls");
     const previousButton = document.getElementById("hero-previous");
     const nextButton = document.getElementById("hero-next");
     const dotsHost = document.getElementById("hero-carousel-dots");
     const dataApi = window.KMCHomeData;
+    const imageLoader = window.KMCImageLoader;
     const AUTOPLAY_DELAY = 5000;
     const TRANSITION_LOCK = 650;
-    if (!slider || !controls || !previousButton || !nextButton || !dotsHost) return;
+    if (!slider || !previousButton || !nextButton || !dotsHost) return;
 
     let slides = [];
     let dots = [];
@@ -21,10 +21,23 @@ document.addEventListener("DOMContentLoaded", () => {
     let touchStartY = 0;
     let currentSignature = "";
 
+    function responsiveLocalUrl(url) {
+        const value = String(url || "");
+        const match = value.match(/^(.*\/hero[1-5])\.webp(?:\?.*)?$/i);
+        if (!match) return value;
+        const viewport = Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0);
+        if (viewport <= 700) return `${match[1]}-900.webp`;
+        if (viewport <= 1400) return `${match[1]}-1600.webp`;
+        return value;
+    }
+
     const fallbackImages = [...slider.querySelectorAll(".hero-slide")]
-        .map(slide => slide.style.backgroundImage.match(/url\(["']?(.*?)["']?\)/)?.[1] || "")
-        .filter(Boolean)
-        .map((url, order) => ({ id: `default-${order + 1}`, url, order }));
+        .map((slide, order) => ({
+            id: `default-${order + 1}`,
+            url: slide.dataset.imageUrl || "",
+            order
+        }))
+        .filter(item => item.url);
 
     const normalizeImages = value => (Array.isArray(value) ? value : [])
         .filter(item => item && typeof item.url === "string" && item.url.trim())
@@ -44,19 +57,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }, AUTOPLAY_DELAY);
     }
 
+    function sourceFor(slide) {
+        return responsiveLocalUrl(slide?.dataset.imageUrl || "");
+    }
+
+    function loadSlide(index) {
+        if (!slides.length) return;
+        const slide = slides[(index + slides.length) % slides.length];
+        if (!slide || slide.dataset.imageLoaded === "true") return;
+        const source = sourceFor(slide);
+        if (!source) return;
+        slide.style.backgroundImage = `url("${source.replace(/"/g, "%22")}")`;
+        slide.dataset.imageLoaded = "true";
+    }
+
     function preload(index) {
         if (slides.length < 2) return;
-        const source = slides[(index + slides.length) % slides.length]?.dataset.imageUrl;
-        if (source) {
-            const image = new Image();
-            image.decoding = "async";
-            image.src = source;
-        }
+        const slide = slides[(index + slides.length) % slides.length];
+        const source = sourceFor(slide);
+        if (!source) return;
+        imageLoader?.preload(source);
     }
 
     function showSlide(index) {
         if (!slides.length) return;
         currentIndex = (index + slides.length) % slides.length;
+        loadSlide(currentIndex);
         slides.forEach((slide, slideIndex) => slide.classList.toggle("active", slideIndex === currentIndex));
         dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === currentIndex));
         preload(currentIndex + 1);
@@ -93,7 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
         normalized.forEach((item, index) => {
             const slide = document.createElement("div");
             slide.className = "hero-slide";
-            slide.style.backgroundImage = `url("${String(item.url).replace(/"/g, "%22")}")`;
             slide.dataset.imageUrl = item.url;
             slide.setAttribute("role", "img");
             slide.setAttribute("aria-label", `KMC Samulnori hero image ${index + 1} of ${normalized.length}`);
@@ -109,7 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const retainedIndex = Math.max(0, slides.findIndex(slide => slide.dataset.imageUrl === previousUrl));
         currentIndex = retainedIndex;
         showSlide(currentIndex);
-        controls.hidden = slides.length <= 1;
+        previousButton.hidden = slides.length <= 1;
+        nextButton.hidden = slides.length <= 1;
+        dotsHost.hidden = slides.length <= 1;
         transitioning = false;
         previousButton.disabled = false;
         nextButton.disabled = false;

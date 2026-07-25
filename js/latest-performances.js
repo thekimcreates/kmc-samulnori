@@ -46,7 +46,7 @@
         const article = document.createElement("article");
         article.className = "performance-card reveal visible";
         if (performance.highlightPhotoUrl) {
-            article.style.setProperty("--performance-image", `url("${String(performance.highlightPhotoUrl).replace(/"/g, "%22")}")`);
+            window.KMCImageLoader?.observeBackground(article, performance.highlightPhotoUrl);
             article.classList.add("has-highlight-photo");
         }
         const locationText = performance.locationTbd ? "Location TBD" : performance.locationName || performance.location || "Location unavailable";

@@ -148,10 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
         button.style.transitionDelay = `${Math.min(index * 55, 275)}ms`;
 
         if (record.highlightPhotoUrl) {
-            button.style.setProperty(
-                "--performance-image",
-                `url("${safeImageUrl(record.highlightPhotoUrl)}")`
-            );
+            window.KMCImageLoader?.observeBackground(button, record.highlightPhotoUrl);
             button.classList.add("has-highlight-photo");
         }
 
