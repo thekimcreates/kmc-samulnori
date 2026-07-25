@@ -35,8 +35,42 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastFocusedElement = null;
     let closeTimer = null;
     const selectedArrangements = new Set();
+    const CACHE_KEYS = {
+        performances: "kmc-public-performances-v2",
+        arrangements: "kmc-public-performance-arrangements-v2",
+        members: "kmc-public-performance-members-v2"
+    };
 
     if (!grid) return;
+
+    function readCache(key) {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(key) || "null");
+            return Array.isArray(parsed?.data) ? parsed.data : [];
+        } catch (error) {
+            console.warn("Unable to read performance cache:", error);
+            return [];
+        }
+    }
+
+    function writeCache(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify({
+                savedAt: Date.now(),
+                data
+            }));
+        } catch (error) {
+            console.warn("Unable to save performance cache:", error);
+        }
+    }
+
+    function stableStringify(value) {
+        try {
+            return JSON.stringify(value);
+        } catch (error) {
+            return "";
+        }
+    }
 
     function safeImageUrl(value) {
         return String(value || "").replaceAll('"', "%22");
@@ -595,59 +629,124 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("hashchange", openHashRecord);
 
+    function refreshControlsAndCards({ reopenHash = false } = {}) {
+        const selectedYear = yearFilter.value || "all";
+        const selectedKeys = new Set(selectedArrangements);
+
+        populateYearFilter();
+        if ([...yearFilter.options].some((option) => option.value === selectedYear)) {
+            yearFilter.value = selectedYear;
+        }
+
+        populateArrangementFilter();
+        selectedArrangements.clear();
+        arrangementOptions.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+            const key = normalizeArrangement(input.value);
+            const checked = selectedKeys.has(key);
+            input.checked = checked;
+            if (checked) selectedArrangements.add(key);
+        });
+        allArrangementsInput.checked = selectedArrangements.size === 0;
+        updateArrangementSummary();
+        render();
+
+        if (activeRecord) {
+            const updated = records.find((record) => record.id === activeRecord.id);
+            if (updated) {
+                activeRecord = updated;
+                detailTitle.textContent = getLocation(updated);
+                detailDateTime.textContent = `${formatDate(updated.date)} • ${formatTime(updated)}`;
+                detailArrangements.textContent = getArrangements(updated).replaceAll(" · ", " • ");
+                renderLocation(updated);
+                renderMembers(updated);
+            }
+        } else if (reopenHash) {
+            openHashRecord();
+        }
+    }
+
+    const cachedPerformances = readCache(CACHE_KEYS.performances);
+    arrangementRecords = readCache(CACHE_KEYS.arrangements);
+    memberRecords = readCache(CACHE_KEYS.members);
+
+    if (cachedPerformances.length) {
+        records = cachedPerformances;
+        refreshControlsAndCards({ reopenHash: true });
+    }
+
     if (!db) {
-        showLoadError();
+        if (!records.length) showLoadError();
         return;
     }
 
-    const performancesRequest = db.collection("performances").orderBy("date", "desc").get();
-    const arrangementRequest = db.collection("siteContent").doc("arrangements").get();
-    const teamRequest = db.collection("siteContent").doc("team").get();
+    const startBackgroundLoad = () => {
+        const performancesRequest = db.collection("performances").orderBy("date", "desc").get();
+        const arrangementRequest = db.collection("siteContent").doc("arrangements").get();
+        const teamRequest = db.collection("siteContent").doc("team").get();
 
-    performancesRequest
-        .then((snapshot) => {
-            records = snapshot.docs.map((documentSnapshot) => ({
-                id: documentSnapshot.id,
-                ...documentSnapshot.data()
-            }));
+        performancesRequest
+            .then((snapshot) => {
+                const freshRecords = snapshot.docs.map((documentSnapshot) => ({
+                    id: documentSnapshot.id,
+                    ...documentSnapshot.data()
+                }));
 
-            populateYearFilter();
-            populateArrangementFilter();
-            render();
-            openHashRecord();
+                const changed = stableStringify(freshRecords) !== stableStringify(records);
+                records = freshRecords;
+                writeCache(CACHE_KEYS.performances, records);
 
-            return Promise.allSettled([arrangementRequest, teamRequest]);
-        })
-        .then((results) => {
-            if (!results) return;
+                if (changed || !grid.querySelector(".performance-card")) {
+                    refreshControlsAndCards({ reopenHash: true });
+                }
+            })
+            .catch((error) => {
+                console.error("Unable to load performances:", error);
+                if (!records.length) showLoadError();
+            });
 
+        Promise.allSettled([arrangementRequest, teamRequest]).then((results) => {
             const [arrangementResult, teamResult] = results;
+            let metadataChanged = false;
 
             if (arrangementResult.status === "fulfilled") {
-                const arrangementSnapshot = arrangementResult.value;
-                const arrangementData = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
-                arrangementRecords = Array.isArray(arrangementData.arrangements)
-                    ? [...arrangementData.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                const snapshot = arrangementResult.value;
+                const data = snapshot.exists ? snapshot.data() : {};
+                const freshArrangements = Array.isArray(data.arrangements)
+                    ? [...data.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                     : [];
+                metadataChanged = metadataChanged || stableStringify(freshArrangements) !== stableStringify(arrangementRecords);
+                arrangementRecords = freshArrangements;
+                writeCache(CACHE_KEYS.arrangements, arrangementRecords);
             }
 
             if (teamResult.status === "fulfilled") {
-                const teamSnapshot = teamResult.value;
-                const teamData = teamSnapshot.exists ? teamSnapshot.data() : {};
-                memberRecords = Array.isArray(teamData.members)
-                    ? teamData.members.map((member, index) => ({
+                const snapshot = teamResult.value;
+                const data = snapshot.exists ? snapshot.data() : {};
+                const freshMembers = Array.isArray(data.members)
+                    ? data.members.map((member, index) => ({
                         ...member,
                         id: member.id || `legacy-member-${index}`
                     }))
                     : [];
+                metadataChanged = metadataChanged || stableStringify(freshMembers) !== stableStringify(memberRecords);
+                memberRecords = freshMembers;
+                writeCache(CACHE_KEYS.members, memberRecords);
             }
 
-            selectedArrangements.clear();
-            populateArrangementFilter();
-            render();
-        })
-        .catch((error) => {
-            console.error("Unable to load performances:", error);
-            showLoadError();
+            if (metadataChanged && records.length) {
+                refreshControlsAndCards();
+            }
         });
+    };
+
+    if (cachedPerformances.length) {
+        if ("requestIdleCallback" in window) {
+            window.requestIdleCallback(startBackgroundLoad, { timeout: 900 });
+        } else {
+            window.setTimeout(startBackgroundLoad, 40);
+        }
+    } else {
+        startBackgroundLoad();
+    }
+
 });
