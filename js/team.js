@@ -1,12 +1,8 @@
 "use strict";
 
-document.addEventListener("DOMContentLoaded", () => {
-    const db = window.kmcFirebase?.db;
-    const instructorName = document.getElementById("instructor-title");
-    const instructorKoreanName = document.getElementById("instructor-korean-name");
-    const koreanMessage = document.getElementById("teacher-message-ko");
-    const englishMessage = document.getElementById("teacher-message-en");
-    const membersGrid = document.getElementById("members-grid");
+(() => {
+    const CACHE_KEY = "kmc-public-team-v2";
+    const CACHE_MAX_AGE = 1000 * 60 * 60 * 24 * 14;
 
     const fallback = {
         instructorName: "Susanna Hong",
@@ -24,26 +20,37 @@ document.addEventListener("DOMContentLoaded", () => {
         ].map(([name, age, service], order) => ({ name, age, service, order }))
     };
 
-    const renderParagraphs = (container, text) => {
-        container.replaceChildren();
-        String(text || "")
-            .split(/\n\s*\n/)
-            .map(paragraph => paragraph.trim())
-            .filter(Boolean)
-            .forEach(paragraph => {
-                const p = document.createElement("p");
-                p.textContent = paragraph;
-                container.appendChild(p);
-            });
+    const stableStringify = value => JSON.stringify(value, (key, val) => {
+        if (!val || typeof val !== "object" || Array.isArray(val)) return val;
+        return Object.keys(val).sort().reduce((result, itemKey) => {
+            result[itemKey] = val[itemKey];
+            return result;
+        }, {});
+    });
+
+    const readCache = () => {
+        try {
+            const record = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+            if (!record || typeof record !== "object" || !record.data) return null;
+            if (Date.now() - Number(record.savedAt || 0) > CACHE_MAX_AGE) return null;
+            return record.data;
+        } catch {
+            return null;
+        }
+    };
+
+    const writeCache = data => {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
+        } catch {
+            // Caching is optional; private browsing/storage restrictions must not break the page.
+        }
     };
 
     const sanitizeRichText = html => {
         const template = document.createElement("template");
         template.innerHTML = String(html || "");
-        const allowedTags = new Set([
-            "P", "BR", "STRONG", "B", "EM", "I", "U",
-            "UL", "OL", "LI", "A"
-        ]);
+        const allowedTags = new Set(["P", "BR", "STRONG", "B", "EM", "I", "U", "UL", "OL", "LI", "A"]);
 
         const clean = parent => {
             [...parent.childNodes].forEach(node => {
@@ -58,20 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                const href = node.tagName === "A"
-                    ? String(node.getAttribute("href") || "").trim()
-                    : "";
-
-                [...node.attributes].forEach(attribute => {
-                    node.removeAttribute(attribute.name);
-                });
+                const href = node.tagName === "A" ? String(node.getAttribute("href") || "").trim() : "";
+                [...node.attributes].forEach(attribute => node.removeAttribute(attribute.name));
 
                 if (node.tagName === "A" && /^(https?:\/\/|mailto:)/i.test(href)) {
                     node.setAttribute("href", href);
                     node.setAttribute("target", "_blank");
                     node.setAttribute("rel", "noopener noreferrer");
                 }
-
                 clean(node);
             });
         };
@@ -80,63 +81,108 @@ document.addEventListener("DOMContentLoaded", () => {
         return template.innerHTML;
     };
 
-    const renderMessage = (container, html, plainText) => {
-        if (!container) return;
+    const renderParagraphs = (container, text) => {
+        const fragment = document.createDocumentFragment();
+        String(text || "")
+            .split(/\n\s*\n/)
+            .map(paragraph => paragraph.trim())
+            .filter(Boolean)
+            .forEach(paragraph => {
+                const p = document.createElement("p");
+                p.textContent = paragraph;
+                fragment.appendChild(p);
+            });
+        container.replaceChildren(fragment);
+    };
 
+    const renderMessage = (container, html, plainText) => {
         const safeHtml = sanitizeRichText(html);
         if (safeHtml.trim()) {
             container.innerHTML = safeHtml;
             return;
         }
-
         renderParagraphs(container, plainText);
     };
 
-    const renderTeam = data => {
-        instructorName.textContent = data.instructorName || fallback.instructorName;
-        instructorKoreanName.textContent = data.instructorKoreanName || "";
-        instructorKoreanName.hidden = !instructorKoreanName.textContent;
-        renderMessage(koreanMessage, data.teacherMessageKoHtml, data.teacherMessageKo);
-        renderMessage(englishMessage, data.teacherMessageEnHtml, data.teacherMessageEn);
+    document.addEventListener("DOMContentLoaded", () => {
+        const instructorName = document.getElementById("instructor-title");
+        const instructorKoreanName = document.getElementById("instructor-korean-name");
+        const koreanMessage = document.getElementById("teacher-message-ko");
+        const englishMessage = document.getElementById("teacher-message-en");
+        const membersGrid = document.getElementById("members-grid");
 
-        const members = Array.isArray(data.members) ? [...data.members] : [];
-        members.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-        membersGrid.replaceChildren();
+        if (!instructorName || !instructorKoreanName || !koreanMessage || !englishMessage || !membersGrid) return;
 
-        members.forEach(member => {
-            const article = document.createElement("article");
-            article.className = "member-card reveal visible";
+        let renderedSignature = "";
 
-            const details = document.createElement("div");
-            details.className = "member-details";
-
-            const name = document.createElement("h3");
-            name.textContent = member.name || "Member";
-
-            const age = document.createElement("p");
-            age.textContent = `Age: ${member.age ?? "—"}`;
-
-            const service = document.createElement("p");
-            service.textContent = `Service: ${member.service || "—"}`;
-
-            details.append(name, age, service);
-            article.appendChild(details);
-            membersGrid.appendChild(article);
+        const normalize = source => ({
+            ...fallback,
+            ...(source || {}),
+            members: Array.isArray(source?.members) ? source.members : fallback.members
         });
-    };
 
-    renderTeam(fallback);
+        const renderTeam = source => {
+            const data = normalize(source);
+            const signature = stableStringify(data);
+            if (signature === renderedSignature) return;
+            renderedSignature = signature;
 
-    if (!db) {
-        console.warn("Team page is using fallback content because Firestore is unavailable.");
-        return;
-    }
+            instructorName.textContent = data.instructorName || fallback.instructorName;
+            instructorKoreanName.textContent = data.instructorKoreanName || "";
+            instructorKoreanName.hidden = !instructorKoreanName.textContent;
+            renderMessage(koreanMessage, data.teacherMessageKoHtml, data.teacherMessageKo);
+            renderMessage(englishMessage, data.teacherMessageEnHtml, data.teacherMessageEn);
 
-    db.collection("siteContent").doc("team").get()
-        .then(snapshot => {
-            if (snapshot.exists) renderTeam({ ...fallback, ...snapshot.data() });
-        })
-        .catch(error => {
-            console.error("Unable to load team information from Firestore:", error);
-        });
-});
+            const members = [...data.members].sort((a, b) => Number(a?.order ?? 0) - Number(b?.order ?? 0));
+            const fragment = document.createDocumentFragment();
+
+            members.forEach(member => {
+                const article = document.createElement("article");
+                article.className = "member-card reveal visible";
+
+                const details = document.createElement("div");
+                details.className = "member-details";
+
+                const name = document.createElement("h3");
+                name.textContent = member?.name || "Member";
+
+                const age = document.createElement("p");
+                age.textContent = `Age: ${member?.age ?? "—"}`;
+
+                const service = document.createElement("p");
+                service.textContent = `Service: ${member?.service || "—"}`;
+
+                details.append(name, age, service);
+                article.appendChild(details);
+                fragment.appendChild(article);
+            });
+
+            membersGrid.replaceChildren(fragment);
+        };
+
+        const cached = readCache();
+        renderTeam(cached || fallback);
+
+        const refreshFromFirestore = async () => {
+            const db = window.kmcFirebase?.db;
+            if (!db) return;
+
+            try {
+                const snapshot = await db.collection("siteContent").doc("team").get();
+                if (!snapshot.exists) return;
+                const latest = normalize(snapshot.data());
+                writeCache(latest);
+                renderTeam(latest);
+            } catch (error) {
+                console.error("Unable to refresh team information from Firestore:", error);
+            }
+        };
+
+        // Let the browser paint the page first. Firebase refreshes quietly afterward.
+        if ("requestIdleCallback" in window) {
+            window.requestIdleCallback(refreshFromFirestore, { timeout: 1200 });
+        } else {
+            window.setTimeout(refreshFromFirestore, 0);
+        }
+    });
+})();
