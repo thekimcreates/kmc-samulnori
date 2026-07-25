@@ -149,6 +149,7 @@
   }
 
   const ADMIN_CACHE_PREFIX = "kmc-admin-access:";
+  const pendingAdminChecks = new Map();
 
   function adminCacheKey(user) {
     return `${ADMIN_CACHE_PREFIX}${user?.uid || "unknown"}`;
@@ -188,24 +189,46 @@
     }
   }
 
-  async function verifyAdmin(auth, db, user, { force = false, ttl = 5 * 60 * 1000, attempts = 3 } = {}) {
+  async function verifyAdmin(auth, db, user, { force = false, ttl = 5 * 60 * 1000, attempts = 2, timeout = 10000 } = {}) {
     if (!auth || !db || !user?.uid) return false;
     if (!force && readCachedAdminAccess(user, ttl) === true) return true;
 
-    let lastError;
-    for (let attempt = 1; attempt <= attempts; attempt += 1) {
-      try {
-        const record = await db.collection("admins").doc(user.uid).get();
-        const active = record.exists && record.data()?.active === true;
-        if (active) cacheAdminAccess(user);
-        else clearAdminAccessCache(user);
-        return active;
-      } catch (error) {
-        lastError = error;
-        if (attempt < attempts) await new Promise(resolve => setTimeout(resolve, attempt * 400));
+    const key = user.uid;
+    if (!force && pendingAdminChecks.has(key)) return pendingAdminChecks.get(key);
+
+    const check = (async () => {
+      let lastError;
+      for (let attempt = 1; attempt <= attempts; attempt += 1) {
+        try {
+          const request = db.collection("admins").doc(user.uid).get();
+          const timer = new Promise((_, reject) => {
+            setTimeout(() => {
+              const error = new Error("Administrator verification timed out.");
+              error.code = "admin/verification-timeout";
+              reject(error);
+            }, timeout);
+          });
+          const record = await Promise.race([request, timer]);
+          const active = record.exists && record.data()?.active === true;
+          if (active) cacheAdminAccess(user);
+          else clearAdminAccessCache(user);
+          return active;
+        } catch (error) {
+          lastError = error;
+          if (attempt < attempts && error?.code !== "admin/verification-timeout") {
+            await new Promise(resolve => setTimeout(resolve, attempt * 400));
+          }
+        }
       }
+      throw lastError;
+    })();
+
+    pendingAdminChecks.set(key, check);
+    try {
+      return await check;
+    } finally {
+      pendingAdminChecks.delete(key);
     }
-    throw lastError;
   }
 
   async function signOut(auth) {
