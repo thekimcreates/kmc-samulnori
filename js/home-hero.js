@@ -6,10 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const previousButton = document.getElementById("hero-previous");
     const nextButton = document.getElementById("hero-next");
     const dotsHost = document.getElementById("hero-carousel-dots");
-    const db = window.kmcFirebase?.db;
+    const dataApi = window.KMCHomeData;
     const AUTOPLAY_DELAY = 5000;
     const TRANSITION_LOCK = 650;
-
     if (!slider || !controls || !previousButton || !nextButton || !dotsHost) return;
 
     let slides = [];
@@ -20,16 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let transitioning = false;
     let touchStartX = 0;
     let touchStartY = 0;
+    let currentSignature = "";
 
     const fallbackImages = [...slider.querySelectorAll(".hero-slide")]
-        .map(slide => {
-            const match = slide.style.backgroundImage.match(/url\(["']?(.*?)["']?\)/);
-            return match?.[1] || "";
-        })
+        .map(slide => slide.style.backgroundImage.match(/url\(["']?(.*?)["']?\)/)?.[1] || "")
         .filter(Boolean)
         .map((url, order) => ({ id: `default-${order + 1}`, url, order }));
 
-    const normalizedImages = value => (Array.isArray(value) ? value : [])
+    const normalizeImages = value => (Array.isArray(value) ? value : [])
         .filter(item => item && typeof item.url === "string" && item.url.trim())
         .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
 
@@ -47,16 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }, AUTOPLAY_DELAY);
     }
 
-    function preloadAround(index) {
+    function preload(index) {
         if (slides.length < 2) return;
-        [index + 1, index - 1].forEach(candidate => {
-            const slide = slides[(candidate + slides.length) % slides.length];
-            const source = slide?.dataset.imageUrl;
-            if (source) {
-                const image = new Image();
-                image.src = source;
-            }
-        });
+        const source = slides[(index + slides.length) % slides.length]?.dataset.imageUrl;
+        if (source) {
+            const image = new Image();
+            image.decoding = "async";
+            image.src = source;
+        }
     }
 
     function showSlide(index) {
@@ -64,13 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
         currentIndex = (index + slides.length) % slides.length;
         slides.forEach((slide, slideIndex) => slide.classList.toggle("active", slideIndex === currentIndex));
         dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === currentIndex));
-        preloadAround(currentIndex);
+        preload(currentIndex + 1);
     }
 
-    function setTransitionLock() {
+    function manualMove(offset) {
+        if (transitioning || slides.length <= 1) return;
         transitioning = true;
         previousButton.disabled = true;
         nextButton.disabled = true;
+        showSlide(currentIndex + offset);
+        scheduleAutoplay();
         window.clearTimeout(transitionTimer);
         transitionTimer = window.setTimeout(() => {
             transitioning = false;
@@ -79,81 +77,71 @@ document.addEventListener("DOMContentLoaded", () => {
         }, TRANSITION_LOCK);
     }
 
-    function manualMove(offset) {
-        if (transitioning || slides.length <= 1) return;
-        setTransitionLock();
-        showSlide(currentIndex + offset);
-        scheduleAutoplay();
-    }
-
     function buildCarousel(images) {
+        const normalized = normalizeImages(images);
+        if (!normalized.length) return;
+        const signature = JSON.stringify(normalized.map(item => [item.id, item.url, item.order]));
+        if (signature === currentSignature) return;
+        currentSignature = signature;
+
+        const previousUrl = slides[currentIndex]?.dataset.imageUrl;
         slider.replaceChildren();
         dotsHost.replaceChildren();
         slides = [];
         dots = [];
-        currentIndex = 0;
 
-        images.forEach((item, index) => {
-            const safeUrl = String(item.url).replace(/"/g, "%22");
+        normalized.forEach((item, index) => {
             const slide = document.createElement("div");
-            slide.className = `hero-slide${index === 0 ? " active" : ""}`;
-            slide.style.backgroundImage = `url("${safeUrl}")`;
+            slide.className = "hero-slide";
+            slide.style.backgroundImage = `url("${String(item.url).replace(/"/g, "%22")}")`;
             slide.dataset.imageUrl = item.url;
             slide.setAttribute("role", "img");
-            slide.setAttribute("aria-label", `KMC Samulnori hero image ${index + 1} of ${images.length}`);
+            slide.setAttribute("aria-label", `KMC Samulnori hero image ${index + 1} of ${normalized.length}`);
             slider.appendChild(slide);
             slides.push(slide);
 
             const dot = document.createElement("span");
-            dot.className = `hero-carousel-dot${index === 0 ? " active" : ""}`;
+            dot.className = "hero-carousel-dot";
             dotsHost.appendChild(dot);
             dots.push(dot);
         });
 
+        const retainedIndex = Math.max(0, slides.findIndex(slide => slide.dataset.imageUrl === previousUrl));
+        currentIndex = retainedIndex;
+        showSlide(currentIndex);
         controls.hidden = slides.length <= 1;
         transitioning = false;
         previousButton.disabled = false;
         nextButton.disabled = false;
-        preloadAround(0);
         scheduleAutoplay();
     }
 
     previousButton.addEventListener("click", () => manualMove(-1));
     nextButton.addEventListener("click", () => manualMove(1));
-
     document.addEventListener("keydown", event => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-        const tag = document.activeElement?.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) return;
         if (event.key === "ArrowLeft") manualMove(-1);
         if (event.key === "ArrowRight") manualMove(1);
     });
-
     slider.addEventListener("touchstart", event => {
-        const touch = event.changedTouches[0];
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
+        touchStartX = event.changedTouches[0].clientX;
+        touchStartY = event.changedTouches[0].clientY;
     }, { passive: true });
-
     slider.addEventListener("touchend", event => {
-        const touch = event.changedTouches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
-        if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) {
-            manualMove(deltaX > 0 ? -1 : 1);
-        }
+        const deltaX = event.changedTouches[0].clientX - touchStartX;
+        const deltaY = event.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) manualMove(deltaX > 0 ? -1 : 1);
     }, { passive: true });
-
     document.addEventListener("visibilitychange", () => document.hidden ? stopAutoplay() : scheduleAutoplay());
 
-    buildCarousel(fallbackImages);
+    const cached = dataApi?.cachedValue("home-content");
+    buildCarousel(normalizeImages(cached?.heroImages).length ? cached.heroImages : fallbackImages);
 
-    if (db) {
-        db.collection("siteContent").doc("homeSections").get()
-            .then(snapshot => {
-                const firebaseImages = normalizedImages(snapshot.data()?.heroImages);
-                if (firebaseImages.length) buildCarousel(firebaseImages);
-            })
-            .catch(error => console.warn("Hero images could not be loaded from Firebase:", error));
-    }
+    dataApi?.getHomeContent()
+        .then(content => {
+            const images = normalizeImages(content?.heroImages);
+            if (images.length) buildCarousel(images);
+        })
+        .catch(error => console.warn("Hero images could not be refreshed:", error));
 });

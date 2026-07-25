@@ -2,101 +2,70 @@
 
 (() => {
     const state = {
-        performances: null,
+        performances: [],
         arrangements: [],
-        loadingPromise: null
+        performancesReady: false,
+        signature: ""
     };
 
     function formatDate(value) {
         if (!value) return "Date unavailable";
         const date = new Date(`${value}T12:00:00`);
-        if (Number.isNaN(date.getTime())) return String(value);
-        return new Intl.DateTimeFormat("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric"
+        return Number.isNaN(date.getTime()) ? String(value) : new Intl.DateTimeFormat("en-US", {
+            month: "long", day: "numeric", year: "numeric"
         }).format(date);
     }
 
     function formatTime(performance) {
         if (performance.timeTbd) return "Time TBD";
         if (!performance.time) return "";
-
         const [hour, minute] = String(performance.time).split(":").map(Number);
         if (!Number.isFinite(hour) || !Number.isFinite(minute)) return String(performance.time);
-
-        return new Intl.DateTimeFormat("en-US", {
-            hour: "numeric",
-            minute: "2-digit"
-        }).format(new Date(2000, 0, 1, hour, minute));
+        return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" })
+            .format(new Date(2000, 0, 1, hour, minute));
     }
 
-    function arrangementLabel(arrangement) {
-        return `${arrangement?.name || "Arrangement"} ${arrangement?.koreanName || ""}`.trim();
-    }
-
-    function getArrangementLabels(performance) {
-        const ids = Array.isArray(performance.arrangementIds) ? performance.arrangementIds : [];
-        const resolved = ids
-            .map(id => state.arrangements.find(item => item.id === id))
+    function arrangementLabels(performance) {
+        const byId = new Map(state.arrangements.map(item => [item.id, item]));
+        const resolved = (Array.isArray(performance.arrangementIds) ? performance.arrangementIds : [])
+            .map(id => byId.get(id))
             .filter(Boolean)
-            .map(arrangementLabel);
-
-        if (resolved.length) return resolved;
-        return Array.isArray(performance.arrangements)
-            ? performance.arrangements.filter(Boolean)
-            : [];
+            .map(item => `${item.name || "Arrangement"} ${item.koreanName || ""}`.trim());
+        return resolved.length ? resolved : (Array.isArray(performance.arrangements) ? performance.arrangements.filter(Boolean) : []);
     }
 
-    function showMessage(container, message) {
+    function message(text) {
         const paragraph = document.createElement("p");
         paragraph.className = "performance-message";
-        paragraph.textContent = message;
-        container.replaceChildren(paragraph);
+        paragraph.textContent = text;
+        return paragraph;
     }
 
-    function createPerformanceCard(record) {
-        const performance = record.data;
-        const arrangements = getArrangementLabels(performance);
+    function card(record) {
+        const performance = record.data || {};
         const article = document.createElement("article");
         article.className = "performance-card reveal visible";
-
         if (performance.highlightPhotoUrl) {
-            const safeUrl = String(performance.highlightPhotoUrl).replaceAll('"', "%22");
-            article.style.setProperty("--performance-image", `url("${safeUrl}")`);
+            article.style.setProperty("--performance-image", `url("${String(performance.highlightPhotoUrl).replace(/"/g, "%22")}")`);
             article.classList.add("has-highlight-photo");
         }
-
-        const locationText = performance.locationTbd
-            ? "Location TBD"
-            : performance.locationName || performance.location || "Location unavailable";
-
+        const locationText = performance.locationTbd ? "Location TBD" : performance.locationName || performance.location || "Location unavailable";
         const link = document.createElement("a");
         link.className = "performance-card-link";
         link.href = `performances.html#${encodeURIComponent(record.id)}`;
         link.setAttribute("aria-label", `View the ${formatDate(performance.date)} performance at ${locationText}`);
-
         const content = document.createElement("div");
         content.className = "performance-card-content";
-
         const dateTime = document.createElement("p");
         dateTime.className = "performance-date-time";
-        dateTime.textContent = [formatDate(performance.date), formatTime(performance)]
-            .filter(Boolean)
-            .join(" • ");
-
+        dateTime.textContent = [formatDate(performance.date), formatTime(performance)].filter(Boolean).join(" • ");
         const location = document.createElement("h3");
         location.className = "performance-location";
         location.textContent = locationText;
-
         const details = document.createElement("p");
         details.className = "performance-meta";
-        details.textContent = performance.arrangementsTbd
-            ? "Arrangements TBD"
-            : arrangements.length
-                ? arrangements.join(" • ")
-                : "Arrangement details coming soon";
-
+        const labels = arrangementLabels(performance);
+        details.textContent = performance.arrangementsTbd ? "Arrangements TBD" : labels.length ? labels.join(" • ") : "Arrangement details coming soon";
         content.append(dateTime, location, details);
         article.append(link, content);
         return article;
@@ -105,64 +74,63 @@
     function render() {
         const container = document.getElementById("latest-performances");
         if (!container) return;
-
-        if (!state.performances) {
+        const signature = JSON.stringify([state.performances, state.arrangements.map(item => [item.id, item.name, item.koreanName])]);
+        if (signature === state.signature && container.childElementCount) return;
+        state.signature = signature;
+        container.removeAttribute("aria-busy");
+        if (!state.performancesReady) {
             container.setAttribute("aria-busy", "true");
             return;
         }
-
-        container.removeAttribute("aria-busy");
-        if (!state.performances.length) {
-            showMessage(container, "No performances have been published yet.");
-            return;
-        }
-
-        container.replaceChildren(...state.performances.map(createPerformanceCard));
+        container.replaceChildren(...(state.performances.length
+            ? state.performances.map(card)
+            : [message("No performances have been published yet.")]));
     }
 
-    function load() {
-        if (state.loadingPromise) return state.loadingPromise;
-
-        const db = window.kmcFirebase?.db;
-        if (!db) {
-            const container = document.getElementById("latest-performances");
-            if (container) showMessage(container, "Latest performances are temporarily unavailable.");
-            return Promise.resolve();
+    function hydrateCached() {
+        const api = window.KMCHomeData;
+        const cachedPerformances = api?.cachedValue("latest-performances-2");
+        const cachedArrangements = api?.cachedValue("arrangements");
+        if (Array.isArray(cachedPerformances)) {
+            state.performances = cachedPerformances;
+            state.performancesReady = true;
         }
+        if (Array.isArray(cachedArrangements?.arrangements)) state.arrangements = cachedArrangements.arrangements;
+        render();
+    }
 
-        state.loadingPromise = Promise.all([
-            db.collection("performances").orderBy("date", "desc").limit(2).get(),
-            db.collection("siteContent").doc("arrangements").get()
-        ])
-            .then(([performanceSnapshot, arrangementSnapshot]) => {
-                const arrangementData = arrangementSnapshot.exists ? arrangementSnapshot.data() : {};
-                state.arrangements = Array.isArray(arrangementData.arrangements)
-                    ? arrangementData.arrangements
-                    : [];
-                state.performances = performanceSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
+    function refresh() {
+        const api = window.KMCHomeData;
+        hydrateCached();
+        if (!api) return;
+        api.getLatestPerformances(2)
+            .then(records => {
+                state.performances = Array.isArray(records) ? records : [];
+                state.performancesReady = true;
+                state.signature = "";
                 render();
             })
             .catch(error => {
-                console.error("Unable to load latest performances:", error);
-                const container = document.getElementById("latest-performances");
-                if (container) showMessage(container, "Latest performances could not be loaded.");
+                console.warn("Unable to refresh latest performances:", error);
+                if (!state.performancesReady) {
+                    state.performancesReady = true;
+                    state.signature = "";
+                    const container = document.getElementById("latest-performances");
+                    if (container) container.replaceChildren(message("Latest performances could not be loaded."));
+                }
             });
-
-        return state.loadingPromise;
+        api.getArrangements()
+            .then(data => {
+                state.arrangements = Array.isArray(data?.arrangements) ? data.arrangements : [];
+                state.signature = "";
+                render();
+            })
+            .catch(() => {});
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        render();
-        load();
-    });
-
-    // The homepage section manager can replace the entire Performances section
-    // after Firebase finishes loading. Re-render cached cards into the new node.
+    document.addEventListener("DOMContentLoaded", refresh);
     window.addEventListener("kmc:home-sections-rendered", () => {
+        state.signature = "";
         render();
-        load();
     });
 })();

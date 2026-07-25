@@ -1,11 +1,55 @@
 "use strict";
-document.addEventListener("DOMContentLoaded", async () => {
-  const grid=document.getElementById("home-arrangement-grid"); if(!grid)return;
-  const fallback=window.KMC_ARRANGEMENT_DEFAULTS || {arrangements:[]}; let data=fallback;
-  try { const db=window.kmcFirebase?.db; if(db){const snap=await db.collection("siteContent").doc("arrangements").get(); if(snap.exists)data={...fallback,...snap.data()};} } catch(e){console.error("Unable to load home arrangements:",e)}
-  grid.replaceChildren(); [...(data.arrangements||[])].sort((a,b)=>(a.order??0)-(b.order??0)).forEach(item=>{
-    const a=document.createElement("a"); a.className="arrangement-card reveal arrangement-card-link visible"; a.href=`arrangements.html#${encodeURIComponent(item.id)}`; a.setAttribute("aria-label",`View ${item.name || 'arrangement'} details`);
-    const img=document.createElement("img"); img.src=item.photoUrl||""; img.alt=item.name||"Arrangement"; img.loading="lazy"; img.decoding="async";
-    const content=document.createElement("div"); content.className="card-content"; const h3=document.createElement("h3"); h3.textContent=item.name||"Arrangement"; const p=document.createElement("p"); p.textContent=item.koreanName||""; content.append(h3,p); a.append(img,content); grid.appendChild(a);
-  });
-});
+
+(() => {
+    let currentSignature = "";
+
+    function normalize(data) {
+        const fallback = window.KMC_ARRANGEMENT_DEFAULTS || { arrangements: [] };
+        const merged = data ? { ...fallback, ...data } : fallback;
+        return [...(merged.arrangements || [])].sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+    }
+
+    function render(data) {
+        const grid = document.getElementById("home-arrangement-grid");
+        if (!grid) return;
+        const arrangements = normalize(data);
+        const signature = JSON.stringify(arrangements.map(item => [item.id, item.name, item.koreanName, item.photoUrl, item.order]));
+        if (signature === currentSignature && grid.childElementCount) return;
+        currentSignature = signature;
+
+        const fragment = document.createDocumentFragment();
+        arrangements.forEach((item, index) => {
+            const link = document.createElement("a");
+            link.className = "arrangement-card reveal arrangement-card-link visible";
+            link.href = `arrangements.html#${encodeURIComponent(item.id)}`;
+            link.setAttribute("aria-label", `View ${item.name || "arrangement"} details`);
+            const image = document.createElement("img");
+            image.src = item.photoUrl || "";
+            image.alt = item.name || "Arrangement";
+            image.loading = index < 2 ? "eager" : "lazy";
+            image.fetchPriority = index === 0 ? "high" : "auto";
+            image.decoding = "async";
+            const content = document.createElement("div");
+            content.className = "card-content";
+            const heading = document.createElement("h3");
+            heading.textContent = item.name || "Arrangement";
+            const koreanName = document.createElement("p");
+            koreanName.textContent = item.koreanName || "";
+            content.append(heading, koreanName);
+            link.append(image, content);
+            fragment.appendChild(link);
+        });
+        grid.replaceChildren(fragment);
+    }
+
+    function refresh() {
+        const dataApi = window.KMCHomeData;
+        render(dataApi?.cachedValue("arrangements"));
+        dataApi?.getArrangements()
+            .then(render)
+            .catch(error => console.warn("Unable to refresh home arrangements:", error));
+    }
+
+    document.addEventListener("DOMContentLoaded", refresh);
+    window.addEventListener("kmc:home-sections-rendered", refresh);
+})();
