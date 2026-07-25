@@ -1,586 +1,235 @@
 /*
 ========================================
-
 KMC SAMULNORI
-Version 3.0
-
-Main JavaScript
-
+Public interface controller
 ========================================
 */
 
 "use strict";
 
-document.addEventListener("DOMContentLoaded", () => {
+(() => {
+    const DESKTOP_MENU_BREAKPOINT = 900;
+    const NAVBAR_SCROLL_POINT = 40;
 
-    /* ======================================
-       ELEMENT REFERENCES
-    ====================================== */
-
-    const navbar = document.getElementById("navbar");
-
-    const menuButton = document.getElementById("menu-toggle");
-
-    const mobileMenu = document.getElementById("mobile-menu");
-
-    const revealElements = document.querySelectorAll(".reveal");
-
-    const images = document.querySelectorAll("img");
-
-
-
-
-
-    /* ======================================
-       NAVBAR
-    ====================================== */
-
-    function updateNavbar() {
-
-        if (!navbar) return;
-
-        if (window.scrollY > 40) {
-
-            navbar.classList.add("scrolled");
-
+    function onReady(callback) {
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", callback, { once: true });
         } else {
+            callback();
+        }
+    }
 
-            navbar.classList.remove("scrolled");
+    onReady(() => {
+        const navbar = document.getElementById("navbar");
+        const menuButton = document.getElementById("menu-toggle");
+        const mobileMenu = document.getElementById("mobile-menu");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+        let scrollFrame = 0;
+        let menuScrollPosition = 0;
+
+        /* Navbar ---------------------------------------------------------- */
+
+        function updateNavbar() {
+            scrollFrame = 0;
+            navbar?.classList.toggle("scrolled", window.scrollY > NAVBAR_SCROLL_POINT);
         }
 
-    }
-
-    updateNavbar();
-
-    window.addEventListener(
-        "scroll",
-        updateNavbar,
-        { passive: true }
-    );
-
-
-
-
-/* ======================================
-   MOBILE MENU
-====================================== */
-
-let menuScrollPosition = 0;
-
-function isMenuOpen() {
-    return (
-        mobileMenu &&
-        mobileMenu.classList.contains("open")
-    );
-}
-
-
-function lockPageScroll() {
-    menuScrollPosition = window.scrollY;
-
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${menuScrollPosition}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.style.width = "100%";
-}
-
-
-function unlockPageScroll() {
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.left = "";
-    document.body.style.right = "";
-    document.body.style.width = "";
-
-    window.scrollTo(0, menuScrollPosition);
-}
-
-
-function openMenu() {
-    if (!mobileMenu || !menuButton) return;
-    if (isMenuOpen()) return;
-
-    mobileMenu.classList.add("open");
-    menuButton.classList.add("active");
-
-    menuButton.setAttribute(
-        "aria-expanded",
-        "true"
-    );
-
-    menuButton.setAttribute(
-        "aria-label",
-        "Close navigation menu"
-    );
-
-    mobileMenu.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-    lockPageScroll();
-
-    const firstMenuLink =
-        mobileMenu.querySelector("a");
-
-    if (firstMenuLink) {
-        window.setTimeout(() => {
-            firstMenuLink.focus({
-                preventScroll: true
-            });
-        }, 150);
-    }
-}
-
-
-function closeMenu(restoreFocus = false) {
-    if (!mobileMenu || !menuButton) return;
-    if (!isMenuOpen()) return;
-
-    mobileMenu.classList.remove("open");
-    menuButton.classList.remove("active");
-
-    menuButton.setAttribute(
-        "aria-expanded",
-        "false"
-    );
-
-    menuButton.setAttribute(
-        "aria-label",
-        "Open navigation menu"
-    );
-
-    mobileMenu.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-    unlockPageScroll();
-
-    if (restoreFocus) {
-        menuButton.focus({
-            preventScroll: true
-        });
-    }
-}
-
-
-function toggleMenu() {
-    if (isMenuOpen()) {
-        closeMenu();
-    } else {
-        openMenu();
-    }
-}
-
-
-function keepFocusInsideMenu(event) {
-    if (
-        event.key !== "Tab" ||
-        !isMenuOpen()
-    ) {
-        return;
-    }
-
-    const focusableElements = [
-        menuButton,
-        ...mobileMenu.querySelectorAll("a")
-    ];
-
-    const firstElement =
-        focusableElements[0];
-
-    const lastElement =
-        focusableElements[
-            focusableElements.length - 1
-        ];
-
-    if (
-        event.shiftKey &&
-        document.activeElement === firstElement
-    ) {
-        event.preventDefault();
-        lastElement.focus();
-    }
-
-    if (
-        !event.shiftKey &&
-        document.activeElement === lastElement
-    ) {
-        event.preventDefault();
-        firstElement.focus();
-    }
-}
-
-
-if (menuButton && mobileMenu) {
-    /*
-    Add accessibility attributes in JavaScript
-    so the HTML remains simple.
-    */
-
-    menuButton.setAttribute(
-        "aria-controls",
-        "mobile-menu"
-    );
-
-    menuButton.setAttribute(
-        "aria-expanded",
-        "false"
-    );
-
-    mobileMenu.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-
-    /*
-    Open or close from the hamburger button.
-    */
-
-    menuButton.addEventListener(
-        "click",
-        event => {
-            event.stopPropagation();
-            toggleMenu();
+        function requestNavbarUpdate() {
+            if (scrollFrame) return;
+            scrollFrame = window.requestAnimationFrame(updateNavbar);
         }
-    );
 
+        updateNavbar();
+        window.addEventListener("scroll", requestNavbarUpdate, { passive: true });
 
-    /*
-    Close after selecting any navigation link.
-    */
+        /* Mobile navigation ---------------------------------------------- */
 
-    mobileMenu
-        .querySelectorAll("a")
-        .forEach(link => {
-            link.addEventListener(
-                "click",
-                () => {
-                    closeMenu();
-                }
-            );
-        });
+        function isMenuOpen() {
+            return Boolean(mobileMenu?.classList.contains("open"));
+        }
 
+        function lockPageScroll() {
+            menuScrollPosition = window.scrollY;
+            document.body.style.position = "fixed";
+            document.body.style.top = `-${menuScrollPosition}px`;
+            document.body.style.left = "0";
+            document.body.style.right = "0";
+            document.body.style.width = "100%";
+        }
 
-    /*
-    Close when the empty menu background is tapped.
-    A click directly on a link will still follow it.
-    */
+        function unlockPageScroll() {
+            const wasLocked = document.body.style.position === "fixed";
+            document.body.style.position = "";
+            document.body.style.top = "";
+            document.body.style.left = "";
+            document.body.style.right = "";
+            document.body.style.width = "";
 
-    mobileMenu.addEventListener(
-        "click",
-        event => {
-            if (event.target === mobileMenu) {
-                closeMenu(true);
+            if (wasLocked) {
+                window.scrollTo({ top: menuScrollPosition, left: 0, behavior: "auto" });
             }
         }
-    );
 
+        function openMenu() {
+            if (!mobileMenu || !menuButton || isMenuOpen()) return;
 
-    /*
-    Escape closes the menu.
-    Tab remains trapped inside while open.
-    */
+            mobileMenu.classList.add("open");
+            menuButton.classList.add("active");
+            menuButton.setAttribute("aria-expanded", "true");
+            menuButton.setAttribute("aria-label", "Close navigation menu");
+            mobileMenu.setAttribute("aria-hidden", "false");
+            lockPageScroll();
 
-    document.addEventListener(
-        "keydown",
-        event => {
-            if (
-                event.key === "Escape" &&
-                isMenuOpen()
-            ) {
+            window.setTimeout(() => {
+                mobileMenu.querySelector("a")?.focus({ preventScroll: true });
+            }, reducedMotion.matches ? 0 : 120);
+        }
+
+        function closeMenu(restoreFocus = false) {
+            if (!mobileMenu || !menuButton || !isMenuOpen()) return;
+
+            mobileMenu.classList.remove("open");
+            menuButton.classList.remove("active");
+            menuButton.setAttribute("aria-expanded", "false");
+            menuButton.setAttribute("aria-label", "Open navigation menu");
+            mobileMenu.setAttribute("aria-hidden", "true");
+            unlockPageScroll();
+
+            if (restoreFocus) menuButton.focus({ preventScroll: true });
+        }
+
+        function trapMenuFocus(event) {
+            if (event.key !== "Tab" || !isMenuOpen() || !mobileMenu || !menuButton) return;
+
+            const focusable = [menuButton, ...mobileMenu.querySelectorAll("a[href]")];
+            if (!focusable.length) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
                 event.preventDefault();
-                closeMenu(true);
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        if (menuButton && mobileMenu) {
+            menuButton.setAttribute("aria-controls", "mobile-menu");
+            menuButton.setAttribute("aria-expanded", "false");
+            mobileMenu.setAttribute("aria-hidden", "true");
+
+            menuButton.addEventListener("click", event => {
+                event.stopPropagation();
+                isMenuOpen() ? closeMenu() : openMenu();
+            });
+
+            mobileMenu.addEventListener("click", event => {
+                if (event.target === mobileMenu) closeMenu(true);
+            });
+
+            mobileMenu.querySelectorAll("a[href]").forEach(link => {
+                link.addEventListener("click", () => closeMenu());
+            });
+
+            document.addEventListener("keydown", event => {
+                if (event.key === "Escape" && isMenuOpen()) {
+                    event.preventDefault();
+                    closeMenu(true);
+                    return;
+                }
+                trapMenuFocus(event);
+            });
+
+            window.addEventListener("resize", () => {
+                if (window.innerWidth > DESKTOP_MENU_BREAKPOINT && isMenuOpen()) closeMenu();
+            }, { passive: true });
+        }
+
+        /* Reveal animations ------------------------------------------------ */
+
+        let revealObserver = null;
+
+        if ("IntersectionObserver" in window && !reducedMotion.matches) {
+            revealObserver = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add("visible");
+                    revealObserver.unobserve(entry.target);
+                });
+            }, {
+                threshold: 0.12,
+                rootMargin: "0px 0px -40px 0px"
+            });
+        }
+
+        function registerRevealElements(root = document) {
+            root.querySelectorAll?.(".reveal:not(.visible):not([data-reveal-observed])")
+                .forEach(element => {
+                    element.dataset.revealObserved = "true";
+                    if (revealObserver) revealObserver.observe(element);
+                    else element.classList.add("visible");
+                });
+        }
+
+        registerRevealElements();
+        window.addEventListener("kmc:home-sections-rendered", () => registerRevealElements());
+
+        /* Same-page anchor links ------------------------------------------ */
+
+        document.addEventListener("click", event => {
+            const link = event.target.closest?.('a[href^="#"]');
+            if (!link) return;
+
+            const href = link.getAttribute("href");
+            if (!href || href === "#") return;
+
+            let target = null;
+            try {
+                target = document.querySelector(href);
+            } catch (_error) {
                 return;
             }
 
-            keepFocusInsideMenu(event);
-        }
-    );
-
-
-    /*
-    Automatically reset the mobile menu when
-    switching back to the desktop layout.
-    */
-
-    window.addEventListener(
-        "resize",
-        () => {
-            if (
-                window.innerWidth > 900 &&
-                isMenuOpen()
-            ) {
-                closeMenu();
-            }
-        },
-        { passive: true }
-    );
-
-
-    /*
-    Close the menu if browser history navigation
-    restores the page from cache.
-    */
-
-    window.addEventListener(
-        "pageshow",
-        () => {
-            if (isMenuOpen()) {
-                closeMenu();
-            }
-        }
-    );
-}
-
-    /* ======================================
-       SCROLL REVEAL
-    ====================================== */
-
-    if (revealElements.length > 0) {
-
-        const revealObserver =
-            new IntersectionObserver(
-
-                entries => {
-
-                    entries.forEach(entry => {
-
-                        if (
-                            entry.isIntersecting
-                        ) {
-
-                            entry.target.classList.add(
-                                "visible"
-                            );
-
-                            revealObserver.unobserve(
-                                entry.target
-                            );
-
-                        }
-
-                    });
-
-                },
-
-                {
-                    threshold: 0.15,
-                    rootMargin: "0px 0px -50px 0px"
-                }
-
-            );
-
-
-
-        revealElements.forEach(element => {
-
-            revealObserver.observe(
-                element
-            );
-
+            if (!target) return;
+            event.preventDefault();
+            target.scrollIntoView({
+                behavior: reducedMotion.matches ? "auto" : "smooth",
+                block: "start"
+            });
         });
 
-    }
+        /* Device theme ---------------------------------------------------- */
 
+        const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const updateTheme = event => {
+            const dark = typeof event?.matches === "boolean" ? event.matches : themeQuery.matches;
+            document.documentElement.dataset.theme = dark ? "dark" : "light";
+        };
 
+        updateTheme();
+        if (themeQuery.addEventListener) themeQuery.addEventListener("change", updateTheme);
+        else themeQuery.addListener(updateTheme);
 
+        /* Page lifecycle -------------------------------------------------- */
 
+        document.body.classList.add("page-loaded");
 
-    /* ======================================
-       IMAGE LOADING
-    ====================================== */
+        window.addEventListener("pageshow", () => {
+            if (isMenuOpen()) closeMenu();
+            updateNavbar();
+            registerRevealElements();
+        });
 
-    images.forEach(image => {
-
-        function markLoaded() {
-
-            image.classList.add(
-                "loaded"
-            );
-
-        }
-
-
-
-        if (image.complete) {
-
-            markLoaded();
-
-        } else {
-
-            image.addEventListener(
-                "load",
-                markLoaded
-            );
-
-        }
-
+        window.KMC = Object.assign(window.KMC || {}, {
+            version: "3.1",
+            closeMenu,
+            openMenu,
+            updateNavbar,
+            registerRevealElements
+        });
     });
-
-
-
-
-
-    /* ======================================
-       SMOOTH SCROLL LINKS
-    ====================================== */
-
-    document
-        .querySelectorAll(
-            'a[href^="#"]'
-        )
-        .forEach(link => {
-
-            link.addEventListener(
-                "click",
-                event => {
-
-                    const target =
-                        document.querySelector(
-                            link.getAttribute("href")
-                        );
-
-                    if (!target) return;
-
-                    event.preventDefault();
-
-                    target.scrollIntoView({
-
-                        behavior:
-                            "smooth",
-
-                        block:
-                            "start"
-
-                    });
-
-                }
-            );
-
-        });
-
-
-
-
-
-    /* ======================================
-       HERO PARALLAX
-    ====================================== */
-
-    const hero =
-        document.querySelector(
-            ".hero"
-        );
-
-    if (hero) {
-
-        window.addEventListener(
-            "scroll",
-
-            () => {
-
-                const offset =
-                    window.scrollY * 0.25;
-
-                hero.style.backgroundPositionY =
-                    `${offset}px`;
-
-            },
-
-            {
-                passive: true
-            }
-
-        );
-
-    }
-    /* ======================================
-       DEVICE THEME
-    ====================================== */
-
-    const themeQuery = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-    );
-
-    function updateTheme() {
-
-        document.documentElement.dataset.theme =
-            themeQuery.matches
-                ? "dark"
-                : "light";
-
-    }
-
-    updateTheme();
-
-    if (themeQuery.addEventListener) {
-
-        themeQuery.addEventListener(
-            "change",
-            updateTheme
-        );
-
-    } else {
-
-        // Safari fallback
-        themeQuery.addListener(
-            updateTheme
-        );
-
-    }
-
-
-
-
-
-    /* ======================================
-       PAGE FADE IN
-    ====================================== */
-
-    document.body.classList.add(
-        "page-loaded"
-    );
-
-
-
-
-
-    /* ======================================
-       FUTURE FIREBASE HOOK
-    ====================================== */
-
-    window.KMC = {
-
-        version: "3.0",
-
-        closeMenu,
-
-        openMenu,
-
-        updateNavbar
-
-    };
-
-
-
-
-
-    /* ======================================
-       DEBUG (Development Only)
-    ====================================== */
-
-    console.log(
-        "%cKMC Samulnori Website",
-        "color:#8B0000;font-size:16px;font-weight:bold;"
-    );
-
-    console.log(
-        "Version 3.0 Loaded Successfully"
-    );
-
-});
+})();
