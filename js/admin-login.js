@@ -36,8 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "auth/network-request-failed": "Network error. Check your connection.",
     "auth/invalid-credential": "The email or password is incorrect.",
     "auth/user-not-found": "The email or password is incorrect.",
-    "auth/wrong-password": "The email or password is incorrect.",
-    "admin/verification-timeout": "Login succeeded, but administrator access could not be checked. Check your connection and try again."
+    "auth/wrong-password": "The email or password is incorrect."
   }[error?.code] || "Unable to verify administrator access. Please try again.");
 
   toggle.addEventListener("click", () => {

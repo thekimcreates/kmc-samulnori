@@ -28,7 +28,11 @@
     const db = typeof firebase.firestore === "function" ? firebase.firestore() : null;
     const storage = typeof firebase.storage === "function" ? firebase.storage() : null;
 
-    const persistenceReady = db && typeof db.enablePersistence === "function"
+    // Public pages benefit from Firestore's IndexedDB cache. Admin pages must use
+    // a direct network client so security checks and writes never wait for a stale
+    // persistence lease or Safari's delayed offline-network recovery.
+    const isAdminPage = /\/admin(?:\/|$)/.test(window.location.pathname);
+    const persistenceReady = !isAdminPage && db && typeof db.enablePersistence === "function"
         ? db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
             if (error?.code === "failed-precondition") {
                 console.info("Firestore persistence is already controlled by another open tab.");

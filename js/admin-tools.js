@@ -189,7 +189,7 @@
     }
   }
 
-  async function verifyAdmin(auth, db, user, { force = false, ttl = 5 * 60 * 1000, attempts = 2, timeout = 10000 } = {}) {
+  async function verifyAdmin(auth, db, user, { force = false, ttl = 5 * 60 * 1000 } = {}) {
     if (!auth || !db || !user?.uid) return false;
     if (!force && readCachedAdminAccess(user, ttl) === true) return true;
 
@@ -197,30 +197,13 @@
     if (!force && pendingAdminChecks.has(key)) return pendingAdminChecks.get(key);
 
     const check = (async () => {
-      let lastError;
-      for (let attempt = 1; attempt <= attempts; attempt += 1) {
-        try {
-          const request = db.collection("admins").doc(user.uid).get();
-          const timer = new Promise((_, reject) => {
-            setTimeout(() => {
-              const error = new Error("Administrator verification timed out.");
-              error.code = "admin/verification-timeout";
-              reject(error);
-            }, timeout);
-          });
-          const record = await Promise.race([request, timer]);
-          const active = record.exists && record.data()?.active === true;
-          if (active) cacheAdminAccess(user);
-          else clearAdminAccessCache(user);
-          return active;
-        } catch (error) {
-          lastError = error;
-          if (attempt < attempts && error?.code !== "admin/verification-timeout") {
-            await new Promise(resolve => setTimeout(resolve, attempt * 400));
-          }
-        }
-      }
-      throw lastError;
+      // Admin authorization must come directly from Firestore's server. This avoids
+      // the long delay caused by waiting for an IndexedDB-backed client to recover.
+      const record = await db.collection("admins").doc(user.uid).get({ source: "server" });
+      const active = record.exists && record.data()?.active === true;
+      if (active) cacheAdminAccess(user);
+      else clearAdminAccessCache(user);
+      return active;
     })();
 
     pendingAdminChecks.set(key, check);
