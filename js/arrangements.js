@@ -1,8 +1,8 @@
 "use strict";
 
 (() => {
-    const CACHE_KEY = "kmc-public-arrangements-v2";
-    const CACHE_VERSION = 2;
+    const CACHE_KEY = "kmc-public-arrangements-v3";
+    const CACHE_VERSION = 3;
     const allowedTags = new Set(["P", "BR", "STRONG", "B", "EM", "I", "U", "UL", "OL", "LI", "A"]);
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -29,6 +29,16 @@
 
         // Let the browser paint the cached/local cards before starting Firestore work.
         window.setTimeout(refreshFromFirestore, 0);
+
+        // Safari may restore this page from its back-forward cache without rerunning
+        // DOMContentLoaded. Refresh again whenever the restored tab becomes active.
+        window.addEventListener("pageshow", event => {
+            if (event.persisted) refreshFromFirestore();
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") refreshFromFirestore();
+        });
 
         function normalizeData(raw) {
             const instruments = Array.isArray(raw?.instruments) ? raw.instruments : [];

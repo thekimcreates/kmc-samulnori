@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-    const CACHE_KEY = "kmc-public-team-v2";
+    const CACHE_KEY = "kmc-public-team-v3";
     const CACHE_MAX_AGE = 1000 * 60 * 60 * 24 * 14;
 
     const fallback = {
@@ -178,11 +178,18 @@
             }
         };
 
-        // Let the browser paint the page first. Firebase refreshes quietly afterward.
-        if ("requestIdleCallback" in window) {
-            window.requestIdleCallback(refreshFromFirestore, { timeout: 1200 });
-        } else {
-            window.setTimeout(refreshFromFirestore, 0);
-        }
+        // Refresh immediately after the cached first paint. Safari may delay idle
+        // callbacks for background/restored tabs, so do not depend on them here.
+        window.setTimeout(refreshFromFirestore, 0);
+
+        // Safari can restore this page from the back-forward cache without firing
+        // DOMContentLoaded again. Always recheck Firestore when the page returns.
+        window.addEventListener("pageshow", event => {
+            if (event.persisted) refreshFromFirestore();
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") refreshFromFirestore();
+        });
     });
 })();
