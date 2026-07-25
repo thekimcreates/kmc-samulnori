@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const firebaseServices = window.kmcFirebase || {};
     const auth = firebaseServices.auth;
     const db = firebaseServices.db;
+    const tools = window.kmcAdminTools;
 
     const page = document.getElementById("admin-dashboard");
     const loading = document.getElementById("dashboard-loading");
@@ -35,26 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.location.reload();
             }, { once: true });
         }
-    }
-
-    async function readAdminRecord(user, attempts = 3) {
-        let lastError;
-
-        for (let attempt = 1; attempt <= attempts; attempt += 1) {
-            try {
-                return await db.collection("admins").doc(user.uid).get();
-            } catch (error) {
-                lastError = error;
-
-                if (attempt < attempts) {
-                    await new Promise(resolve => {
-                        window.setTimeout(resolve, attempt * 500);
-                    });
-                }
-            }
-        }
-
-        throw lastError;
     }
 
 
@@ -145,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    if (!auth || !db) {
+    if (!auth || !db || !tools) {
         showVerificationError(
             new Error("Firebase Auth or Firestore did not initialize.")
         );
@@ -161,13 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const adminRecord = await readAdminRecord(user);
-            const adminData = adminRecord.exists
-                ? adminRecord.data()
-                : null;
-
-            if (!adminRecord.exists || adminData?.active !== true) {
-                await auth.signOut();
+            if (!await tools.verifyAdmin(auth, db, user)) {
+                await tools.signOut(auth);
                 redirectToLogin();
                 return;
             }
@@ -200,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
             logout.disabled = true;
 
             try {
-                await auth.signOut();
+                await tools.signOut(auth);
                 redirectToLogin();
             } catch (error) {
                 console.error("Unable to sign out:", error);

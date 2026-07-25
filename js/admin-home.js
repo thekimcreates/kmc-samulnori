@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.querySelector("[data-close-home-section-modal]").addEventListener("click", closeModal);
     logout.addEventListener("click", async () => {
         logout.disabled = true;
-        await auth.signOut();
+        await tools.signOut(auth);
         redirectToLogin();
     });
 
@@ -325,9 +325,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!user) return redirectToLogin();
 
         try {
-            const adminRecord = await db.collection("admins").doc(user.uid).get();
-            if (!adminRecord.exists || adminRecord.data()?.active !== true) {
-                await auth.signOut();
+            if (!await tools.verifyAdmin(auth, db, user)) {
+                await tools.signOut(auth);
                 return redirectToLogin();
             }
 

@@ -148,5 +148,74 @@
     catch (error) { if (error?.code !== "storage/object-not-found") console.warn("Unable to remove old image:", error); }
   }
 
-  window.kmcAdminTools = { sanitizeHtml, plainTextToHtml, createRichEditor, confirmAction, showUndo, logActivity, deleteStoragePath };
+  const ADMIN_CACHE_PREFIX = "kmc-admin-access:";
+
+  function adminCacheKey(user) {
+    return `${ADMIN_CACHE_PREFIX}${user?.uid || "unknown"}`;
+  }
+
+  function clearAdminAccessCache(user) {
+    try {
+      if (user?.uid) sessionStorage.removeItem(adminCacheKey(user));
+      else {
+        Object.keys(sessionStorage)
+          .filter(key => key.startsWith(ADMIN_CACHE_PREFIX))
+          .forEach(key => sessionStorage.removeItem(key));
+      }
+    } catch (error) {
+      console.info("Administrator session cache is unavailable:", error);
+    }
+  }
+
+  function readCachedAdminAccess(user, ttl) {
+    try {
+      const raw = sessionStorage.getItem(adminCacheKey(user));
+      if (!raw) return null;
+      const cached = JSON.parse(raw);
+      if (cached?.active === true && Date.now() - Number(cached.checkedAt || 0) < ttl) return true;
+      sessionStorage.removeItem(adminCacheKey(user));
+    } catch (error) {
+      clearAdminAccessCache(user);
+    }
+    return null;
+  }
+
+  function cacheAdminAccess(user) {
+    try {
+      sessionStorage.setItem(adminCacheKey(user), JSON.stringify({ active: true, checkedAt: Date.now() }));
+    } catch (error) {
+      console.info("Administrator session cache could not be saved:", error);
+    }
+  }
+
+  async function verifyAdmin(auth, db, user, { force = false, ttl = 5 * 60 * 1000, attempts = 3 } = {}) {
+    if (!auth || !db || !user?.uid) return false;
+    if (!force && readCachedAdminAccess(user, ttl) === true) return true;
+
+    let lastError;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        const record = await db.collection("admins").doc(user.uid).get();
+        const active = record.exists && record.data()?.active === true;
+        if (active) cacheAdminAccess(user);
+        else clearAdminAccessCache(user);
+        return active;
+      } catch (error) {
+        lastError = error;
+        if (attempt < attempts) await new Promise(resolve => setTimeout(resolve, attempt * 400));
+      }
+    }
+    throw lastError;
+  }
+
+  async function signOut(auth) {
+    const user = auth?.currentUser;
+    clearAdminAccessCache(user);
+    if (auth) await auth.signOut();
+  }
+
+  window.kmcAdminTools = {
+    sanitizeHtml, plainTextToHtml, createRichEditor, confirmAction, showUndo,
+    logActivity, deleteStoragePath, verifyAdmin, clearAdminAccessCache, signOut
+  };
 })();

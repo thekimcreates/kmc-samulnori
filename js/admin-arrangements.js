@@ -422,14 +422,13 @@ document.addEventListener("DOMContentLoaded", () => {
   q("instrument-photo").onchange = () => { const file = q("instrument-photo").files[0]; if (file) preview(q("instrument-photo-preview"), q("instrument-photo-preview-wrap"), URL.createObjectURL(file)); };
   document.querySelectorAll("[data-close-modal]").forEach(button => { button.onclick = () => closeModal(editor); });
   document.querySelectorAll("[data-close-instrument-modal]").forEach(button => { button.onclick = () => closeModal(instrumentModal); });
-  logout.onclick = async () => { await auth.signOut(); location.replace("login.html"); };
+  logout.onclick = async () => { await tools.signOut(auth); location.replace("login.html"); };
 
   if (!auth || !db || !storage) { loading.textContent = "Firebase could not be initialized."; return; }
   auth.onAuthStateChanged(async user => {
     if (!user) return location.replace("login.html");
     try {
-      const admin = await db.collection("admins").doc(user.uid).get();
-      if (!admin.exists || admin.data()?.active !== true) { await auth.signOut(); return location.replace("login.html"); }
+      if (!await tools.verifyAdmin(auth, db, user)) { await tools.signOut(auth); return location.replace("login.html"); }
       email.textContent = user.email || "Administrator";
       const snapshot = await docRef.get();
       if (snapshot.exists) state = { arrangements: [], instruments: [], ...snapshot.data() };

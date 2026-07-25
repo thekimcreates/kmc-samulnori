@@ -66,8 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   auth?.onAuthStateChanged(async user => {
     if(!user) return redirect();
     try {
-      const admin = await db.collection("admins").doc(user.uid).get();
-      if(!admin.exists || admin.data().active!==true){ await auth.signOut(); return redirect(); }
+      if(!await tools.verifyAdmin(auth,db,user)){ await tools.signOut(auth); return redirect(); }
       email.textContent=user.email||"Administrator";
       const snap=await db.collection("siteContent").doc("team").get();
       populate(snap.exists?{...fallback,...snap.data()}:fallback);
@@ -91,5 +90,5 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch(error){ console.error(error); setStatus("Unable to save. Check your Firestore rules and connection.","error"); }
     finally { saveButton.disabled=false; saveButton.textContent="Save Team Page"; }
   });
-  logout.addEventListener("click",async()=>{ logout.disabled=true; await auth.signOut(); redirect(); });
+  logout.addEventListener("click",async()=>{ logout.disabled=true; await tools.signOut(auth); redirect(); });
 });

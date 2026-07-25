@@ -556,9 +556,8 @@ document.addEventListener("DOMContentLoaded", () => {
     auth.onAuthStateChanged(async (user) => {
         if (!user) return returnToLogin();
         try {
-            const adminDocument = await db.collection("admins").doc(user.uid).get();
-            if (!adminDocument.exists || adminDocument.data().active !== true) {
-                await auth.signOut();
+            if (!await tools.verifyAdmin(auth, db, user)) {
+                await tools.signOut(auth);
                 return returnToLogin();
             }
             email.textContent = user.email || "Administrator";
@@ -569,8 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resetForm();
         } catch (error) {
             console.error("Unable to verify administrator:", error);
-            await auth.signOut();
-            returnToLogin();
+            loading.textContent = "Unable to verify administrator access. Check your connection and refresh.";
         }
     });
 
@@ -717,7 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
     logout.addEventListener("click", async () => {
         logout.disabled = true;
         if (unsubscribePerformances) unsubscribePerformances();
-        await auth.signOut();
+        await tools.signOut(auth);
         returnToLogin();
     });
     window.addEventListener("beforeunload", () => {
