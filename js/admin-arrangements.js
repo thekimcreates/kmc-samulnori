@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("article");
       card.className = "performance-admin-card sortable-admin-card";
       card.dataset.arrangementId = item.id;
-      card.innerHTML = `<button class="admin-drag-handle" type="button" aria-label="Drag ${item.name || "arrangement"} to reorder" title="Drag to reorder">⋮⋮</button><div class="arrangement-admin-card-main"><img class="arrangement-admin-thumb" alt="" loading="lazy" decoding="async"><div><h3></h3><p></p></div></div><div class="performance-admin-actions"><button class="admin-secondary-button admin-small-button" data-edit type="button">Edit</button><button class="admin-danger-button admin-small-button" data-delete type="button">Delete</button></div>`;
+      card.innerHTML = `<button class="admin-drag-handle" type="button" aria-label="Drag ${item.name || "arrangement"} to reorder" title="Drag to reorder"><span></span><span></span><span></span></button><div class="arrangement-admin-card-main"><img class="arrangement-admin-thumb" alt="" loading="lazy" decoding="async"><div><h3></h3><p></p></div></div><div class="performance-admin-actions"><button class="admin-secondary-button admin-small-button" data-edit type="button">Edit</button><button class="admin-danger-button admin-small-button" data-delete type="button">Delete</button></div>`;
       card.querySelector("img").src = displayUrl(item.photoUrl);
       card.querySelector("img").alt = item.name || "Arrangement";
       card.querySelector("h3").textContent = `${item.name || "Arrangement"} ${item.koreanName || ""}`.trim();

@@ -262,10 +262,26 @@
             backdrop.classList.remove("is-active");
             backdrop.setAttribute("aria-hidden", "true");
 
+            const restoreY = scrollY;
+            const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+            document.documentElement.style.scrollBehavior = "auto";
+
+            // Remove the deep-link hash while the document is still locked so the
+            // browser cannot scroll the selected card into view during close.
+            history.replaceState(null, "", location.pathname + location.search);
+
             document.body.classList.remove("arrangement-open");
             Object.assign(document.body.style, { position: "", top: "", left: "", right: "", width: "" });
-            window.scrollTo(0, scrollY);
-            history.replaceState(null, "", location.pathname + location.search);
+
+            const restoreScrollPosition = () => window.scrollTo({ top: restoreY, left: 0, behavior: "auto" });
+            restoreScrollPosition();
+            requestAnimationFrame(() => {
+                restoreScrollPosition();
+                requestAnimationFrame(() => {
+                    restoreScrollPosition();
+                    document.documentElement.style.scrollBehavior = previousScrollBehavior;
+                });
+            });
 
             activeCard = null;
             activePanel = null;

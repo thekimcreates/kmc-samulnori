@@ -2559,3 +2559,15 @@ footer img {
     .hero-carousel-arrow span { font-size: 1.8rem; }
     .hero-carousel-dots { gap: 6px; }
 }
+
+
+/* Phase 2I visual alignment fixes */
+.hero-content {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(100%, 1180px);
+    box-sizing: border-box;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}

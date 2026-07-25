@@ -2172,3 +2172,56 @@ body.home-section-sorting * {
     .home-hero-drag-preview { grid-template-columns:36px 86px minmax(0,1fr); }
     .home-hero-drag-preview > .admin-danger-button { grid-column:2 / -1; justify-self:start; }
 }
+
+
+/* Phase 2I admin visual consistency fixes */
+.home-hero-upload-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    line-height: 1.2;
+}
+
+.admin-drag-handle,
+.member-drag-handle {
+    width: 38px;
+    min-width: 38px;
+    height: 48px;
+    display: grid;
+    place-content: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: normal;
+}
+
+.admin-drag-handle span,
+.member-drag-handle span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(127, 23, 33, 0.62);
+}
+
+.admin-drag-handle:hover,
+.admin-drag-handle:focus-visible,
+.member-drag-handle:hover,
+.member-drag-handle:focus-visible {
+    background: rgba(127, 23, 33, 0.08);
+    outline: none;
+}
+
+.instrument-library-summary .performance-admin-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
