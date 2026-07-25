@@ -164,13 +164,13 @@
         renderTeam(cached || fallback);
 
         const refreshFromFirestore = async () => {
-            const db = window.kmcFirebase?.db;
-            if (!db) return;
+            const dataStore = window.KMCDataStore;
+            if (!dataStore) return;
 
             try {
-                const snapshot = await db.collection("siteContent").doc("team").get();
-                if (!snapshot.exists) return;
-                const latest = normalize(snapshot.data());
+                const data = await dataStore.getTeam();
+                if (!data) return;
+                const latest = normalize(data);
                 writeCache(latest);
                 renderTeam(latest);
             } catch (error) {

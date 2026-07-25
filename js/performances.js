@@ -2,6 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     const db = window.kmcFirebase?.db;
+    const dataStore = window.KMCDataStore;
     const grid = document.getElementById("performances-grid");
     const emptyState = document.getElementById("performance-empty");
     const count = document.getElementById("performance-count");
@@ -674,22 +675,18 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshControlsAndCards({ reopenHash: true });
     }
 
-    if (!db) {
+    if (!db || !dataStore) {
         if (!records.length) showLoadError();
         return;
     }
 
     const startBackgroundLoad = () => {
-        const performancesRequest = db.collection("performances").orderBy("date", "desc").get();
-        const arrangementRequest = db.collection("siteContent").doc("arrangements").get();
-        const teamRequest = db.collection("siteContent").doc("team").get();
+        const performancesRequest = dataStore.getPerformances();
+        const arrangementRequest = dataStore.getArrangements();
+        const teamRequest = dataStore.getTeam();
 
         performancesRequest
-            .then((snapshot) => {
-                const freshRecords = snapshot.docs.map((documentSnapshot) => ({
-                    id: documentSnapshot.id,
-                    ...documentSnapshot.data()
-                }));
+            .then((freshRecords) => {
 
                 const changed = stableStringify(freshRecords) !== stableStringify(records);
                 records = freshRecords;
@@ -709,8 +706,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let metadataChanged = false;
 
             if (arrangementResult.status === "fulfilled") {
-                const snapshot = arrangementResult.value;
-                const data = snapshot.exists ? snapshot.data() : {};
+                const data = arrangementResult.value || {};
                 const freshArrangements = Array.isArray(data.arrangements)
                     ? [...data.arrangements].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                     : [];
@@ -720,8 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (teamResult.status === "fulfilled") {
-                const snapshot = teamResult.value;
-                const data = snapshot.exists ? snapshot.data() : {};
+                const data = teamResult.value || {};
                 const freshMembers = Array.isArray(data.members)
                     ? data.members.map((member, index) => ({
                         ...member,

@@ -12,7 +12,7 @@
         if (!list || !detailRoot || !backdrop) return;
 
         const fallback = normalizeData(window.KMC_ARRANGEMENT_DEFAULTS || {});
-        const db = window.kmcFirebase?.db;
+        const dataStore = window.KMCDataStore;
         const requestedId = safeDecode(location.hash.slice(1));
 
         let currentData = readCache() || fallback;
@@ -287,12 +287,12 @@
         }
 
         async function refreshFromFirestore() {
-            if (!db) return;
+            if (!dataStore) return;
             try {
-                const snapshot = await db.collection("siteContent").doc("arrangements").get();
-                if (!snapshot.exists) return;
+                const data = await dataStore.getArrangements();
+                if (!data) return;
 
-                const remote = normalizeData({ ...fallback, ...snapshot.data() });
+                const remote = normalizeData({ ...fallback, ...data });
                 writeCache(remote);
                 if (signature(remote) === renderedSignature) return;
 

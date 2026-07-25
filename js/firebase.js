@@ -24,9 +24,22 @@
         firebase.initializeApp(config);
     }
 
-    window.kmcFirebase = {
-        auth: typeof firebase.auth === "function" ? firebase.auth() : null,
-        db: typeof firebase.firestore === "function" ? firebase.firestore() : null,
-        storage: typeof firebase.storage === "function" ? firebase.storage() : null
-    };
+    const auth = typeof firebase.auth === "function" ? firebase.auth() : null;
+    const db = typeof firebase.firestore === "function" ? firebase.firestore() : null;
+    const storage = typeof firebase.storage === "function" ? firebase.storage() : null;
+
+    const persistenceReady = db && typeof db.enablePersistence === "function"
+        ? db.enablePersistence({ synchronizeTabs: true }).catch((error) => {
+            if (error?.code === "failed-precondition") {
+                console.info("Firestore persistence is already controlled by another open tab.");
+            } else if (error?.code === "unimplemented") {
+                console.info("This browser does not support Firestore offline persistence.");
+            } else {
+                console.warn("Firestore offline persistence could not be enabled:", error);
+            }
+            return false;
+        })
+        : Promise.resolve(false);
+
+    window.kmcFirebase = { auth, db, storage, persistenceReady };
 })();
