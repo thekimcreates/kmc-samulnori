@@ -2458,11 +2458,16 @@ footer img {
 }
 
 .home-text-section {
-    background: var(--page-background, #ffffff);
+    background: var(--background);
+    color: var(--text);
 }
 
 .home-text-section-container {
     max-width: 980px;
+}
+
+.home-text-section .section-header h2 {
+    color: var(--text);
 }
 
 .home-custom-rich-text {
@@ -2470,7 +2475,7 @@ footer img {
     margin: 0 auto;
     font-size: clamp(1rem, 1.6vw, 1.15rem);
     line-height: 1.8;
-    color: rgba(17, 17, 17, 0.72);
+    color: var(--secondary-text);
 }
 
 .home-custom-rich-text p,
@@ -2484,10 +2489,21 @@ footer img {
     padding-left: 1.4em;
 }
 
+.home-custom-rich-text strong,
+.home-custom-rich-text b {
+    color: var(--text);
+}
+
 .home-custom-rich-text a {
-    color: #7f1721;
+    color: var(--kmc-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
+}
+
+@media (prefers-color-scheme: dark) {
+    .home-custom-rich-text a {
+        color: #e06b74;
+    }
 }
 
 
